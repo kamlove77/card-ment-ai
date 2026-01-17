@@ -3,7 +3,7 @@ const SHEET_API_URL = "https://docs.google.com/spreadsheets/d/1HMYW2X5Avi8-XZ3ER
 
 const $ = (id) => document.getElementById(id);
 
-const SHEET_API_URL = "여기에_네_AppsScript_URL";
+
 
 async function loadTemplatesFromSheet() {
   const res = await fetch(SHEET_API_URL);
@@ -103,4 +103,5 @@ $("clear").onclick = () => {
   $("detail").value = "";
   $("out").innerHTML = "";
 };
+
 
