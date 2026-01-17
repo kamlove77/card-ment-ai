@@ -1,44 +1,77 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzdqUoV2pjnG2aYWP4NASY-isAjbTDibX5GeMS5gmOfcp-06ua8Z1A2vkcAJVh8STpo6w/exec";
+const SHEET_API_URL =
+  "https://script.google.com/macros/s/AKfycbzdqUoV2pjnG2aYWP4NASY-isAjbTDibX5GeMS5gmOfcp-06ua8Z1A2vkcAJVh8STpo6w/exec";
 
-async function loadData() {
-  const res = await fetch(API_URL);
-  return await res.json(); // [[type, text], ...]
-}
+const $ = (id) => document.getElementById(id);
 
-async function init() {
-  const data = await loadData();
-  const types = [...new Set(data.map(r => r[0]))];
-  const sel = document.getElementById("type");
-  sel.innerHTML = "";
-  types.forEach(t => {
-    const o = document.createElement("option");
-    o.value = t;
-    o.textContent = t;
-    sel.appendChild(o);
+async function loadTemplatesFromSheet() {
+  const res = await fetch(SHEET_API_URL);
+  const data = await res.json();
+
+  const map = {};
+  data.forEach((r) => {
+    if (!map[r.type]) map[r.type] = [];
+    map[r.type].push(r.text);
   });
+  return map;
 }
 
-function makeMent(list) {
-  const out = document.getElementById("out");
+function polishTone(text, tone) {
+  if (tone === "short") {
+    const first = text.split("다.")[0];
+    return first.endsWith("다") ? first + "." : first + "다.";
+  }
+  if (tone === "soft") {
+    return "고객님 불편을 드려 죄송합니다. " + text;
+  }
+  return text;
+}
+
+function withDetail(text, detail) {
+  if (!detail.trim()) return text;
+  return `${text}\n(참고: 고객님 말씀하신 상황: ${detail})`;
+}
+
+async function makeMentions(type, tone, detail) {
+  const templates = await loadTemplatesFromSheet();
+  const base = templates[type] ?? [];
+  const out = [];
+  for (let i = 0; i < 5; i++) {
+    const t = base[i % base.length] || "등록된 멘트가 없습니다.";
+    out.push(withDetail(polishTone(t, tone), detail));
+  }
+  return out;
+}
+
+function render(list) {
+  const out = $("out");
   out.innerHTML = "";
-  list.slice(0,5).forEach(t=>{
-    const d = document.createElement("div");
-    d.className="card";
-    d.textContent=t;
-    out.appendChild(d);
+  list.forEach((m, idx) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="pill">추천 ${idx + 1}</div>
+      <div class="ment" id="m-${idx}"></div>
+      <div class="ment-actions">
+        <button data-copy="${idx}">복사</button>
+      </div>
+    `;
+    out.appendChild(card);
+    card.querySelector(`#m-${idx}`).textContent = m;
+
+    card.querySelector(`[data-copy="${idx}"]`).onclick = () =>
+      navigator.clipboard.writeText(m);
   });
 }
 
-document.getElementById("gen").onclick = async ()=>{
-  const data = await loadData();
-  const type = document.getElementById("type").value;
-  const list = data.filter(r=>r[0]===type).map(r=>r[1]);
-  makeMent(list);
+$("gen").onclick = async () => {
+  const type = $("type").value;
+  const tone = $("tone").value;
+  const detail = $("detail").value;
+  const list = await makeMentions(type, tone, detail);
+  render(list);
 };
 
-init();
-
-
-
-
-
+$("clear").onclick = () => {
+  $("detail").value = "";
+  $("out").innerHTML = "";
+};
