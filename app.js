@@ -1,4 +1,4 @@
-const SHEET_API_URL = "https://docs.google.com/spreadsheets/d/1HMYW2X5Avi8-XZ3ERiohTU_ABfha6JRjgXg750y1oGQ/edit?gid=0#gid=0";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbx74RuBip87Eh_wLLfJBdaZaK_1pZUEN7W_AKqtYDMzN_cD6q0gb6mYKAErbZjpiGh99A/exec";
 
 
 const $ = (id) => document.getElementById(id);
@@ -103,5 +103,6 @@ $("clear").onclick = () => {
   $("detail").value = "";
   $("out").innerHTML = "";
 };
+
 
 
