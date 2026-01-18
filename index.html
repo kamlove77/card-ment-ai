@@ -5,138 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 스마트 가이드</title>
     <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #28a745;
-            --bg-color: #f0f2f5;
-        }
-
-        body {
-            font-family: 'Malgun Gothic', sans-serif;
-            background: var(--bg-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .nav-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 900px;
-        }
-
-        .nav-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            background: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .nav-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .content-section {
-            display: none;
-            width: 100%;
-            max-width: 900px;
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        /* [중요] 누적 합계 박스 스타일 */
-        .summary-box {
-            background: #f8f9fa;
-            border: 2px solid var(--primary-color);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .summary-title {
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 8px;
-        }
-
-        .summary-value {
-            font-weight: bold;
-            font-size: 2.2rem;
-            color: #333;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: var(--secondary-color);
-            color: white;
-            padding: 12px;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: center;
-        }
-
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        .btn-main { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; }
         
-        .info-display {
-            background: #fff9e6;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 5px solid #ffc107;
-            margin-top: 10px;
-        }
+        /* 상단 탭 메뉴 */
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav button { flex: 1; padding: 15px; border: none; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav button.active { background: #007bff; color: white; }
+
+        /* 컨텐츠 박스 */
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none; }
+        .card.active { display: block; }
+
+        /* 합계 박스 */
+        .summary { background: #e7f3ff; border: 2px solid #007bff; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+        .summary-val { font-size: 2rem; font-weight: bold; color: #007bff; }
+
+        /* 입력창 및 버튼 */
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .btn-blue { background: #007bff; color: white; }
+        .btn-black { background: #333; color: white; margin-top: 10px; }
+
+        /* 결과 창 */
+        .result-box { background: #fff9e6; padding: 15px; border-radius: 8px; border-left: 5px solid #ffc107; margin-top: 15px; font-size: 0.95rem; }
+        
+        /* 테이블 */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        th { background: #28a745; color: white; padding: 10px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="nav-bar">
-        <button class="nav-btn active" onclick="showPage('page-home')">🎫 상담 멘트 / 가이드</button>
-        <button class="nav-btn" onclick="showPage('page-perf')">📊 실적 히스토리</button>
+<div class="container">
+    <div class="nav">
+        <button id="tab1" class="active" onclick="openTab('home')">🎫 가이드/멘트</button>
+        <button id="tab2" onclick="openTab('perf')">📊 실적 합계</button>
     </div>
 
-    <div id="page-home" class="content-section active">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div>
-                <h3>📝 멘트 생성기</h3>
-                <div class="input-group">
-                    <label>상황 유형</label>
-                    <select id="type"><option>로딩 중...</option></select>
-                </div>
-                <button id="btn-generate" class="btn-main">멘트 만들기</button>
-                <textarea id="ment-output" rows="8" style="margin-top:10px;" placeholder="결과가 여기 표시됩니다."></textarea>
-            </div>
+    <div id="home" class="card active">
+        <h3>🔍 업무 가이드 조회</h3>
+        <input type="text" id="quick-search" placeholder="화면번호 또는 키워드 입력">
+        <button id="btn-search" class="btn btn-black">정보 확인하기</button>
+        
+        <div class="result-box">
+            <p><strong>번호:</strong> <span id="view-screen">-</span></p>
+            <p><strong>키워드:</strong> <span id="view-keywords">-</span></p>
+            <p><strong>내용:</strong> <div id="view-desc" style="white-space:pre-wrap;">-</div></p>
+        </div>
 
-            <div>
-                <h3>🔍 가이드 조회</h3>
-                <div class="input-group">
-                    <input type="text" id="quick-search" placeholder="화면번호 또는 키워드">
-                </div>
-                <button id="btn-search" class="btn-main" style="background:#444;">정보 확인하기</button>
-                <div class="info-display">
-                    <p>
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
+
+        <h3>📝 멘트 생성기</h3>
+        <label style="font-size: 0.8rem; font-weight: bold;">상황 유형 선택</label>
+        <select id="type"><option>데이터 로딩 중...</option></select>
+        <button id="btn-generate" class="btn btn-blue">멘트 만들기</button>
+        <textarea id="ment-output" rows="6" placeholder="여기에 멘트가 생성됩니다."></textarea>
+    </div>
+
+    <div id="perf" class="card">
+        <h3>📊 이달의 실적 누적</h3>
+        <div class="summary">
+            <div style="font-weight: bold; margin-bottom: 5px; color: #555;">이번 달 완료 콜수 총합</div>
+            <div class="summary-val"><span id="total-calls">0</span>건</div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>날짜</th>
+                    <th>콜수</th>
+                    <th>달성률</th>
+                </tr>
+            </thead>
+            <tbody id="perf-list">
+                <tr><td colspan="3">로딩 중...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="./app.js"></script>
+<script>
+    function openTab(name) {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(name).classList.add('active');
+        if(name === 'home') document.getElementById('tab1').classList.add('active');
+        else document.getElementById('tab2').classList.add('active');
+    }
+</script>
+</body>
+</html>
