@@ -13,7 +13,7 @@
         .col-content { flex: 1; padding-left: 10px; }
         .nav { display: flex; gap: 8px; margin-bottom: 20px; }
         .nav button { flex: 1; padding: 15px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; font-size: 1rem; color: #606266; }
-        .nav button.active { background: #007bff; color: white; border-color: #007bff; }
+        .nav button.active { background: #007bff !important; color: white !important; border-color: #007bff !important; }
         .content { display: none; }
         .content.active { display: block; }
         .flex-row { display: flex; gap: 20px; }
@@ -22,7 +22,7 @@
         .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .btn-blue { background: #007bff; color: white; }
         .btn-gray { background: #909399; color: white; }
-        .summary { background: #f0f7ff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d0e3ff; }
+        .summary { background: #f0f7ff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; border-bottom: 1px solid #ebeef5; text-align: center; }
         th { background: #f8f9fa; color: #666; }
@@ -33,7 +33,7 @@
 <div class="container">
     <div class="top-info-bar">
         <div class="notice-title">📢 공지사항</div>
-        <div id="notice-container">데이터 로딩 중...</div>
+        <div id="notice-container">데이터를 불러오는 중입니다...</div>
     </div>
 
     <div class="nav">
@@ -54,9 +54,9 @@
             </div>
             <div class="card">
                 <h3 style="color:#007bff;">✍️ 멘트 생성</h3>
-                <select id="ment-sel"><option>유형 로딩 중...</option></select>
+                <select id="ment-sel"><option>로딩 중...</option></select>
                 <button onclick="doMent()" class="btn btn-blue">멘트 생성</button>
-                <textarea id="ment-txt" rows="12" style="margin-top:10px;" placeholder="선택한 유형의 멘트가 표시됩니다."></textarea>
+                <textarea id="ment-txt" rows="12" style="margin-top:10px;"></textarea>
             </div>
         </div>
     </div>
@@ -64,14 +64,9 @@
     <div id="perf-sec" class="content">
         <div class="card" style="max-width: 600px; margin: 0 auto;">
             <h3>📊 월간 실적 현황</h3>
-            <div class="summary">
-                <span style="color:#666;">이번 달 총 완료:</span> 
-                <span id="all-total" style="font-size:24px; font-weight:bold; color:#007bff;">0</span>건
-            </div>
+            <div class="summary">이번 달 총 완료: <span id="all-total" style="font-size:24px; font-weight:bold; color:#007bff;">0</span>건</div>
             <table>
-                <thead>
-                    <tr><th>날짜</th><th>콜수</th><th>달성률</th></tr>
-                </thead>
+                <thead><tr><th>날짜</th><th>콜수</th><th>달성률</th></tr></thead>
                 <tbody id="p-list"></tbody>
             </table>
         </div>
@@ -79,34 +74,59 @@
 </div>
 
 <script>
+    // 1. 구글 앱스 스크립트 URL (기존 URL 유지)
     const URL = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec";
     let dataList = [];
 
+    // 2. 탭 전환 기능 (가장 확실한 방식)
     function changeTab(mode) {
-        document.getElementById('home-sec').style.display = (mode === 'home') ? 'block' : 'none';
-        document.getElementById('perf-sec').style.display = (mode === 'perf') ? 'block' : 'none';
-        document.getElementById('tab-home').className = (mode === 'home') ? 'active' : '';
-        document.getElementById('tab-perf').className = (mode === 'perf') ? 'active' : '';
-    }
+        const homeSec = document.getElementById('home-sec');
+        const perfSec = document.getElementById('perf-sec');
+        const btnHome = document.getElementById('tab-home');
+        const btnPerf = document.getElementById('tab-perf');
 
-    // [강력 보강] 어떤 날짜 형태가 와도 "MM-DD"로 변환하는 함수
-    function formatDate(dateInput) {
-        try {
-            const d = new Date(dateInput);
-            if (!isNaN(d.getTime())) {
-                const m = (d.getMonth() + 1).toString().padStart(2, '0');
-                const day = d.getDate().toString().padStart(2, '0');
-                return `${m}-${day}`;
-            }
-            // 만약 날짜 변환이 안된다면 문자열에서 숫자만 추출 시도
-            const match = String(dateInput).match(/(\d{1,2})[.-월\s]+(\d{1,2})/);
-            if (match) return `${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')}`;
-            return dateInput;
-        } catch (e) {
-            return dateInput;
+        if (mode === 'home') {
+            homeSec.style.display = 'block';
+            perfSec.style.display = 'none';
+            btnHome.classList.add('active');
+            btnPerf.classList.remove('active');
+        } else {
+            homeSec.style.display = 'none';
+            perfSec.style.display = 'block';
+            btnHome.classList.remove('active');
+            btnPerf.classList.add('active');
         }
     }
 
+    // 3. 날짜 변환 함수 (영문 날짜 해결)
+    function formatDate(input) {
+        try {
+            const d = new Date(input);
+            if (!isNaN(d.getTime())) {
+                const m = (d.getMonth() + 1).toString().padStart(2, '0');
+                const dd = d.getDate().toString().padStart(2, '0');
+                return `${m}-${dd}`;
+            }
+            return input;
+        } catch (e) { return input; }
+    }
+
+    // 4. 데이터 통합 로드
     async function loadAll() {
         try {
+            // 공지사항
             const nRes = await fetch(URL + "?mode=notice");
+            const nData = await nRes.json();
+            const nBox = document.getElementById("notice-container");
+            nBox.innerHTML = "";
+            nData.forEach(i => {
+                nBox.innerHTML += `<div class="notice-row"><div class="col-date">${i.date}</div><div class="col-content">• ${i.content}</div></div>`;
+            });
+
+            // 가이드/멘트
+            const mRes = await fetch(URL + "?mode=ment");
+            dataList = await mRes.json();
+            const sel = document.getElementById("ment-sel");
+            const types = [...new Set(dataList.map(i => i.type).filter(t => t))];
+            sel.innerHTML = '<option value="">상황 유형을 선택하세요</option>';
+            types.forEach(t => sel.innerHTML += `<option value="${t
