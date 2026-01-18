@@ -3,91 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>카드 상담 가이드</title>
+    <title>카드 상담 통합 가이드</title>
     <style>
         :root { --blue: #007bff; --red: #ff4d4f; --bg: #f2f4f7; --yellow: #fff9c4; }
-        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 5px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
         /* 공지사항: 노란색 굵은 선 */
         .notice-container { 
             background: var(--yellow); border: 2.5px solid #fbc02d; 
-            border-radius: 10px; height: 85px; padding: 8px; margin-bottom: 5px; flex-shrink: 0; display: flex; flex-direction: column; 
+            border-radius: 12px; height: 95px; padding: 10px; margin-bottom: 10px; flex-shrink: 0; display: flex; flex-direction: column; 
         }
-        .notice-list { overflow-y: auto; flex-grow: 1; font-size: 0.85rem; }
-        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 2px 0; display: flex; }
+        .notice-header { font-weight: bold; color: #444; margin-bottom: 5px; border-bottom: 1px solid #e6e0a8; }
+        .notice-list { overflow-y: auto; flex-grow: 1; font-size: 0.9rem; }
+        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 3px 0; display: flex; }
         .notice-date { color: #555; min-width: 65px; font-weight: bold; }
 
-        /* 가로 2단 강제 고정 */
-        .main-layout { display: flex; gap: 8px; flex: 1; overflow: hidden; }
+        /* 가로 2단 고정 레이아웃 */
+        .main-layout { display: flex; gap: 12px; flex: 1; overflow: hidden; }
         
-        /* 패널 디자인: 선명한 테두리 적용 */
+        /* 패널 디자인: 선명한 테두리 강조 */
         .panel { 
-            background: white; border-radius: 12px; padding: 12px; 
-            border: 2px solid #ddd; /* 기본 회색 선 */
+            background: white; border-radius: 15px; padding: 15px; 
             display: flex; flex-direction: column; flex: 1; min-width: 0; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
         }
 
-        /* 멘트 패널: 굵은 파란색 선 */
-        .panel-blue { border: 2.5px solid var(--blue); }
-        h2 { font-size: 0.95rem; font-weight: bold; border-bottom: 2px solid #eee; margin: 0 0 8px 0; padding-bottom: 4px; }
-        
-        /* 가이드 패널: 굵은 빨간색 선 */
-        .panel-red { border: 2.5px solid var(--red); }
+        /* 멘트 구역: 파란색 테두리 */
+        .panel-blue { border: 3px solid var(--blue); }
+        /* 가이드 구역: 빨간색 테두리 */
+        .panel-red { border: 3px solid var(--red); }
 
+        h2 { font-size: 1.1rem; font-weight: bold; margin: 0 0 10px 0; display: flex; align-items: center; gap: 5px; }
         select, input { 
-            width: 100%; padding: 8px; border-radius: 6px; 
-            border: 2px solid #ccc; font-size: 0.9rem; font-weight: bold; box-sizing: border-box; 
+            width: 100%; padding: 10px; border-radius: 8px; 
+            border: 2px solid #ddd; font-size: 1rem; box-sizing: border-box; 
         }
+        select:focus, input:focus { border-color: var(--blue); outline: none; }
         
-        /* 멘트 박스: 파란색 테두리 강조 */
+        /* 멘트 박스 선명화 */
         .ment-box { 
             background: #f8fbff; border: 2px solid var(--blue); 
-            padding: 10px; border-radius: 8px; flex: 1; 
-            font-size: 0.9rem; line-height: 1.5; overflow-y: auto; 
-            margin-top: 8px; white-space: pre-wrap; color: #111;
+            padding: 15px; border-radius: 10px; flex: 1; 
+            font-size: 1.05rem; line-height: 1.6; overflow-y: auto; 
+            margin-top: 10px; white-space: pre-wrap; color: #111;
         }
 
-        /* 가이드 박스: 빨간색 배경+선 */
+        /* 가이드 박스 */
         .guide-box { 
-            background: #fff5f5; border: 2px solid var(--red); 
-            padding: 8px; height: 60px; overflow-y: auto; 
-            margin: 5px 0; font-size: 0.85rem; border-radius: 8px;
+            background: #fff5f5; border: 2.5px solid var(--red); 
+            padding: 12px; height: 80px; overflow-y: auto; 
+            margin: 8px 0; font-size: 0.95rem; border-radius: 10px;
         }
         
-        /* 실적 테이블 선명하게 */
-        .perf-area { flex: 1; overflow-y: auto; border: 1.5px solid #eee; border-radius: 8px; margin-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { background: #f0f4f8; position: sticky; top: 0; padding: 5px; border-bottom: 2px solid #ddd; color: #333; }
-        td { padding: 5px; border-bottom: 1px solid #eee; text-align: center; }
+        /* 실적 현황 테이블 */
+        .perf-area { flex: 1; overflow-y: auto; border: 1.5px solid #eee; border-radius: 10px; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #f1f3f5; position: sticky; top: 0; padding: 8px; border-bottom: 2px solid #dee2e6; }
+        td { padding: 8px; border-bottom: 1px solid #eee; text-align: center; }
         .cum-cell { font-weight: bold; color: var(--blue); background-color: #f0f7ff; }
 
-        /* 음성 저장 버튼 */
+        /* 음성 버튼: 하단 고정 */
         .voice-btn { 
             background: var(--blue); color: white; border: none; 
-            padding: 10px; border-radius: 8px; font-weight: bold; 
-            font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+            padding: 12px; border-radius: 10px; font-weight: bold; 
+            font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .voice-btn:active { background: #004494; transform: scale(0.98); }
+        .voice-btn:active { background: #0056b3; }
     </style>
 </head>
 <body>
 
 <div class="notice-container">
-    <div id="notice-list" class="notice-list">데이터를 불러오는 중...</div>
+    <div class="notice-header">📢 실시간 공지사항</div>
+    <div id="notice-list" class="notice-list">데이터를 불러오는 중입니다...</div>
 </div>
 
 <div class="main-layout">
     <div class="panel panel-blue">
-        <h2>📑 상담 멘트 생성기</h2>
-        <select id="ment-select" onchange="updateMentBox(this.value)"><option value="">-- 상황 선택 --</option></select>
-        <div id="ment-display" class="ment-box">상황을 선택해 주세요.</div>
+        <h2>📝 상담 멘트 생성기</h2>
+        <select id="ment-select" onchange="updateMentBox(this.value)">
+            <option value="">-- 상황을 선택하세요 --</option>
+        </select>
+        <div id="ment-display" class="ment-box">상황을 선택하면 적절한 상담 멘트가 표시됩니다.</div>
     </div>
 
     <div class="panel panel-red">
-        <h2>📊 실적 및 가이드</h2>
-        <input type="text" id="keyword" placeholder="번호 또는 문자 입력..." onkeyup="searchGuide()">
+        <h2>🔍 화면 가이드</h2>
+        <input type="text" id="keyword" placeholder="화면번호 또는 문자 입력..." onkeyup="searchGuide()">
         <div id="guide-display" class="guide-box">가이드 내용이 여기에 표시됩니다.</div>
+        
+        <h2 style="margin-top:10px; border:none;">📊 실적 현황</h2>
         <div class="perf-area">
             <table>
                 <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
@@ -99,54 +104,88 @@
 </div>
 
 <script>
+    // ⚠️ 꽃게님의 구글 앱 스크립트 URL을 정확히 입력하세요!
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-    let dbData = { notice: [], ment: [], perf: [] };
+    let globalDB = { notice: [], ment: [], perf: [] };
 
     async function loadData() {
         try {
-            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
-            dbData = res;
+            const response = await fetch(`${API_URL}?t=${new Date().getTime()}`);
+            const data = await response.json();
+            globalDB = data;
             
-            document.getElementById('notice-list').innerHTML = res.notice.map(n => 
-                `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('');
+            // 1. 공지사항 업데이트
+            const noticeHtml = data.notice.length > 0 
+                ? data.notice.map(n => `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('')
+                : "공지사항이 없습니다.";
+            document.getElementById('notice-list').innerHTML = noticeHtml;
             
+            // 2. 멘트 선택지 업데이트
             const select = document.getElementById('ment-select');
-            res.ment.filter(m => m.type).forEach(m => {
+            select.innerHTML = '<option value="">-- 상황을 선택하세요 --</option>';
+            data.ment.filter(m => m.type).forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
             });
 
-            let cum = 0;
-            document.getElementById('perf-list').innerHTML = res.perf.map(p => {
-                const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
-                cum += val;
-                return `<tr><td>${p.date}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
+            // 3. 실적 현황 업데이트
+            let cumulative = 0;
+            const perfHtml = data.perf.map(p => {
+                const numVal = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
+                cumulative += numVal;
+                return `<tr><td>${p.date}</td><td>${p.val}</td><td class="cum-cell">${cumulative.toLocaleString()}</td></tr>`;
             }).join('');
-        } catch(e) { document.getElementById('notice-list').innerText = "❌ 데이터 연결 실패"; }
+            document.getElementById('perf-list').innerHTML = perfHtml;
+
+        } catch (error) {
+            console.error("데이터 로딩 오류:", error);
+            document.getElementById('notice-list').innerText = "❌ 데이터를 불러올 수 없습니다. API 주소 및 권한을 확인하세요.";
+        }
     }
 
-    function updateMentBox(v) {
-        const item = dbData.ment.find(m => m.type === v);
-        document.getElementById('ment-display').innerText = item ? item.talk : "상황을 선택해 주세요.";
+    function updateMentBox(val) {
+        const item = globalDB.ment.find(m => m.type === val);
+        document.getElementById('ment-display').innerText = item ? item.talk : "상황을 선택하면 적절한 상담 멘트가 표시됩니다.";
     }
 
     function searchGuide() {
-        const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const found = dbData.ment.find(m => String(m.num).includes(q) || m.key.toLowerCase().includes(q));
-        document.getElementById('guide-display').innerHTML = found ? `<b>[${found.num}] ${found.key}</b><br>${found.pos}` : "결과 없음";
+        const query = document.getElementById('keyword').value.toLowerCase().trim();
+        if(!query) {
+            document.getElementById('guide-display').innerText = "가이드 내용이 여기에 표시됩니다.";
+            return;
+        }
+        const found = globalDB.ment.find(m => String(m.num).includes(query) || (m.key && m.key.toLowerCase().includes(query)));
+        document.getElementById('guide-display').innerHTML = found 
+            ? `<b>[${found.num}] ${found.key}</b><br><div style="margin-top:5px;">${found.pos}</div>` 
+            : "검색 결과가 없습니다.";
     }
 
     function startVoice() {
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("이 브라우저는 음성 인식을 지원하지 않습니다.");
+            return;
+        }
+        const recognition = new SpeechRecognition();
         recognition.lang = 'ko-KR';
         recognition.start();
-        document.getElementById('notice-list').innerText = "🎤 말씀하세요... (예: 백 건)";
+        
+        document.getElementById('notice-list').innerText = "🎤 듣고 있습니다... 숫자를 말씀해주세요.";
+        
         recognition.onresult = (event) => {
-            const val = event.results[0][0].transcript.replace(/[^0-9]/g, '');
-            if (val && confirm(val + "건을 저장할까요?")) { /* 저장 로직 */ alert(val + "건 저장 요청됨!"); }
+            const speechToText = event.results[0][0].transcript;
+            const count = speechToText.replace(/[^0-9]/g, '');
+            if (count) {
+                if (confirm(`${count}건을 오늘 실적으로 등록할까요?`)) {
+                    alert(`${count}건 등록 요청됨! (서버 저장 로직 추가 필요)`);
+                }
+            } else {
+                alert("숫자가 인식되지 않았습니다. 다시 시도해주세요.");
+            }
             loadData();
         };
     }
+
     window.onload = loadData;
 </script>
 </body>
