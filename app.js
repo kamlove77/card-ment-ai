@@ -20,6 +20,7 @@ async function init() {
 // 3. 실적 로드 (날짜를 MM/DD로 변환)
 async function loadPerformance() {
     const listBody = document.getElementById("perf-list");
+    const totalEl = document.getElementById("total-calls");
     if (!listBody) return;
 
     try {
@@ -27,27 +28,48 @@ async function loadPerformance() {
         const data = await res.json();
         listBody.innerHTML = ""; 
 
+        const now = new Date();
+        const currentMonth = now.getMonth(); // 현재 월 (0~11)
+        const currentYear = now.getFullYear();
+        
+        let monthTotal = 0; // 이번 달 누적 합계 변수
+
         data.forEach(row => {
-            const tr = document.createElement("tr");
-            let displayDate = "-";
+            if (!row.date) return;
             
-            // 날짜 변환 안전 로직
-            if (row.date) {
-                const dateObj = new Date(row.date);
-                if (!isNaN(dateObj.getTime())) {
-                    displayDate = `${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
-                } else {
-                    const parts = String(row.date).split(" ");
-                    const monthMap = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" };
-                    if (parts.length >= 3) displayDate = `${monthMap[parts[1]] || "01"}/${parts[2].padStart(2, '0')}`;
+            const dateObj = new Date(row.date);
+            const tr = document.createElement("tr");
+            
+            // 1. 이번 달 데이터인지 판별 (연도와 월이 같은지 확인)
+            if (!isNaN(dateObj.getTime())) {
+                if (dateObj.getFullYear() === currentYear && dateObj.getMonth() === currentMonth) {
+                    const callCount = parseInt(String(row.current).replace(/[^0-9]/g, "")) || 0;
+                    monthTotal += callCount;
                 }
             }
 
-            tr.innerHTML = `<td>${displayDate}</td><td>${row.current}콜</td><td>${row.rate}</td><td>${row.memo || "-"}</td>`;
+            // 2. 날짜 가공 (MM/DD 형식)
+            let displayDate = "-";
+            if (!isNaN(dateObj.getTime())) {
+                displayDate = `${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
+            }
+
+            tr.innerHTML = `
+                <td>${displayDate}</td>
+                <td>${row.current}콜</td>
+                <td style="font-weight:bold; color:#007bff;">${row.rate}</td>
+                <td>${row.memo || "-"}</td>
+            `;
             listBody.appendChild(tr);
         });
+
+        // 3. 화면 상단에 이번 달 월과 누적 합계 표시
+        if (totalEl) {
+            totalEl.innerHTML = `<span style="font-size: 0.9rem; color: #666;">(${currentMonth + 1}월 누적)</span> ${monthTotal.toLocaleString()}`;
+        }
+
     } catch (e) {
-        listBody.innerHTML = "<tr><td colspan='4'>데이터를 불러올 수 없습니다.</td></tr>";
+        console.error("실적 로드 실패:", e);
     }
 }
 
@@ -117,3 +139,4 @@ document.addEventListener('click', function(e) {
 });
 
 window.onload = init;
+
