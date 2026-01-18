@@ -1,5 +1,5 @@
 // [최신 주소 반영] 방금 알려주신 URL입니다.
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbz7ADEaPxJ4RRV57V2WuJd15WVAf5lslyey1WTR8idCceGqfIkNSmyFeRpVgHbkoflM0g/exec";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycby1jVagwV4x0YS12-Qd29udMREg7gTZ6xbQduykULuSklaGyKzIXjlX7jhwnP43Y5COCw/exec";
 
 const $ = (id) => document.getElementById(id);
 
@@ -75,3 +75,4 @@ $("clear").onclick = () => {
   $("view-keywords").textContent = "-";
   $("view-desc").textContent = "-";
 };
+
