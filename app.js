@@ -75,3 +75,33 @@ $("clear").onclick = () => {
   $("detail").value = "";
   $("out").innerHTML = "";
 };
+
+// 1. 페이지 로드 시 시트에서 유형(Type)을 가져와 Select 박스 채우기
+window.onload = async () => {
+  const templates = await loadTemplatesFromSheet();
+  const typeSelect = $("type");
+  
+  // 시트에서 가져온 유니크한 'type' 키값들로 옵션 생성
+  Object.keys(templates).forEach(typeName => {
+    const opt = document.createElement("option");
+    opt.value = typeName;
+    opt.textContent = typeName;
+    typeSelect.appendChild(opt);
+  });
+};
+
+// 2. 누락된 'tone' 요소 에러 방지 (HTML에 tone이 없을 경우 대비)
+$("gen").onclick = async () => {
+  const type = $("type").value;
+  // HTML에 id="tone" 인 select 박스가 없다면 기본값 "default" 사용
+  const tone = $("tone") ? $("tone").value : "default"; 
+  const detail = $("detail").value;
+  
+  if(!type) {
+    alert("상황 유형을 선택해주세요.");
+    return;
+  }
+  
+  const list = await makeMentions(type, tone, detail);
+  render(list);
+};
