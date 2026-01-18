@@ -3,79 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카드 상담 통합 가이드</title>
+    <title>카드 상담 가이드 시스템</title>
     <style>
-        :root { --primary: #007bff; --bg: #f4f7f9; --accent: #e83e8c; }
+        :root { --primary: #007bff; --bg: #f4f7f9; --accent: #ff6b6b; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
         .container { max-width: 650px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* 공지사항 */
-        .notice-section { background: #fff9c4; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; border-left: 5px solid #fbc02d; }
+        .notice-section { background: #fff9c4; border-left: 5px solid #fbc02d; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem; }
+        .search-area { position: sticky; top: 0; background: white; padding-bottom: 15px; z-index: 10; border-bottom: 2px solid #eee; margin-bottom: 15px; }
+        input { width: 100%; padding: 15px; border: 2px solid var(--primary); border-radius: 10px; box-sizing: border-box; font-size: 1.1rem; }
 
-        /* 검색창 고정 */
-        .search-area { position: sticky; top: 0; background: white; padding: 10px 0; z-index: 100; border-bottom: 2px solid #eee; margin-bottom: 15px; }
-        input { width: 100%; padding: 15px; border: 2px solid var(--primary); border-radius: 10px; box-sizing: border-box; font-size: 1.1rem; outline: none; }
-
-        /* 가이드 카드 디자인 */
-        .guide-card { border: 2px solid #eee; border-radius: 12px; margin-bottom: 20px; background: #fff; overflow: hidden; }
+        .guide-card { border: 1px solid #dee2e6; border-radius: 12px; margin-bottom: 15px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        /* ⭐ 상담 멘트 (A-E) 영역 ⭐ */
+        .ment-top { padding: 15px; border-bottom: 1px dashed #ddd; }
+        .type-tag { display: inline-block; background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 10px; }
+        .talk-text { font-size: 1.1rem; line-height: 1.6; color: #111; white-space: pre-wrap; background: #f9f9f9; padding: 12px; border-radius: 8px; }
         
-        /* ⭐ 1순위: 상담 멘트 (A-E 연결) ⭐ */
-        .ment-area { padding: 20px; border-bottom: 2px dashed #eee; background: #fdfdfd; }
-        .type-tag { display: inline-block; background: var(--primary); color: white; padding: 3px 10px; border-radius: 5px; font-size: 0.9rem; font-weight: bold; margin-bottom: 12px; }
-        .talk-ment { font-size: 1.15rem; line-height: 1.7; color: #111; white-space: pre-wrap; font-weight: 500; }
-
-        /* ⭐ 2순위: 시스템 가이드 (B-C-D 연결) ⭐ */
-        .system-guide { padding: 12px 20px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; }
-        .screen-num { font-weight: bold; color: #555; font-size: 1rem; }
-        .system-pos { color: var(--accent); font-weight: bold; font-size: 0.9rem; }
+        /* ⭐ 가이드 (B-C-D) 영역 ⭐ */
+        .guide-bottom { padding: 10px 15px; background: #f1f3f5; display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .screen-info { font-weight: bold; color: #555; }
+        .pos-info { color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <div id="notice-list" class="notice-section">📢 공지 로딩 중...</div>
-
-    <div class="search-area">
-        <input type="text" id="keyword" placeholder="화면번호 또는 멘트 검색..." onkeyup="filterData()" autofocus>
-    </div>
-
-    <div id="guide-list">데이터를 불러오는 중입니다...</div>
+    <div id="notice-list" class="notice-section">📢 공지사항 로딩 중...</div>
+    <div class="search-area"><input type="text" id="keyword" placeholder="화면번호 또는 멘트 검색..." onkeyup="filterData()"></div>
+    <div id="guide-list">데이터 로딩 중...</div>
 </div>
-
 <script>
-    // 앱 스크립트 배포 주소 (이전 대화에서 드린 GAS 코드가 적용되어 있어야 합니다)
-    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-    let guideData = [];
-
+    const API_URL = "꽃게님의_배포_주소_여기에_입력"; // ⚠️ 본인의 주소로 교체하세요!
+    let allData = [];
     async function init() {
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
-            document.getElementById("notice-list").innerHTML = "📢 " + (res.notice[0]?.content || "현재 공지사항이 없습니다.");
-            guideData = res.ment;
-            render(guideData);
+            document.getElementById("notice-list").innerHTML = "📢 " + (res.notice[0]?.content || "공지 없음");
+            allData = res.ment;
+            render(allData);
         } catch(e) { document.getElementById("guide-list").innerText = "연결 실패"; }
     }
-
     function render(data) {
         document.getElementById("guide-list").innerHTML = data.map(g => `
             <div class="guide-card">
-                <div class="ment-area">
+                <div class="ment-top">
                     <div class="type-tag">${g.type}</div>
-                    <div class="talk-ment">${g.talkMent || "등록된 상담 멘트가 없습니다."}</div>
+                    <div class="talk-text">${g.talkMent || "멘트 없음"}</div>
                 </div>
-                <div class="system-guide">
-                    <span class="screen-num">화면: ${g.screenNum} (${g.searchKey})</span>
-                    <span class="system-pos">📍 위치: ${g.detailPos}</span>
+                <div class="guide-bottom">
+                    <span class="screen-info">번호: ${g.screenNum} (${g.searchKey})</span>
+                    <span class="pos-info">📍 ${g.detailPos}</span>
                 </div>
             </div>
         `).join('');
     }
-
     function filterData() {
         const k = document.getElementById("keyword").value.toLowerCase();
-        render(guideData.filter(g => 
-            String(g.screenNum).includes(k) || g.searchKey.includes(k) || g.talkMent.includes(k)
-        ));
+        render(allData.filter(g => String(g.screenNum).includes(k) || g.searchKey.includes(k) || g.talkMent.includes(k)));
     }
     window.onload = init;
 </script>
