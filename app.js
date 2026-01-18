@@ -1,4 +1,5 @@
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbz0jAAwOj2VB2Kq_WxRAZvqdKmm65BRrsFu6M6NUF4GhRjsmFxrM_q3YlKqs6w/exec";
+// 기존 주소를 지우고 이 새로운 주소로 바꿔주세요.
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxxIRvwQmIBbmccxMJCCx6lZXM3mq6EVqwKgzUuenSPkLNbbht_N0Ke5a1wBIeD9PPEjA/exec";
 
 const $ = (id) => document.getElementById(id);
 
@@ -61,3 +62,4 @@ $("clear").onclick = () => {
   $("detail").value = "";
   $("out").innerHTML = "";
 };
+
