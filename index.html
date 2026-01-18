@@ -3,63 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카드 상담 통합 시스템</title>
+    <title>카드 상담 가이드 시스템</title>
     <style>
         :root { --primary: #007bff; --bg: #f4f7f9; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .container { max-width: 650px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 650px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-height: 500px; }
         
         /* 공지사항 박스 */
-        .notice-section { background: #fff9c4; border-left: 5px solid #fbc02d; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
-        .notice-content { font-size: 0.9rem; line-height: 1.5; max-height: 100px; overflow-y: auto; }
-
-        /* 탭 버튼 */
-        .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
-        .nav-tabs button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #eee; }
-        .nav-tabs button.active { background: var(--primary); color: white; }
-
-        .content { display: none; }
-        .content.active { display: block; }
+        .notice-section { background: #fff9c4; border-left: 5px solid #fbc02d; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
+        .notice-content { font-size: 0.95rem; line-height: 1.6; color: #333; }
 
         /* 검색창 */
-        .search-box { margin-bottom: 15px; }
-        input { width: 100%; padding: 12px; border: 2px solid var(--primary); border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .search-area { margin-bottom: 20px; }
+        input { width: 100%; padding: 15px; border: 2px solid var(--primary); border-radius: 10px; box-sizing: border-box; font-size: 1.1rem; outline: none; }
 
-        /* ⭐ 상담 멘트 카드 스타일 ⭐ */
-        .guide-card { border: 1px solid #eef2f6; padding: 15px; border-radius: 10px; margin-bottom: 15px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .card-header { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; }
-        .screen-num { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
-        .guide-body { font-size: 1rem; line-height: 1.6; white-space: pre-wrap; background: #f9f9f9; padding: 10px; border-radius: 6px; color: #333; }
+        /* 가이드 멘트 카드 */
+        .guide-card { border: 1px solid #eef2f6; padding: 18px; border-radius: 12px; margin-bottom: 15px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
+        .screen-num { font-weight: bold; color: var(--primary); font-size: 1.2rem; }
+        .guide-body { font-size: 1.05rem; line-height: 1.7; white-space: pre-wrap; background: #f8f9fa; padding: 12px; border-radius: 8px; color: #333; }
 
-        /* 실적 통계 */
-        .perf-summary { background: #e7f1ff; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 10px; font-weight: bold; color: var(--primary); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: center; }
-        th { background: #f1f3f5; padding: 8px; }
-        td { padding: 8px; border-bottom: 1px solid #eee; }
+        /* 실적 영역 */
+        .perf-area { margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px; }
+        .perf-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; }
+        th { background: #f1f3f5; padding: 10px; border-bottom: 2px solid #dee2e6; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="notice-section">
-        <div style="font-weight:bold; margin-bottom:5px;">📢 실시간 업무 공지</div>
-        <div id="notice-list" class="notice-content">로딩 중...</div>
+        <div style="font-weight:bold; color:#856404; margin-bottom:8px;">📢 주요 공지사항</div>
+        <div id="notice-list" class="notice-content">데이터를 가져오는 중...</div>
     </div>
 
-    <div class="nav-tabs">
-        <button id="tab-g" class="active" onclick="showTab('g')">📜 가이드 & 멘트</button>
-        <button id="tab-s" onclick="showTab('s')">📊 실적 현황</button>
+    <div class="search-area">
+        <input type="text" id="keyword" placeholder="화면번호 또는 멘트 키워드 검색..." onkeyup="filterData()">
     </div>
 
-    <div id="sec-g" class="content active">
-        <div class="search-box">
-            <input type="text" id="keyword" placeholder="화면번호 또는 멘트 검색..." onkeyup="filterGuides()">
+    <div id="guide-list">가이드 로딩 중...</div>
+
+    <div class="perf-area">
+        <div class="perf-title">
+            <span>📊 이번 달 실적 현황</span>
+            <span style="color:var(--primary);">합계: <span id="total-val">0</span>건</span>
         </div>
-        <div id="guide-list">데이터를 불러오는 중입니다...</div>
-    </div>
-
-    <div id="sec-s" class="content">
-        <div id="perf-summary" class="perf-summary">이번 달 합계: 0건</div>
         <table>
             <thead><tr><th>날짜</th><th>완료(C)</th><th>달성률</th></tr></thead>
             <tbody id="perf-list"></tbody>
@@ -68,70 +58,63 @@
 </div>
 
 <script>
+    // ⚠️ 꽃게님의 API 주소를 여기에 정확히 넣어주세요!
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let guideData = [];
 
-    async function init() {
+    async function fetchData() {
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             
-            // 공지사항 로드
-            document.getElementById("notice-list").innerHTML = res.notice.map(n => `<div>• ${n.content}</div>`).join('') || "공지 없음";
+            // 공지 업데이트
+            document.getElementById("notice-list").innerHTML = res.notice.map(n => `<div>• ${n.content}</div>`).join('') || "현재 공지가 없습니다.";
 
-            // 가이드 데이터 저장 및 즉시 출력
+            // 가이드 데이터 저장 및 첫 화면 출력
             guideData = res.ment;
-            displayGuides(guideData);
+            renderGuides(guideData);
 
-            // 실적 데이터 로드
+            // 실적 업데이트
             let total = 0;
-            const perfHtml = res.perf.map(p => {
+            const perfRows = res.perf.map(p => {
                 total += parseInt(String(p.current).replace(/[^0-9]/g, "")) || 0;
                 return `<tr><td>${p.date}</td><td>${p.current}</td><td>${p.rate}</td></tr>`;
             }).join('');
-            document.getElementById("perf-list").innerHTML = perfHtml;
-            document.getElementById("perf-summary").innerText = `이번 달 합계: ${total.toLocaleString()}건`;
+            document.getElementById("perf-list").innerHTML = perfRows;
+            document.getElementById("total-val").innerText = total.toLocaleString();
 
-        } catch (e) {
-            document.getElementById("guide-list").innerText = "연결 실패. 앱 스크립트 배포 상태를 확인하세요.";
+        } catch (error) {
+            console.error(error);
+            document.getElementById("guide-list").innerHTML = "<div style='color:red; padding:20px;'>데이터 연결 오류! 앱 스크립트 배포 주소를 확인하세요.</div>";
         }
     }
 
-    // ⭐ 멘트 카드를 화면에 그리는 함수 ⭐
-    function displayGuides(data) {
-        const listContainer = document.getElementById("guide-list");
-        if (!data || data.length === 0) {
-            listContainer.innerHTML = "표시할 멘트가 없습니다.";
+    function renderGuides(items) {
+        const container = document.getElementById("guide-list");
+        if (!items || items.length === 0) {
+            container.innerHTML = "표시할 가이드가 없습니다.";
             return;
         }
-        listContainer.innerHTML = data.map(g => `
+        container.innerHTML = items.map(g => `
             <div class="guide-card">
                 <div class="card-header">
-                    <span class="screen-num">번호: ${g.screenNum}</span>
-                    <span style="font-size:0.8rem; color:#999;">${g.type || '안내'}</span>
+                    <span class="screen-num">화면번호: ${g.screenNum}</span>
+                    <span style="font-size:0.85rem; color:#888;">${g.type || '안내'}</span>
                 </div>
-                <div class="guide-body">${g.text || '멘트 내용이 비어있습니다.'}</div>
+                <div class="guide-body">${g.text || '멘트가 없습니다.'}</div>
             </div>
         `).join('');
     }
 
-    // 검색 필터링
-    function filterGuides() {
+    function filterData() {
         const k = document.getElementById("keyword").value.toLowerCase();
         const filtered = guideData.filter(g => 
             String(g.screenNum).includes(k) || String(g.text).toLowerCase().includes(k)
         );
-        displayGuides(filtered);
+        renderGuides(filtered);
     }
 
-    // 탭 전환
-    function showTab(type) {
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-        document.getElementById('sec-' + type).classList.add('active');
-        document.getElementById('tab-' + type).classList.add('active');
-    }
-
-    window.onload = init;
+    // 페이지 로드 시 즉시 실행
+    window.onload = fetchData;
 </script>
 </body>
 </html>
