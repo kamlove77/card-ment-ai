@@ -1,38 +1,26 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <title>카드 상담 멘트 생성기</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body { font-family: Arial, sans-serif; background:#f5f6f8; }
-    .wrap { max-width:600px; margin:40px auto; background:#fff; padding:30px; border-radius:12px; }
-    h1 { text-align:center; }
-    select, textarea, button {
-      width:100%; padding:12px; margin-top:10px; font-size:14px;
-    }
-    .card { border:1px solid #ddd; border-radius:8px; padding:12px; margin-top:12px; }
-  </style>
-</head>
-<body>
 <div class="wrap">
   <h1>카드 상담 멘트 생성기</h1>
 
   <label>상황 유형</label>
-  <select id="type"></select>
+  <select id="type">
+    <option value="">유형 로딩 중...</option>
+  </select>
+
+  <label>말투 설정</label>
+  <select id="tone">
+    <option value="default">기본형</option>
+    <option value="short">단정형 (~다.)</option>
+    <option value="soft">정중형 (사과 포함)</option>
+  </select>
 
   <label>고객 상황</label>
-  <textarea id="detail" placeholder="고객 상황 입력"></textarea>
+  <textarea id="detail" placeholder="고객 상황을 입력하세요"></textarea>
 
-  <button id="gen">멘트 만들기</button>
+  <button id="gen" style="background-color: #007bff; color: white; border: none;">멘트 만들기</button>
+  <button id="clear" style="background-color: #6c757d; color: white; border: none; margin-top: 5px;">초기화</button>
 
   <div id="out"></div>
 </div>
-
-<script src="./app.js?v=1"></script>
-
-</body>
-</html>
 
 
 
