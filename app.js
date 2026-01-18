@@ -36,25 +36,26 @@ async function loadNotice() {
         const container = document.getElementById("notice-container");
         
         if (data && data.length > 0) {
-            container.innerHTML = ""; // 기존 내용 비우기
+            container.innerHTML = ""; 
             data.forEach(item => {
                 const div = document.createElement("div");
-                div.style.marginBottom = "5px";
-                div.style.fontWeight = "500";
+                div.className = "notice-item";
                 
-                // [수정된 부분] 날짜(item.date)와 내용(item.content)을 같이 표시합니다.
-                // 만약 날짜가 있으면 [1/19] 형식으로 붙이고, 없으면 내용만 나옵니다.
-                const dateLabel = item.date && item.date !== "undefined" ? `[${item.date}] ` : "";
-                div.innerText = `• ${dateLabel}${item.content}`; 
+                // [수정] 시트 컬럼명이 '날짜'이므로 item.날짜 또는 item.date를 확인
+                const dateVal = item.날짜 || item.date;
+                const dateLabel = (dateVal && dateVal !== "undefined") ? `[${dateVal}] ` : "";
                 
+                // [수정] 시트 컬럼명이 '공지내용'이므로 item.공지내용 또는 item.content를 확인
+                const contentVal = item.공지내용 || item.content || "";
+                
+                div.innerText = `• ${dateLabel}${contentVal}`; 
                 container.appendChild(div);
             });
         } else {
-            container.innerText = "현재 등록된 공지사항이 없습니다.";
+            container.innerHTML = "<div class='notice-item'>현재 등록된 공지가 없습니다.</div>";
         }
     } catch (e) {
-        console.error("공지사항 로드 실패");
-        document.getElementById("notice-container").innerText = "공지사항을 불러올 수 없습니다.";
+        console.error("공지 로드 실패:", e);
     }
 }
 // 멘트 유형 드롭다운 업데이트
@@ -126,4 +127,5 @@ async function loadPerformance() {
 }
 
 window.onload = init;
+
 
