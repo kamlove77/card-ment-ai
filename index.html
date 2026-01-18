@@ -4,35 +4,66 @@
     <meta charset="UTF-8">
     <title>카드 상담 스마트 가이드</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        /* 기본 레이아웃 */
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; }
-        .top-info-bar { background: #ffffff; border: 1px solid #dcdfe6; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .notice-title { font-size: 1.1rem; font-weight: bold; color: #007bff; margin-bottom: 12px; border-bottom: 2px solid #e7f1ff; padding-bottom: 8px; }
-        .notice-row { display: flex; padding: 6px 0; border-bottom: 1px solid #f2f2f2; }
-        .col-date { width: 80px; font-weight: bold; color: #666; }
-        .col-content { flex: 1; padding-left: 10px; }
+
+        /* 상단 공지사항 바 (스크롤 적용) */
+        .top-info-bar { 
+            background: #ffffff; border: 1px solid #dcdfe6; 
+            padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        }
+        .notice-title { 
+            font-size: 1.1rem; font-weight: bold; color: #007bff; 
+            margin-bottom: 12px; border-bottom: 2px solid #e7f1ff; padding-bottom: 8px; 
+        }
+        
+        /* [중요] 공지사항이 길어지면 이 안에서만 스크롤이 생깁니다 */
+        #notice-container { 
+            max-height: 150px; /* 공지창 최대 높이 */
+            overflow-y: auto;  /* 세로 스크롤 자동 생성 */
+            padding-right: 5px;
+        }
+        /* 스크롤바 디자인 (크롬/엣지용) */
+        #notice-container::-webkit-scrollbar { width: 6px; }
+        #notice-container::-webkit-scrollbar-thumb { background: #dcdfe6; border-radius: 10px; }
+
+        .notice-row { display: flex; padding: 8px 0; border-bottom: 1px solid #f2f2f2; align-items: flex-start; }
+        .col-date { width: 80px; font-weight: bold; color: #888; flex-shrink: 0; font-size: 0.9rem; }
+        .col-content { flex: 1; padding-left: 10px; word-break: break-all; font-size: 0.95rem; line-height: 1.4; }
+
+        /* 네비게이션 탭 */
         .nav { display: flex; gap: 8px; margin-bottom: 20px; }
-        .nav button { flex: 1; padding: 15px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .nav button.active { background: #007bff !important; color: white !important; }
+        .nav button { flex: 1; padding: 15px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; font-size: 1rem; color: #606266; }
+        .nav button.active { background: #007bff !important; color: white !important; border-color: #007bff; }
+
+        /* 컨텐츠 카드 */
         .content { display: none; }
         .content.active { display: block; }
         .flex-row { display: flex; gap: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #dcdfe6; flex: 1; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dcdfe6; border-radius: 6px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #dcdfe6; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dcdfe6; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-blue { background: #007bff; color: white; }
         .btn-gray { background: #909399; color: white; }
-        .summary { background: #f0f7ff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
+        
+        /* 실적 통계 테이블 */
+        .summary { background: #f0f7ff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d0e3ff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; border-bottom: 1px solid #ebeef5; text-align: center; }
+        th { background: #f8f9fa; color: #666; font-size: 0.9rem; }
+
+        @media (max-width: 800px) { .flex-row { flex-direction: column; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="top-info-bar">
-        <div class="notice-title">📢 공지사항</div>
-        <div id="notice-container">로딩 중... (안 나오면 F5)</div>
+        <div class="notice-title">📢 실시간 공지사항</div>
+        <div id="notice-container">데이터를 연결 중입니다...</div>
     </div>
 
     <div class="nav">
@@ -43,131 +74,17 @@
     <div id="sec-home" class="content active">
         <div class="flex-row">
             <div class="card">
-                <h3>🔍 가이드 조회</h3>
-                <input type="text" id="in-search" placeholder="화면번호 혹은 키워드">
+                <h3 style="margin-top:0;">🔍 가이드 조회</h3>
+                <input type="text" id="in-search" placeholder="화면번호 혹은 키워드 입력">
                 <button onclick="fnSearch()" class="btn btn-gray">조회하기</button>
-                <div style="margin-top:15px; background:#f9f9f9; padding:15px; border-radius:6px; min-height:100px;">
-                    <strong>번호:</strong> <span id="out-num">-</span><br><br>
-                    <strong>내용:</strong><div id="out-desc" style="white-space:pre-wrap;">-</div>
+                <div style="margin-top:15px; background:#f9f9f9; padding:15px; border-radius:6px; min-height:110px; border:1px solid #eee;">
+                    <p style="margin:0 0 10px 0;"><strong>화면번호:</strong> <span id="out-num" style="color:#007bff;">-</span></p>
+                    <strong>내용:</strong>
+                    <div id="out-desc" style="white-space:pre-wrap; margin-top:5px; font-size:0.95rem; color:#444;">검색 결과가 여기에 표시됩니다.</div>
                 </div>
             </div>
             <div class="card">
-                <h3 style="color:#007bff;">✍️ 멘트 생성</h3>
-                <select id="sel-type"><option value="">선택하세요</option></select>
+                <h3 style="margin-top:0; color:#007bff;">✍️ 멘트 생성</h3>
+                <select id="sel-type"><option value="">로딩 중...</option></select>
                 <button onclick="fnMent()" class="btn btn-blue">멘트 생성</button>
-                <textarea id="out-ment" rows="12" style="margin-top:10px;"></textarea>
-            </div>
-        </div>
-    </div>
-
-    <div id="sec-perf" class="content">
-        <div class="card" style="max-width: 600px; margin: 0 auto;">
-            <h3>📊 월간 실적 현황</h3>
-            <div class="summary">총 완료: <span id="txt-total" style="font-size:24px; font-weight:bold; color:#007bff;">0</span>건</div>
-            <table>
-                <thead><tr><th>날짜</th><th>콜수</th><th>달성률</th></tr></thead>
-                <tbody id="list-perf"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-    // 1. 설정 및 변수
-    const API = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec";
-    let allData = [];
-
-    // 2. 탭 전환 기능 (데이터와 상관없이 무조건 작동하도록 상단 배치)
-    function goTab(mode) {
-        console.log("탭 전환 클릭:", mode);
-        const sHome = document.getElementById('sec-home');
-        const sPerf = document.getElementById('sec-perf');
-        const tHome = document.getElementById('tab-home');
-        const tPerf = document.getElementById('tab-perf');
-
-        if(mode === 'home') {
-            sHome.style.display = 'block';
-            sPerf.style.display = 'none';
-            tHome.classList.add('active');
-            tPerf.classList.remove('active');
-        } else {
-            sHome.style.display = 'none';
-            sPerf.style.display = 'block';
-            tHome.classList.remove('active');
-            tPerf.classList.add('active');
-        }
-    }
-
-    // 3. 날짜 포맷 (월-일)
-    function fixDate(v) {
-        const d = new Date(v);
-        if(!isNaN(d.getTime())) {
-            return (d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getDate().toString().padStart(2,'0');
-        }
-        return v;
-    }
-
-    // 4. 데이터 로드
-    async function init() {
-        try {
-            console.log("데이터 로드 시작...");
-            
-            // 공지사항 로드
-            const r1 = await fetch(API + "?mode=notice");
-            const d1 = await r1.json();
-            const b1 = document.getElementById("notice-container");
-            b1.innerHTML = "";
-            d1.forEach(i => {
-                b1.innerHTML += `<div class="notice-row"><div class="col-date">${i.date}</div><div class="col-content">• ${i.content}</div></div>`;
-            });
-
-            // 멘트 및 가이드 로드
-            const r2 = await fetch(API + "?mode=ment");
-            allData = await r2.json();
-            const sel = document.getElementById("sel-type");
-            const ts = [...new Set(allData.map(i => i.type).filter(t => t))];
-            sel.innerHTML = '<option value="">선택하세요</option>';
-            ts.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
-
-            // 실적 로드
-            const r3 = await fetch(API + "?mode=perf");
-            const d3 = await r3.json();
-            const b3 = document.getElementById("list-perf");
-            let total = 0;
-            b3.innerHTML = "";
-            d3.forEach(r => {
-                total += parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
-                b3.innerHTML += `<tr><td>${fixDate(r.date)}</td><td>${r.current}콜</td><td>${r.rate}</td></tr>`;
-            });
-            document.getElementById("txt-total").innerText = total.toLocaleString();
-            
-            console.log("데이터 로드 완료!");
-        } catch (e) {
-            console.error("오류 발생:", e);
-            document.getElementById("notice-container").innerHTML = "<b style='color:red'>서버 연결 오류! F5를 눌러주세요.</b>";
-        }
-    }
-
-    // 검색 및 멘트 생성 함수
-    function fnSearch() {
-        const v = document.getElementById("in-search").value.trim().toLowerCase();
-        if(!v) return;
-        const f = allData.find(i => String(i.screenNum).toLowerCase() === v || (i.keywords && i.keywords.includes(v)));
-        if(f) {
-            document.getElementById("out-num").innerText = f.screenNum;
-            document.getElementById("out-desc").innerText = f.description;
-        } else { alert("검색 결과가 없습니다."); }
-    }
-
-    function fnMent() {
-        const s = document.getElementById("sel-type").value;
-        if(!s) return alert("유형을 선택하세요.");
-        const res = allData.filter(i => i.type === s);
-        document.getElementById("out-ment").value = res.map((i, idx) => `[멘트 ${idx+1}]\n${i.text}`).join("\n\n---\n\n");
-    }
-
-    // 페이지 로드 시 실행
-    window.onload = init;
-</script>
-</body>
-</html>
+                <textarea id="out-ment" rows="12" style="margin-top:10
