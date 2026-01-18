@@ -27,37 +27,33 @@ window.onload = async () => {
         });
     }
 
-    // [기능 1] 멘트 생성 (왼쪽)
+    // [왼쪽] 멘트 만들기 버튼
     $("gen").onclick = async () => {
         const type = $("type").value;
-        const tone = $("tone").value;
-        const detail = $("detail").value;
         if (!type) return alert("유형을 먼저 선택하세요.");
-
         const allData = await loadData();
         const filtered = allData.filter(item => item.type === type);
-        
         const out = $("out");
         out.innerHTML = "";
         filtered.forEach((item, idx) => {
             const card = document.createElement("div");
             card.className = "card";
-            const ment = item.text + (detail ? `\n\n[참고: ${detail}]` : "");
             card.innerHTML = `
                 <div style="font-weight:bold; color:#007bff; font-size:12px;">추천 ${idx+1}</div>
-                <div style="white-space:pre-wrap; margin:10px 0;">${ment}</div>
-                <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${ment}\`)">복사</button>
+                <div style="white-space:pre-wrap; margin:10px 0;">${item.text}</div>
+                <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${item.text}\`)">복사</button>
             `;
             out.appendChild(card);
         });
     };
 
-    // [기능 2] 개별 조회 (오른쪽) - 왼쪽과 상관없이 작동
+    // [오른쪽] 8974 등 화면번호 개별 조회 버튼 (핵심 수정 부분)
     $("btn-search").onclick = async () => {
         const keyword = $("quick-search").value.trim();
-        if (!keyword) return alert("화면번호를 입력하세요.");
+        if (!keyword) return alert("조회할 화면번호를 입력하세요.");
 
         const allData = await loadData();
+        // 시트의 B열(screenNum) 또는 C열(keywords)에서 입력값이 포함된 행 찾기
         const found = allData.find(item => 
             (item.screenNum && String(item.screenNum).includes(keyword)) ||
             (item.keywords && String(item.keywords).includes(keyword))
@@ -68,7 +64,10 @@ window.onload = async () => {
             $("view-keywords").textContent = found.keywords || "-";
             $("view-desc").textContent = found.description || "-";
         } else {
-            alert("정보를 찾을 수 없습니다.");
+            alert("일치하는 정보를 찾을 수 없습니다.");
+            $("view-screen").textContent = "-";
+            $("view-keywords").textContent = "-";
+            $("view-desc").textContent = "-";
         }
     };
 };
