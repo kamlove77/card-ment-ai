@@ -1,25 +1,55 @@
-// 최신 배포 URL 적용
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwt6m_Cpo9II5FBjTS57UXKqIBvuQdhN1jx9a9gRvCt9nA0wkYUxbK9W8LbIYETmifr8w/exec";
-
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzum84HO-733vm3uN-RNU8Kn9buRLx_Eg4N_SZgoFyBD6SXH4imoeqSLjYBscCTIbb63Q/exec";
 const $ = (id) => document.getElementById(id);
 
-async function loadData() {
+// 1. 데이터 로드 공통 함수
+async function fetchData(mode = "ment") {
     try {
-        const res = await fetch(SHEET_API_URL);
-        return await res.json();
+        const response = await fetch(`${SHEET_API_URL}?mode=${mode}`);
+        return await response.json();
     } catch (e) {
-        console.error("데이터 로드 실패:", e);
+        console.error("데이터 로드 에러:", e);
         return [];
     }
 }
 
+// 2. 실적 관리 화면 (표) 업데이트 함수
+async function loadPerformance() {
+    const listBody = $("perf-list");
+    listBody.innerHTML = "<tr><td colspan='4'>엑셀 자료를 가져오는 중...</td></tr>";
+
+    const data = await fetchData("perf"); // mode=perf로 호출
+
+    listBody.innerHTML = "";
+    if (data.length === 0) {
+        listBody.innerHTML = "<tr><td colspan='4'>기록된 실적 데이터가 없습니다.</td></tr>";
+        return;
+    }
+
+    data.forEach(row => {
+        const tr = document.createElement("tr");
+        // 목표 135 대비 달성률 계산
+        const rateNum = ((row.current / 135) * 100).toFixed(1);
+        const color = rateNum >= 100 ? "#28a745" : "#d9534f";
+
+        tr.innerHTML = `
+            <td>${row.date}</td>
+            <td>${row.current}콜</td>
+            <td style="font-weight:bold; color:${color}">${rateNum}%</td>
+            <td>${row.memo || "-"}</td>
+        `;
+        listBody.appendChild(tr);
+    });
+}
+
+// 3. 페이지 로드 시 초기 세팅
 window.onload = async () => {
-    const data = await loadData();
+    // 멘트 유형 드롭다운 초기화
+    const mentData = await fetchData("ment");
     const typeSelect = $("type");
     
-    if (data.length > 0) {
+    if (mentData.length > 0) {
         typeSelect.innerHTML = "<option value=''>유형을 선택하세요</option>";
-        const types = [...new Set(data.map(item => item.type))];
+        const types = [...new Set(mentData.map(item => item.type))];
         types.forEach(t => {
             const opt = document.createElement("option");
             opt.value = t; opt.textContent = t;
@@ -27,47 +57,38 @@ window.onload = async () => {
         });
     }
 
-    // [왼쪽] 멘트 만들기 버튼
+    // [멘트 만들기] 버튼 이벤트
     $("gen").onclick = async () => {
         const type = $("type").value;
-        if (!type) return alert("유형을 먼저 선택하세요.");
-        const allData = await loadData();
-        const filtered = allData.filter(item => item.type === type);
+        if (!type) return alert("유형을 선택해주세요.");
+        
+        const filtered = mentData.filter(item => item.type === type);
         const out = $("out");
         out.innerHTML = "";
         filtered.forEach((item, idx) => {
             const card = document.createElement("div");
             card.className = "card";
             card.innerHTML = `
-                <div style="font-weight:bold; color:#007bff; font-size:12px;">추천 ${idx+1}</div>
+                <div style="font-weight:bold; color:#007bff;">추천 ${idx + 1}</div>
                 <div style="white-space:pre-wrap; margin:10px 0;">${item.text}</div>
-                <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${item.text}\`)">복사</button>
+                <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${item.text}\`).then(()=>alert('복사되었습니다!'))">복사</button>
             `;
             out.appendChild(card);
         });
     };
 
-    // [오른쪽] 8974 등 화면번호 개별 조회 버튼 (핵심 수정 부분)
-    $("btn-search").onclick = async () => {
+    // [화면번호 조회] 버튼 이벤트
+    $("btn-search").onclick = () => {
         const keyword = $("quick-search").value.trim();
-        if (!keyword) return alert("조회할 화면번호를 입력하세요.");
-
-        const allData = await loadData();
-        // 시트의 B열(screenNum) 또는 C열(keywords)에서 입력값이 포함된 행 찾기
-        const found = allData.find(item => 
-            (item.screenNum && String(item.screenNum).includes(keyword)) ||
-            (item.keywords && String(item.keywords).includes(keyword))
-        );
-
+        if (!keyword) return alert("번호를 입력하세요.");
+        
+        const found = mentData.find(item => String(item.screenNum).includes(keyword));
         if (found) {
-            $("view-screen").textContent = found.screenNum || "-";
-            $("view-keywords").textContent = found.keywords || "-";
-            $("view-desc").textContent = found.description || "-";
+            $("view-screen").textContent = found.screenNum;
+            $("view-keywords").textContent = found.keywords;
+            $("view-desc").textContent = found.description;
         } else {
-            alert("일치하는 정보를 찾을 수 없습니다.");
-            $("view-screen").textContent = "-";
-            $("view-keywords").textContent = "-";
-            $("view-desc").textContent = "-";
+            alert("조회된 정보가 없습니다.");
         }
     };
 };
