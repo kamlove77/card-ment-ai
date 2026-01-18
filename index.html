@@ -9,18 +9,20 @@
         .top-info-bar { border: 1px solid #e0e6ed; padding: 15px; border-radius: 10px; margin-bottom: 20px; background: #fafbfc; }
         #notice-container { max-height: 100px; overflow-y: auto; font-size: 0.95rem; line-height: 1.6; }
         .nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        .nav button { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: #e9ecef; transition: 0.2s; }
+        .nav button { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: #e9ecef; }
         .nav button.active { background: #007bff; color: white; }
         .content { display: none; }
         .content.active { display: block; }
         .card { border: 1px solid #eee; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0; box-sizing: border-box; }
-        .btn-search { background: #007bff; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn-search { background: #007bff; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 20px; }
         .summary-box { background: #e7f1ff; padding: 18px; border-radius: 10px; text-align: center; margin-bottom: 15px; border: 1px solid #d0e3ff; }
         #perf-list-wrapper { max-height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; }
         thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 10; padding: 12px; border-bottom: 2px solid #dee2e6; }
         td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
+        .guide-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .guide-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -28,7 +30,7 @@
 <div class="container">
     <div class="top-info-bar">
         <div style="font-weight:bold; color:#007bff; margin-bottom:5px;">📢 실시간 공지</div>
-        <div id="notice-container">데이터를 불러오는 중입니다...</div>
+        <div id="notice-container">데이터 로딩 중...</div>
     </div>
 
     <div class="nav">
@@ -39,9 +41,9 @@
     <div id="sec-h" class="content active">
         <div class="card">
             <h3>🔍 가이드 검색</h3>
-            <input type="text" id="keyword" placeholder="화면번호 또는 키워드 입력" onkeyup="if(window.event.keyCode==13){searchGuide()}">
+            <input type="text" id="keyword" placeholder="화면번호, 키워드, 내용 입력" onkeyup="if(window.event.keyCode==13){searchGuide()}">
             <button onclick="searchGuide()" class="btn-search">조회하기</button>
-            <div id="search-res" style="margin-top:15px; padding:15px; background:#f8f9fa; border-radius:8px; min-height:100px; white-space:pre-wrap;">결과가 표시됩니다.</div>
+            <div id="search-res" style="background:#fff; border-radius:8px; min-height:100px; white-space:pre-wrap;">가이드를 불러오는 중...</div>
         </div>
     </div>
 
@@ -77,37 +79,59 @@
             const res = await response.json();
 
             // 1. 공지사항
-            const nBox = document.getElementById("notice-container");
-            nBox.innerHTML = res.notice.length ? res.notice.map(i => `<div><b>[${i.date}]</b> ${i.content}</div>`).join('') : "공지사항이 없습니다.";
+            document.getElementById("notice-container").innerHTML = res.notice.length ? res.notice.map(i => `<div><b>[${i.date}]</b> ${i.content}</div>`).join('') : "공지사항이 없습니다.";
 
-            // 2. 가이드
+            // 2. 가이드 초기 목록 표시
             guideData = res.ment;
+            displayGuides(guideData);
 
-            // 3. 실적 테이블 및 완료콜수(C열) 합산
+            // 3. 실적 & C열 합산
             const pList = document.getElementById("perf-list");
             let totalSum = 0;
-            
             pList.innerHTML = res.perf.map(r => {
-                const rawValue = String(r.current).trim(); // 시트의 C열 값
+                const rawValue = String(r.current).trim();
                 if (rawValue && rawValue !== "-" && rawValue !== "") {
                     const numValue = parseInt(rawValue.replace(/[^0-9]/g, "")) || 0;
                     totalSum += numValue;
                 }
                 return `<tr><td>${r.date || "-"}</td><td>${r.current}</td><td>${r.rate}</td></tr>`;
             }).join('');
-
             document.getElementById("total-val").innerText = totalSum.toLocaleString();
 
         } catch(e) {
-            document.getElementById("notice-container").innerText = "로딩 실패. 시트 상태를 확인하세요.";
+            document.getElementById("notice-container").innerText = "로딩 실패. 시트와 배포 주소를 확인하세요.";
         }
+    }
+
+    function displayGuides(data) {
+        const resBox = document.getElementById("search-res");
+        if(!data || data.length === 0) {
+            resBox.innerHTML = "등록된 가이드가 없습니다.";
+            return;
+        }
+        resBox.innerHTML = data.map(f => `
+            <div class="guide-item">
+                <b style="color:#007bff; font-size:1.1rem;">[${f.screenNum}]</b> <span style="color:#666;">${f.type}</span><br>
+                <div style="margin-top:8px; line-height:1.6;">${f.text}</div>
+            </div>
+        `).join('');
     }
 
     function searchGuide() {
         const k = document.getElementById("keyword").value.trim().toLowerCase();
-        if(!k) return;
-        const f = guideData.find(i => String(i.screenNum).toLowerCase().includes(k) || (i.keywords && i.keywords.includes(k)));
-        document.getElementById("search-res").innerHTML = f ? `<b>[${f.screenNum}]</b>\n\n${f.text}` : "결과가 없습니다.";
+        if(!k) {
+            displayGuides(guideData);
+            return;
+        }
+        const filtered = guideData.filter(i => 
+            String(i.screenNum).toLowerCase().includes(k) || 
+            (i.keywords && i.keywords.toLowerCase().includes(k)) ||
+            (i.text && i.text.toLowerCase().includes(k))
+        );
+        displayGuides(filtered);
+        if(filtered.length > 0) {
+            document.getElementById("search-res").insertAdjacentHTML('afterbegin', `<div style="color:#007bff; font-weight:bold; margin-bottom:15px;">🎯 검색 결과: ${filtered.length}건</div>`);
+        }
     }
 
     window.onload = loadAllData;
