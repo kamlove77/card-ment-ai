@@ -83,4 +83,28 @@ $("clear").onclick = () => {
     $("view-desc").textContent = "-";
 };
 
+// [추가 기능] 오른쪽 독립 조회 버튼 로직
+$("btn-search").onclick = async () => {
+    // 1. 입력창에서 검색어 가져오기
+    const keyword = $("quick-search").value.trim();
+    if (!keyword) return alert("조회할 화면번호나 검색어를 입력하세요.");
+
+    // 2. 시트 데이터 로드
+    const data = await loadData();
+    
+    // 3. 시트 전체에서 화면번호(B열) 또는 검색어(C열)가 일치하는 첫 번째 행 찾기
+    const found = data.find(item => 
+        item.screenNum.includes(keyword) || 
+        item.keywords.includes(keyword)
+    );
+
+    // 4. 결과가 있으면 오른쪽 가이드 영역만 업데이트
+    if (found) {
+        $("view-screen").textContent = found.screenNum;
+        $("view-keywords").textContent = found.keywords;
+        $("view-desc").textContent = found.description;
+    } else {
+        alert("일치하는 화면 정보가 없습니다. 다시 확인해 주세요.");
+    }
+};
 
