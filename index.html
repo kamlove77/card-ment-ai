@@ -23,4 +23,90 @@
         .btn-blue { background: #007bff; color: white; }
         .btn-gray { background: #909399; color: white; }
         .summary { background: #f0f7ff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d0e3ff; }
-        table { width: 100%; border-collapse: collapse; margin-top:
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ebeef5; text-align: center; }
+        th { background: #f8f9fa; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-info-bar">
+        <div class="notice-title">📢 공지사항</div>
+        <div id="notice-container">데이터 로딩 중...</div>
+    </div>
+
+    <div class="nav">
+        <button id="tab-home" class="active" onclick="changeTab('home')">📜 가이드 & 멘트</button>
+        <button id="tab-perf" onclick="changeTab('perf')">📈 실적 통계</button>
+    </div>
+
+    <div id="home-sec" class="content active">
+        <div class="flex-row">
+            <div class="card">
+                <h3>🔍 가이드 조회</h3>
+                <input type="text" id="search-input" placeholder="화면번호 혹은 키워드 입력">
+                <button onclick="doSearch()" class="btn btn-gray">조회하기</button>
+                <div style="margin-top:15px; background:#f9f9f9; padding:15px; border-radius:6px; min-height:100px;">
+                    <strong>번호:</strong> <span id="res-num">-</span><br><br>
+                    <strong>내용:</strong><div id="res-desc" style="white-space:pre-wrap;">-</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="color:#007bff;">✍️ 멘트 생성</h3>
+                <select id="ment-sel"><option>유형 로딩 중...</option></select>
+                <button onclick="doMent()" class="btn btn-blue">멘트 생성</button>
+                <textarea id="ment-txt" rows="12" style="margin-top:10px;" placeholder="선택한 유형의 멘트가 표시됩니다."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="perf-sec" class="content">
+        <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <h3>📊 월간 실적 현황</h3>
+            <div class="summary">
+                <span style="color:#666;">이번 달 총 완료:</span> 
+                <span id="all-total" style="font-size:24px; font-weight:bold; color:#007bff;">0</span>건
+            </div>
+            <table>
+                <thead>
+                    <tr><th>날짜</th><th>콜수</th><th>달성률</th></tr>
+                </thead>
+                <tbody id="p-list"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const URL = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec";
+    let dataList = [];
+
+    function changeTab(mode) {
+        document.getElementById('home-sec').style.display = (mode === 'home') ? 'block' : 'none';
+        document.getElementById('perf-sec').style.display = (mode === 'perf') ? 'block' : 'none';
+        document.getElementById('tab-home').className = (mode === 'home') ? 'active' : '';
+        document.getElementById('tab-perf').className = (mode === 'perf') ? 'active' : '';
+    }
+
+    // [강력 보강] 어떤 날짜 형태가 와도 "MM-DD"로 변환하는 함수
+    function formatDate(dateInput) {
+        try {
+            const d = new Date(dateInput);
+            if (!isNaN(d.getTime())) {
+                const m = (d.getMonth() + 1).toString().padStart(2, '0');
+                const day = d.getDate().toString().padStart(2, '0');
+                return `${m}-${day}`;
+            }
+            // 만약 날짜 변환이 안된다면 문자열에서 숫자만 추출 시도
+            const match = String(dateInput).match(/(\d{1,2})[.-월\s]+(\d{1,2})/);
+            if (match) return `${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')}`;
+            return dateInput;
+        } catch (e) {
+            return dateInput;
+        }
+    }
+
+    async function loadAll() {
+        try {
+            const nRes = await fetch(URL + "?mode=notice");
