@@ -41,8 +41,12 @@ async function loadNotice() {
                 const div = document.createElement("div");
                 div.style.marginBottom = "5px";
                 div.style.fontWeight = "500";
-                // 시트의 'content' 내용을 그대로 출력
-                div.innerText = `• ${item.content}`; 
+                
+                // [수정된 부분] 날짜(item.date)와 내용(item.content)을 같이 표시합니다.
+                // 만약 날짜가 있으면 [1/19] 형식으로 붙이고, 없으면 내용만 나옵니다.
+                const dateLabel = item.date && item.date !== "undefined" ? `[${item.date}] ` : "";
+                div.innerText = `• ${dateLabel}${item.content}`; 
+                
                 container.appendChild(div);
             });
         } else {
@@ -53,7 +57,6 @@ async function loadNotice() {
         document.getElementById("notice-container").innerText = "공지사항을 불러올 수 없습니다.";
     }
 }
-
 // 멘트 유형 드롭다운 업데이트
 function updateTypeDropdown() {
     const typeSelect = document.getElementById("type");
@@ -123,3 +126,4 @@ async function loadPerformance() {
 }
 
 window.onload = init;
+
