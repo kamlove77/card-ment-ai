@@ -6,50 +6,41 @@
   <style>
     body { font-family: 'Malgun Gothic', sans-serif; background:#f0f2f5; margin:0; padding:20px; }
     
-    /* 최상단 실적 카드 스타일 */
+    /* 최상단 실적 카드 */
     .performance-card { 
       max-width: 1160px; margin: 0 auto 20px auto; 
       background: #fff; padding: 20px; border-radius: 15px; 
       box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-left: 5px solid #28a745; 
     }
-
     .main-container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
-    
-    /* 좌측 패널: 멘트 생성 */
     .left-panel { flex: 1; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    
-    /* 우측 패널: 가이드 및 개별 조회 */
     .right-panel { flex: 0.8; background: #ffffff; padding: 25px; border-radius: 15px; border: 3px solid #007bff; position: sticky; top: 20px; }
     
     h2 { font-size: 18px; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; }
     label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #444; }
-    
     select, textarea, input, button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
     
     textarea { height: 80px; resize: none; border: 1px solid #007bff; }
     button#gen { background: #007bff; color: #fff; font-weight: bold; border: none; cursor: pointer; }
     
-    /* 개별 조회 영역 스타일 */
     .search-area { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #dee2e6; }
     #btn-search { background: #333; color: #fff; border: none; cursor: pointer; margin-top: 10px; font-weight: bold; }
-    #btn-search:hover { background: #000; }
-
+    
     .info-box { margin-bottom: 15px; }
     .info-label { display: block; font-weight: bold; color: #007bff; font-size: 13px; margin-bottom: 4px; }
     .info-value { background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #eee; min-height: 20px; font-size: 14px; line-height: 1.6; }
     
     .card { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 10px; margin-top: 15px; }
-    .copy-btn { background: #28a745; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: auto; font-size: 13px; }
+    .copy-btn { background: #28a745; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: auto; font-size: 13px; margin-top: 10px; }
   </style>
 </head>
 <body>
 
   <div class="performance-card">
-    <h2 style="color: #333; border:none; margin-bottom:10px;">📊 오늘의 실적 관리</h2>
+    <h2 style="color: #333; border:none; margin-bottom:10px;">📊 오늘의 실적 관리 (목표: 135콜)</h2>
     <div style="display: flex; gap: 10px; align-items: flex-end;">
       <div style="flex: 2;">
-        <span style="font-size: 13px; color: #666;">현재 완료한 콜수 (목표: 135콜)</span>
-        <input type="number" id="current-cols" placeholder="예: 85">
+        <input type="number" id="current-cols" placeholder="현재 완료한 콜수 입력">
       </div>
       <div style="flex: 1;">
         <button id="btn-check-perf" style="background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold;">달성 확인</button>
@@ -71,7 +62,7 @@
       </select>
       <label>상세 상황 입력</label>
       <textarea id="detail" placeholder="상황을 입력하세요."></textarea>
-      <button id="gen" style="margin-top:15px;">멘트 만들기</button>
+      <button id="gen">멘트 만들기</button>
       <div id="out"></div>
     </div>
 
@@ -82,19 +73,9 @@
         <input type="text" id="quick-search" placeholder="예: 8974">
         <button id="btn-search">정보 확인하기</button>
       </div>
-
-      <div class="info-box">
-        <span class="info-label">🖥️ 화면번호</span>
-        <div id="view-screen" class="info-value">-</div>
-      </div>
-      <div class="info-box">
-        <span class="info-label">🔍 검색어</span>
-        <div id="view-keywords" class="info-value">-</div>
-      </div>
-      <div class="info-box">
-        <span class="info-label">📌 상세 설명</span>
-        <div id="view-desc" class="info-value" style="min-height: 250px; white-space: pre-wrap;">-</div>
-      </div>
+      <div class="info-box"><span class="info-label">🖥️ 화면번호</span><div id="view-screen" class="info-value">-</div></div>
+      <div class="info-box"><span class="info-label">🔍 검색어</span><div id="view-keywords" class="info-value">-</div></div>
+      <div class="info-box"><span class="info-label">📌 상세 설명</span><div id="view-desc" class="info-value" style="min-height: 250px; white-space: pre-wrap;">-</div></div>
     </div>
   </div>
 
