@@ -10,8 +10,42 @@
         
         .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
 
-        .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 85px; padding: 12px; flex-shrink: 0; }
-        .notice-list { overflow-y: auto; height: 50px; font-size: 0.9rem; }
+        /* 공지사항 전체 박스 */
+.notice-container { 
+    background: #fffbe6; /* 연한 노란색 유지 */
+    border: 1.2px solid #ffe58f; 
+    border-radius: 12px; 
+    padding: 12px; 
+    height: 100px; /* 높이 살짝 조절 */
+    flex-shrink: 0; 
+    box-sizing: border-box;
+}
+
+/* 공지사항 내부 리스트 줄 만들기 */
+.notice-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 4px;
+    border-bottom: 1px dashed #ffd666; /* 점선으로 세련된 구분선 */
+    font-size: 0.85rem;
+}
+
+.notice-item:last-child {
+    border-bottom: none; /* 마지막 줄은 구분선 제거 */
+}
+
+/* 날짜 라벨 포인트 */
+.notice-date {
+    background: #fff;
+    color: #856404;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 10px;
+    border: 1px solid #ffe58f;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         
@@ -144,5 +178,6 @@
 </script>
 </body>
 </html>
+
 
 
