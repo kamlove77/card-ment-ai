@@ -36,17 +36,27 @@ async function loadNotice() {
         const container = document.getElementById("notice-container");
         
         if (data && data.length > 0) {
-            container.innerHTML = "";
+            container.innerHTML = ""; 
             data.forEach(item => {
-                const div = document.createElement("div");
-                div.className = "notice-item";
-                // 이미 code.js에서 "1/18" 형식으로 보내주므로 바로 사용
-                const datePart = item.date ? `[${item.date}] ` : "";
-                div.innerText = `• ${datePart}${item.content}`;
-                container.appendChild(div);
+                const row = document.createElement("div");
+                row.className = "notice-row";
+
+                // A열 (날짜) 칸
+                const dateCol = document.createElement("div");
+                dateCol.className = "col-date";
+                dateCol.innerText = item.date || ""; 
+
+                // B열 (내용) 칸
+                const contentCol = document.createElement("div");
+                contentCol.className = "col-content";
+                contentCol.innerText = `• ${item.content || ""}`;
+
+                row.appendChild(dateCol);
+                row.appendChild(contentCol);
+                container.appendChild(row);
             });
         }
-    } catch (e) { console.error("공지 로드 에러:", e); }
+    } catch (e) { console.error("공지 로드 실패", e); }
 }
 // 멘트 유형 드롭다운 업데이트
 function updateTypeDropdown() {
@@ -117,6 +127,7 @@ async function loadPerformance() {
 }
 
 window.onload = init;
+
 
 
 
