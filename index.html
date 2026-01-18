@@ -2,54 +2,60 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카드 상담 가이드</title>
+    <title>카드 상담 스마트 가이드</title>
     <style>
-        :root { --primary: #007bff; --bg: #f4f7f9; }
-        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .nav { display: flex; gap: 5px; margin-bottom: 15px; }
-        .nav button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #e9ecef; }
-        .nav button.active { background: var(--primary); color: white; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .top-info-bar { border: 1px solid #e0e6ed; padding: 15px; border-radius: 10px; margin-bottom: 20px; background: #fafbfc; }
+        #notice-container { max-height: 100px; overflow-y: auto; font-size: 0.95rem; line-height: 1.6; }
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav button { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: #e9ecef; }
+        .nav button.active { background: #007bff; color: white; }
         .content { display: none; }
         .content.active { display: block; }
-        .search-box { margin-bottom: 15px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        
-        /* 상담 멘트 창 디자인 */
-        .guide-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .guide-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #f8f9fa; padding-bottom: 8px; }
-        .screen-num { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
-        .guide-body { font-size: 1rem; line-height: 1.6; color: #333; white-space: pre-wrap; }
-        
-        .stat-card { background: #007bff; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; }
+        .card { border: 1px solid #eee; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0; box-sizing: border-box; }
+        .btn-search { background: #007bff; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        .summary-box { background: #e7f1ff; padding: 18px; border-radius: 10px; text-align: center; margin-bottom: 15px; border: 1px solid #d0e3ff; }
+        #perf-list-wrapper { max-height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 10; padding: 12px; border-bottom: 2px solid #dee2e6; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
     </style>
 </head>
 <body>
+
 <div class="container">
+    <div class="top-info-bar">
+        <div style="font-weight:bold; color:#007bff; margin-bottom:5px;">📢 실시간 공지</div>
+        <div id="notice-container">데이터 로딩 중...</div>
+    </div>
+
     <div class="nav">
-        <button id="btn-h" class="active" onclick="showTab('h')">📜 상담 멘트</button>
-        <button id="btn-p" onclick="showTab('p')">📊 실적 통계</button>
+        <button id="btn-h" class="active" onclick="showTab('h')">📜 가이드 & 멘트</button>
+        <button id="btn-p" onclick="showTab('p')">📈 실적 통계</button>
     </div>
 
     <div id="sec-h" class="content active">
-        <div class="search-box">
-            <input type="text" id="keyword" placeholder="화면번호 또는 내용 검색..." onkeyup="searchGuide()">
+        <div class="card">
+            <h3>🔍 가이드 검색</h3>
+            <input type="text" id="keyword" placeholder="화면번호 또는 키워드 입력" onkeyup="if(window.event.keyCode==13){searchGuide()}">
+            <button onclick="searchGuide()" class="btn-search">조회하기</button>
+            <div id="search-res" style="margin-top:15px; padding:15px; background:#f8f9fa; border-radius:8px; min-height:100px; white-space:pre-wrap;">결과가 표시됩니다.</div>
         </div>
-        <div id="guide-list">데이터 로딩 중...</div>
     </div>
 
     <div id="sec-p" class="content">
-        <div class="stat-card">
-            <div>이번 달 완료 합계</div>
-            <div style="font-size:2rem; font-weight:bold;"><span id="total-val">0</span>건</div>
+        <div class="card">
+            <h3>📊 실적 현황</h3>
+            <div class="summary-box">이번 달 누적 완료: <span id="total-val" style="font-weight:bold; color:#007bff; font-size:1.6rem;">0</span>건</div>
+            <div id="perf-list-wrapper">
+                <table>
+                    <thead><tr><th>날짜</th><th>콜수</th><th>달성률</th></tr></thead>
+                    <tbody id="perf-list"></tbody>
+                </table>
+            </div>
         </div>
-        <table>
-            <thead><tr style="background:#f8f9fa;"><th>날짜</th><th>완료(C)</th><th>달성률</th></tr></thead>
-            <tbody id="perf-list"></tbody>
-        </table>
     </div>
 </div>
 
@@ -57,41 +63,60 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let guideData = [];
 
-    async function init() {
-        try {
-            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
-            guideData = res.ment;
-            renderGuides(guideData);
-            let total = 0;
-            document.getElementById("perf-list").innerHTML = res.perf.map(p => {
-                total += parseInt(String(p.current).replace(/[^0-9]/g, "")) || 0;
-                return `<tr><td>${p.date}</td><td>${p.current}</td><td>${p.rate}</td></tr>`;
-            }).join('');
-            document.getElementById("total-val").innerText = total.toLocaleString();
-        } catch (e) { document.getElementById("guide-list").innerText = "연결 실패"; }
-    }
-
-    function renderGuides(data) {
-        document.getElementById("guide-list").innerHTML = data.map(g => `
-            <div class="guide-card">
-                <div class="guide-header"><span class="screen-num">${g.screenNum}</span><span style="font-size:0.8rem; color:#999;">${g.type}</span></div>
-                <div class="guide-body">${g.text || "내용 없음"}</div>
-            </div>
-        `).join('');
-    }
-
-    function searchGuide() {
-        const k = document.getElementById("keyword").value.toLowerCase();
-        renderGuides(guideData.filter(g => String(g.screenNum).includes(k) || String(g.text).toLowerCase().includes(k)));
-    }
-
     function showTab(m) {
         document.getElementById('sec-h').classList.toggle('active', m === 'h');
         document.getElementById('sec-p').classList.toggle('active', m === 'p');
         document.getElementById('btn-h').classList.toggle('active', m === 'h');
         document.getElementById('btn-p').classList.toggle('active', m === 'p');
     }
-    window.onload = init;
+
+    function fixDate(v) {
+        if(!v || v === "-") return "-";
+        return v;
+    }
+
+    async function loadAllData() {
+        const t = new Date().getTime();
+        try {
+            const response = await fetch(`${API_URL}?t=${t}`);
+            const res = await response.json();
+
+            // 1. 공지사항
+            const nBox = document.getElementById("notice-container");
+            nBox.innerHTML = res.notice.length ? res.notice.map(i => `<div><b>[${i.date}]</b> ${i.content}</div>`).join('') : "공지사항이 없습니다.";
+
+            // 2. 가이드
+            guideData = res.ment;
+
+            // 3. 실적 & 정밀 합계 (콜수 열의 숫자만 추출)
+            const pList = document.getElementById("perf-list");
+            let totalSum = 0;
+            
+            pList.innerHTML = res.perf.map(r => {
+                const rawValue = String(r.current).trim();
+                // 데이터가 있고 '-'가 아닐 때만 숫자만 골라내어 합산
+                if (rawValue && rawValue !== "-" && rawValue !== "0") {
+                    const numValue = parseInt(rawValue.replace(/[^0-9]/g, "")) || 0;
+                    totalSum += numValue;
+                }
+                return `<tr><td>${fixDate(r.date)}</td><td>${r.current}</td><td>${r.rate}</td></tr>`;
+            }).join('');
+
+            document.getElementById("total-val").innerText = totalSum.toLocaleString();
+
+        } catch(e) {
+            document.getElementById("notice-container").innerText = "로딩 실패. 주소와 시트 상태를 확인하세요.";
+        }
+    }
+
+    function searchGuide() {
+        const k = document.getElementById("keyword").value.trim().toLowerCase();
+        if(!k) return;
+        const f = guideData.find(i => String(i.screenNum).toLowerCase().includes(k) || (i.keywords && i.keywords.includes(k)));
+        document.getElementById("search-res").innerHTML = f ? `<b>[${f.screenNum}]</b>\n\n${f.text}` : "결과가 없습니다.";
+    }
+
+    window.onload = loadAllData;
 </script>
 </body>
 </html>
