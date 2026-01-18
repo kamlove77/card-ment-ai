@@ -20,7 +20,7 @@ async function init() {
 // 3. 실적 로드 (날짜를 MM/DD로 변환)
 async function loadPerformance() {
     const listBody = document.getElementById("perf-list");
-    const totalEl = document.getElementById("total-calls");
+    const totalEl = document.getElementById("total-calls"); // 합계 박스 ID
     if (!listBody) return;
 
     try {
@@ -29,47 +29,38 @@ async function loadPerformance() {
         listBody.innerHTML = ""; 
 
         const now = new Date();
-        const currentMonth = now.getMonth(); // 현재 월 (0~11)
+        const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
-        
-        let monthTotal = 0; // 이번 달 누적 합계 변수
+        let monthTotal = 0; 
 
         data.forEach(row => {
-            if (!row.date) return;
-            
-            const dateObj = new Date(row.date);
             const tr = document.createElement("tr");
+            let rowCall = parseInt(String(row.current).replace(/[^0-9]/g, "")) || 0;
             
-            // 1. 이번 달 데이터인지 판별 (연도와 월이 같은지 확인)
-            if (!isNaN(dateObj.getTime())) {
-                if (dateObj.getFullYear() === currentYear && dateObj.getMonth() === currentMonth) {
-                    const callCount = parseInt(String(row.current).replace(/[^0-9]/g, "")) || 0;
-                    monthTotal += callCount;
+            // 날짜 확인 및 이번 달 합산
+            let displayDate = "-";
+            if (row.date) {
+                const dateObj = new Date(row.date);
+                if (!isNaN(dateObj.getTime())) {
+                    // 이번 달 데이터라면 합계에 추가
+                    if (dateObj.getFullYear() === currentYear && dateObj.getMonth() === currentMonth) {
+                        monthTotal += rowCall;
+                    }
+                    displayDate = `${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
                 }
             }
 
-            // 2. 날짜 가공 (MM/DD 형식)
-            let displayDate = "-";
-            if (!isNaN(dateObj.getTime())) {
-                displayDate = `${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
-            }
-
-            tr.innerHTML = `
-                <td>${displayDate}</td>
-                <td>${row.current}콜</td>
-                <td style="font-weight:bold; color:#007bff;">${row.rate}</td>
-                <td>${row.memo || "-"}</td>
-            `;
+            tr.innerHTML = `<td>${displayDate}</td><td>${row.current}콜</td><td>${row.rate}</td><td>${row.memo || "-"}</td>`;
             listBody.appendChild(tr);
         });
 
-        // 3. 화면 상단에 이번 달 월과 누적 합계 표시
+        // 화면 상단 박스에 합계 출력 (이 부분이 핵심!)
         if (totalEl) {
-            totalEl.innerHTML = `<span style="font-size: 0.9rem; color: #666;">(${currentMonth + 1}월 누적)</span> ${monthTotal.toLocaleString()}`;
+            totalEl.textContent = monthTotal.toLocaleString(); 
         }
 
     } catch (e) {
-        console.error("실적 로드 실패:", e);
+        console.error("합계 계산 중 오류:", e);
     }
 }
 
@@ -139,4 +130,5 @@ document.addEventListener('click', function(e) {
 });
 
 window.onload = init;
+
 
