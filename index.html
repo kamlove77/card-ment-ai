@@ -98,6 +98,7 @@
     }
 
     // 통합 데이터 로딩 (속도 최적화)
+   // 통합 데이터 로딩 (합산 로직 강화 버전)
     async function loadAllData() {
         const t = new Date().getTime();
         try {
@@ -111,17 +112,24 @@
             // 2. 가이드 데이터 저장
             guideData = res.ment;
 
-            // 3. 실적 테이블 & 합계
+            // 3. 실적 테이블 & 정확한 합계 계산
             const pList = document.getElementById("perf-list");
-            let sum = 0;
+            let totalSum = 0; // 합계 변수 초기화
+            
             pList.innerHTML = res.perf.map(r => {
-                sum += parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
+                // [수정된 부분] 숫자 외의 문자(건, 명 등)를 모두 제거하고 순수 숫자만 추출하여 합산
+                const numValue = parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
+                totalSum += numValue;
+                
                 return `<tr><td>${fixDate(r.date)}</td><td>${r.current}</td><td>${r.rate}</td></tr>`;
             }).join('');
-            document.getElementById("total-val").innerText = sum.toLocaleString();
+
+            // 최종 합계 표시 (천 단위 콤마 추가)
+            document.getElementById("total-val").innerText = totalSum.toLocaleString();
 
         } catch(e) {
             document.getElementById("notice-container").innerText = "로딩 실패. 주소를 확인하거나 [새 버전]으로 배포했는지 확인하세요.";
+            console.error(e);
         }
     }
 
@@ -142,3 +150,4 @@
 </script>
 </body>
 </html>
+
