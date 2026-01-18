@@ -10,7 +10,7 @@
         
         .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* ✅ 공지사항: 5줄 이상 확보 (230px) */
+        /* ✅ 공지사항 박스: 5줄 이상 보이도록 높이 유지 */
         .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 230px; padding: 12px; flex-shrink: 0; display: flex; flex-direction: column; box-sizing: border-box; }
         .notice-title { font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 0.9rem; }
         .notice-list { overflow-y: auto; flex: 1; }
@@ -18,21 +18,23 @@
         .notice-item { display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1.5px dashed #ffd666 !important; width: 100%; box-sizing: border-box; }
         .notice-item:last-child { border-bottom: none !important; }
         
-        /* ✅ 날짜: 흰 박스 제거 */
+        /* ✅ 날짜: 흰색 박스 제거 깔끔하게 */
         .notice-date { color: #856404; font-weight: bold; margin-right: 12px; font-size: 0.85rem; flex-shrink: 0; background: none !important; border: none !important; padding: 2px 0 !important; }
         .notice-content { font-size: 0.9rem; line-height: 1.5; color: #444; flex: 1; white-space: normal !important; word-break: break-all; }
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         
         .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid var(--border-grey); }
-        .panel-blue, .panel-red { border-top: 1.2px solid var(--border-grey); } 
 
         h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; color: #333; }
         
+        /* ✅ 검색창: 박스 밖으로 튀어나오지 않게 설정 */
         #keyword { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 8px; border: 1.2px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; }
         
         .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
-        .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 65px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; }
+        
+        /* ✅ 가이드 박스: 빨간색 강조 유지 */
+        .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 80px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; line-height: 1.4; }
         
         .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
@@ -54,7 +56,7 @@
     </div>
     
     <div class="main-layout">
-        <div class="panel panel-blue">
+        <div class="panel">
             <h2>📑 상담 멘트</h2>
             <select id="ment-select" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;" onchange="updateMentBox(this.value)">
                 <option value="">-- 상황 선택 --</option>
@@ -62,7 +64,7 @@
             <div id="ment-display" class="ment-box">상황을 선택하세요.</div>
         </div>
         
-        <div class="panel panel-red">
+        <div class="panel">
             <h2>📊 실적 및 가이드</h2>
             <input type="text" id="keyword" placeholder="화면번호/키워드 검색..." onkeyup="searchGuide()">
             <div id="guide-display" class="guide-box">가이드 내용 표시</div>
@@ -81,10 +83,10 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let db = { notice: [], ment: [], perf: [] };
 
-    // ✅ 날짜 형식을 "MM/DD"로 변환하는 함수 추가
+    // 날짜 형식을 "월/일"로 변환하는 함수
     function formatDate(dateStr) {
         const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return dateStr; // 변환 실패 시 원본 반환
+        if (isNaN(d.getTime())) return dateStr;
         return `${d.getMonth() + 1}/${d.getDate()}`;
     }
 
@@ -93,6 +95,7 @@
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
             
+            // 공지사항 렌더링
             document.getElementById('notice-list').innerHTML = res.notice.map(n => `
                 <div class="notice-item">
                     <span class="notice-date">${formatDate(n.date)}</span>
@@ -110,7 +113,6 @@
             document.getElementById('perf-list').innerHTML = res.perf.map(p => {
                 const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
                 cum += val;
-                // ✅ 테이블 날짜도 월/일로 표시
                 return `<tr><td>${formatDate(p.date)}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
             }).join('');
         } catch(e) { console.error(e); }
@@ -121,10 +123,27 @@
         document.getElementById('ment-display').innerText = item ? item.talk : "상황을 선택하세요.";
     }
 
+    // ✅ 가이드 검색 기능: [화면번호]와 키워드가 모두 나오도록 수정
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const found = db.ment.find(m => String(m.num).includes(q) || (m.key && m.key.toLowerCase().includes(q)));
-        document.getElementById('guide-display').innerHTML = found ? `<b>${found.key}</b><br>${found.pos}` : "가이드 내용 표시";
+        if (!q) {
+            document.getElementById('guide-display').innerHTML = "가이드 내용 표시";
+            return;
+        }
+
+        const found = db.ment.find(m => 
+            String(m.num).includes(q) || 
+            (m.key && m.key.toLowerCase().includes(q))
+        );
+
+        if (found) {
+            document.getElementById('guide-display').innerHTML = `
+                <b style="color:#333;">[${found.num || ''}] ${found.key || ''}</b><br>
+                <div style="margin-top:5px;">${found.pos || ''}</div>
+            `;
+        } else {
+            document.getElementById('guide-display').innerHTML = "검색 결과가 없습니다.";
+        }
     }
 
     function startVoice() {
