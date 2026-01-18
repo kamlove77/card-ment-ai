@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 스마트 가이드</title>
     <style>
-        /* 1. 디자인 (밝은 테마) */
+        /* 1. 디자인 (밝은 테마 및 레이아웃) */
         body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; }
         
@@ -24,14 +24,14 @@
 
         #notice-container { flex: 1; padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; }
 
-        /* [핵심] A열 날짜 / B열 내용 분리 스타일 */
+        /* A열 날짜 / B열 내용 분리 스타일 */
         .notice-row { display: flex; align-items: center; padding: 5px 0; border-bottom: 1px solid #f2f2f2; }
         .notice-row:last-child { border-bottom: none; }
         .col-date { width: 80px; font-weight: bold; color: #555; }
         .col-content { flex: 1; color: #333; padding-left: 15px; }
 
         .nav { display: flex; gap: 8px; margin-bottom: 20px; }
-        .nav button { flex: 1; padding: 14px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; }
+        .nav button { flex: 1; padding: 14px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; color: #606266; }
         .nav button.active { background: #007bff; color: white; border-color: #007bff; }
 
         .content { display: none; }
@@ -103,89 +103,15 @@
 </div>
 
 <script>
-    // 2. 스크립트 (모든 기능 통합)
+    // 2. 스크립트 (모든 기능 통합 및 URL 적용)
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec";
     let mentData = [];
 
     async function init() {
         setTodayDate();
-        await loadNotice();
-        await loadMents();
-        await loadPerformance();
+        await Promise.all([loadNotice(), loadMents(), loadPerformance()]);
     }
 
     async function loadNotice() {
         try {
             const res = await fetch(`${SHEET_API_URL}?mode=notice`);
-            const data = await res.json();
-            const container = document.getElementById("notice-container");
-            container.innerHTML = "";
-            data.forEach(item => {
-                const row = `
-                    <div class="notice-row">
-                        <div class="col-date">${item.date || ""}</div>
-                        <div class="col-content">• ${item.content || ""}</div>
-                    </div>`;
-                container.innerHTML += row;
-            });
-        } catch (e) { console.error(e); }
-    }
-
-    async function loadMents() {
-        try {
-            const res = await fetch(`${SHEET_API_URL}?mode=ment`);
-            mentData = await res.json();
-            const select = document.getElementById("type");
-            const types = [...new Set(mentData.map(i => i.type))];
-            select.innerHTML = '<option value="">유형 선택</option>';
-            types.forEach(t => select.innerHTML += `<option value="${t}">${t}</option>`);
-        } catch (e) { console.error(e); }
-    }
-
-    function searchGuide() {
-        const val = document.getElementById("quick-search").value.toLowerCase();
-        const f = mentData.find(i => String(i.screenNum).toLowerCase() === val || String(i.keywords).includes(val));
-        if(f) {
-            document.getElementById("view-screen").innerText = f.screenNum;
-            document.getElementById("view-desc").innerText = f.description;
-        } else { alert("검색 결과가 없습니다."); }
-    }
-
-    function generateMent() {
-        const sel = document.getElementById("type").value;
-        const res = mentData.filter(i => i.type === sel);
-        document.getElementById("ment-output").value = res.map((i, idx) => `[멘트 ${idx+1}]\n${i.text}`).join("\n\n---\n\n");
-    }
-
-    async function loadPerformance() {
-        try {
-            const res = await fetch(`${SHEET_API_URL}?mode=perf`);
-            const data = await res.json();
-            const list = document.getElementById("perf-list");
-            let total = 0;
-            list.innerHTML = "";
-            data.forEach(r => {
-                total += parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
-                list.innerHTML += `<tr><td>${r.date.split('T')[0]}</td><td>${r.current}콜</td><td>${r.rate}</td></tr>`;
-            });
-            document.getElementById("total-calls").innerText = total.toLocaleString();
-        } catch (e) { console.error(e); }
-    }
-
-    function setTodayDate() {
-        const now = new Date();
-        const week = ['일','월','화','수','목','금','토'];
-        document.getElementById('today-date').innerText = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()} (${week[now.getDay()]})`;
-    }
-
-    function tab(id) {
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    window.onload = init;
-</script>
-</body>
-</html>
