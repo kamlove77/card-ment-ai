@@ -2,53 +2,56 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카드 상담 통합 포털</title>
+    <title>카드 상담 통합 시스템</title>
     <style>
-        :root { --primary: #007bff; --bg: #f4f7f9; }
-        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        .container { max-width: 1100px; margin: 0 auto; }
+        :root { --main: #007bff; --bg: #f8f9fa; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .wrapper { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
         
-        /* 공지사항 (상단 고정) */
-        .notice-bar { background: #fff9c4; border-left: 5px solid #fbc02d; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; }
+        /* 상단 공지사항 */
+        .notice-area { background: #fffde7; border: 1px solid #ffe57f; padding: 15px; border-radius: 10px; margin-bottom: 25px; }
+        .notice-item { font-size: 0.95rem; margin-bottom: 5px; color: #444; }
 
-        /* 좌우 메인 레이아웃 */
-        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); min-height: 500px; }
-        h2 { font-size: 1.1rem; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-top: 0; }
+        /* 좌우 분할 레이아웃 */
+        .content-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 25px; }
+        h2 { font-size: 1.1rem; color: var(--main); border-bottom: 2px solid var(--main); padding-bottom: 8px; margin-top: 0; }
 
-        /* 왼쪽: 멘트 생성기 (A-E) */
-        .ment-item { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
-        .type-tag { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 8px; display: inline-block; }
-        .talk-txt { font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; }
+        /* 왼쪽: 상담 멘트 (A-E) */
+        .ment-card { background: #fdfdfd; border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        .ment-type { font-weight: bold; color: var(--main); font-size: 0.9rem; margin-bottom: 10px; display: block; }
+        .ment-text { font-size: 1.05rem; line-height: 1.7; white-space: pre-wrap; color: #222; }
 
         /* 오른쪽: 가이드 & 실적 */
-        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; }
-        .guide-box { background: #fff0f0; padding: 15px; border-radius: 8px; border-left: 5px solid #ff4d4f; margin-bottom: 20px; }
+        input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; margin-bottom: 15px; box-sizing: border-box; }
+        .guide-res { background: #fff5f5; padding: 15px; border-radius: 8px; border-left: 5px solid #ff5252; margin-bottom: 25px; min-height: 80px; }
         
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
-        th { background: #f1f3f5; padding: 8px; border-bottom: 2px solid #dee2e6; }
-        td { padding: 8px; border-bottom: 1px solid #eee; text-align: center; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #f1f3f5; padding: 10px; border-bottom: 2px solid #dee2e6; }
+        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="notice-list" class="notice-bar">📢 실시간 업무 공지 로딩 중...</div>
+<div class="wrapper">
+    <div class="notice-area">
+        <div style="font-weight:bold; margin-bottom:10px;">📢 실시간 주요 공지</div>
+        <div id="notice-content">데이터를 불러오는 중...</div>
+    </div>
 
-    <div class="main-grid">
-        <div class="card">
-            <h2>📑 상담 멘트 생성기</h2>
+    <div class="content-grid">
+        <div class="left-panel">
+            <h2>📑 상담 멘트 생성기 (A-E)</h2>
             <div id="ment-list">로딩 중...</div>
         </div>
 
-        <div class="card">
-            <h2>🔍 화면 가이드</h2>
-            <input type="text" id="keyword" placeholder="화면번호 입력 후 엔터" onkeyup="searchGuide()">
-            <div id="guide-result" class="guide-box">번호를 입력해 주세요.</div>
+        <div class="right-panel">
+            <h2>🔍 화면 가이드 (B-C-D)</h2>
+            <input type="text" id="keyword" placeholder="화면번호 입력 후 엔터" onkeyup="if(window.event.keyCode==13){searchGuide()}">
+            <div id="guide-result" class="guide-res">번호를 입력하고 엔터를 누르세요.</div>
 
-            <h2 style="margin-top:30px;">📊 실적 현황</h2>
+            <h2 style="margin-top:30px;">📊 나의 실적 통계</h2>
             <table>
-                <thead><tr><th>날짜</th><th>완료</th><th>비율</th></tr></thead>
+                <thead><tr><th>날짜</th><th>완료건</th><th>달성률</th></tr></thead>
                 <tbody id="perf-list"></tbody>
             </table>
         </div>
@@ -57,44 +60,43 @@
 
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-    let data = { ment: [], notice: [], perf: [] };
+    let db = { notice: [], ment: [], perf: [] };
 
-    async function init() {
+    async function loadData() {
         try {
-            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
-            data = res;
+            const r = await fetch(`${API_URL}?t=${Date.now()}`).then(res => res.json());
+            db = r;
             
-            // 공지 띄우기
-            document.getElementById('notice-list').innerHTML = "📢 " + (data.notice[0]?.content || "공지 없음");
+            // 공지사항 출력
+            document.getElementById('notice-content').innerHTML = db.notice.map(n => `<div class="notice-item">• ${n.content}</div>`).join('') || "현재 공지 없음";
             
-            // 멘트 리스트 (A-E)
-            document.getElementById('ment-list').innerHTML = data.ment.map(m => `
-                <div class="ment-item">
-                    <div class="type-tag">${m.type}</div>
-                    <div class="talk-txt">${m.talk}</div>
+            // 멘트 리스트 출력 (A-E)
+            document.getElementById('ment-list').innerHTML = db.ment.map(m => `
+                <div class="ment-card">
+                    <span class="ment-type">[${m.type}]</span>
+                    <div class="ment-text">${m.talk}</div>
                 </div>
             `).join('');
 
-            // 실적 리스트
-            document.getElementById('perf-list').innerHTML = data.perf.map(p => `
-                <tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>
+            // 실적 리스트 출력
+            document.getElementById('perf-list').innerHTML = db.perf.map(p => `
+                <tr><td>${p.date}</td><td>${p.val}건</td><td>${p.rate}</td></tr>
             `).join('');
 
-        } catch(e) { console.error(e); }
+        } catch(e) { document.getElementById('notice-content').innerText = "연결 실패 (API 주소를 확인하세요)"; }
     }
 
-    // 가이드 검색 (B-C-D)
     function searchGuide() {
         const k = document.getElementById('keyword').value;
-        const found = data.ment.find(m => String(m.num) === k);
-        const resBox = document.getElementById('guide-result');
-        if(found) {
-            resBox.innerHTML = `<strong>검색어:</strong> ${found.key}<br><strong>상세설명:</strong> ${found.pos}`;
+        const item = db.ment.find(m => String(m.num) === k);
+        const res = document.getElementById('guide-result');
+        if(item) {
+            res.innerHTML = `<strong>검색어:</strong> ${item.key}<br><strong>상세설명:</strong> ${item.pos}`;
         } else {
-            resBox.innerText = "번호를 다시 확인해 주세요.";
+            res.innerText = "번호를 찾을 수 없습니다.";
         }
     }
-    window.onload = init;
+    window.onload = loadData;
 </script>
 </body>
 </html>
