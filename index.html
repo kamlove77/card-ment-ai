@@ -2,53 +2,50 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>카드 상담 통합 가이드</title>
     <style>
-        :root { --blue: #007bff; --red: #ff4d4f; --bg: #f5f7fa; --yellow: #fff9c4; }
-        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        :root { --blue: #007bff; --red: #ff4d4f; --bg: #f2f4f7; --yellow: #fff9c4; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 8px; color: #333; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
 
-        /* ✅ 공지사항: 휴대폰에서도 스크롤바가 항상 보이게 설정 */
+        /* ✅ 공지사항: 높이를 더 줄여서 공간 확보 */
         .notice-container { 
-            background: var(--yellow); border-left: 6px solid #fbc02d; 
-            margin-bottom: 20px; border-radius: 12px; 
-            height: 140px; display: flex; flex-direction: column;
-            padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: var(--yellow); border: 1.5px solid #fbc02d; 
+            margin-bottom: 10px; border-radius: 10px; 
+            height: 110px; display: flex; flex-direction: column;
+            padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .notice-header { font-weight: bold; font-size: 1.1rem; color: #444; margin-bottom: 10px; border-bottom: 1px solid #e6e0a8; padding-bottom: 5px; flex-shrink: 0; }
-        
-        /* 모바일 스크롤 강제 활성화 */
-        .notice-list { 
-            overflow-y: scroll !important; 
-            flex-grow: 1; 
-            -webkit-overflow-scrolling: touch; 
-        }
-        /* 스크롤바가 눈에 보이도록 스타일 지정 */
-        .notice-list::-webkit-scrollbar { width: 6px; display: block !important; }
+        .notice-header { font-weight: bold; font-size: 1rem; margin-bottom: 5px; border-bottom: 1px solid #e6e0a8; padding-bottom: 3px; }
+        .notice-list { overflow-y: auto; flex-grow: 1; -webkit-overflow-scrolling: touch; }
+        .notice-list::-webkit-scrollbar { width: 4px; display: block !important; }
         .notice-list::-webkit-scrollbar-thumb { background: #fbc02d; border-radius: 10px; }
+        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 4px 0; font-size: 0.85rem; display: flex; }
+        .notice-date { color: #777; min-width: 70px; font-weight: bold; }
 
-        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 8px 0; font-size: 0.95rem; display: flex; align-items: flex-start; }
-        .notice-date { color: #666; font-size: 0.85rem; min-width: 85px; font-weight: bold; }
+        /* ✅ 레이아웃: PC에선 2단, 모바일에선 콤팩트하게 */
+        .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .panel { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); height: 520px; display: flex; flex-direction: column; border: 1px solid #e1e4e8; }
+        h2 { font-size: 1rem; color: #222; border-bottom: 2px solid var(--blue); padding-bottom: 5px; margin: 0 0 10px 0; }
 
-        /* 레이아웃: 왼쪽 스타일의 세련된 느낌 반영 */
-        .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .panel { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); height: 600px; display: flex; flex-direction: column; border: 1px solid #eef0f2; }
-        h2 { font-size: 1.1rem; color: #333; border-bottom: 2px solid var(--blue); padding-bottom: 8px; margin-top: 0; }
-
-        .ment-box { background: #fff; border: 2.5px solid var(--blue); padding: 20px; border-radius: 12px; flex-grow: 1; font-size: 1.1rem; line-height: 1.7; white-space: pre-wrap; margin-top: 15px; display: none; overflow-y: auto; }
-        .guide-box { background: #fff1f0; border-left: 5px solid var(--red); padding: 15px; border-radius: 10px; height: 130px; overflow-y: auto; margin-top: 15px; }
+        .select-box { width: 100%; padding: 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 0.95rem; }
+        .ment-box { background: #f8fbff; border: 2px solid var(--blue); padding: 15px; border-radius: 10px; flex-grow: 1; font-size: 1rem; line-height: 1.6; white-space: pre-wrap; margin-top: 10px; display: none; overflow-y: auto; }
         
-        /* 실적 현황 스크롤 */
-        .perf-area { margin-top: 15px; flex-grow: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
+        .search-input { width: 100%; padding: 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 0.9rem; margin-bottom: 8px; box-sizing: border-box; }
+        .guide-box { background: #fff5f5; border-left: 4px solid var(--red); padding: 12px; border-radius: 8px; height: 100px; overflow-y: auto; margin-bottom: 15px; font-size: 0.9rem; }
+        
+        /* ✅ 실적 현황: 높이 고정 및 스크롤 */
+        .perf-area { flex-grow: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; max-height: 250px; }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #fcfcfc; padding: 10px; border-bottom: 2px solid #eee; position: sticky; top: 0; z-index: 5; font-size: 0.85rem; }
-        td { padding: 10px; border-bottom: 1px solid #f9f9f9; text-align: center; font-size: 0.9rem; }
+        th { background: #f9fafb; padding: 8px; border-bottom: 2px solid #edf0f2; position: sticky; top: 0; z-index: 5; font-size: 0.8rem; }
+        td { padding: 8px; border-bottom: 1px solid #f1f3f5; text-align: center; font-size: 0.85rem; }
+        .cum-cell { font-weight: bold; color: var(--blue); }
 
-        /* 모바일용 1단 배열 */
+        /* 모바일 최적화: 패널 높이를 줄여서 전체 화면에 들어오게 함 */
         @media (max-width: 768px) {
             .main-layout { grid-template-columns: 1fr; }
-            .panel { height: auto; min-height: 450px; }
+            .panel { height: auto; min-height: 380px; padding: 12px; }
+            .perf-area { max-height: 180px; } /* 모바일에서 실적창 높이 조절 */
         }
     </style>
 </head>
@@ -57,27 +54,26 @@
 <div class="wrapper">
     <div class="notice-container">
         <div class="notice-header">📢 공지사항</div>
-        <div id="notice-list" class="notice-list">데이터를 로딩 중입니다...</div>
+        <div id="notice-list" class="notice-list">로딩 중...</div>
     </div>
 
     <div class="main-layout">
         <div class="panel">
-            <h2>📑 상담 멘트 생성기</h2>
-            <select id="ment-select" style="width:100%; padding:12px; margin-top:10px; border:2px solid var(--blue); border-radius:8px;" onchange="updateMentBox(this.value)">
-                <option value="">-- 상황을 선택하세요 --</option>
+            <h2>📑 상담 멘트</h2>
+            <select id="ment-select" class="select-box" onchange="updateMentBox(this.value)">
+                <option value="">-- 상황 선택 --</option>
             </select>
             <div id="ment-display" class="ment-box"></div>
         </div>
 
         <div class="panel">
-            <h2>🔍 화면 가이드</h2>
-            <input type="text" id="keyword" placeholder="번호 또는 문자 입력..." onkeyup="searchGuide()" style="width:100%; padding:12px; margin-top:10px; border:1px solid #ddd; border-radius:8px;">
-            <div id="guide-display" class="guide-box">가이드 내용이 표시됩니다.</div>
+            <h2>🔍 가이드 & 실적</h2>
+            <input type="text" id="keyword" class="search-input" placeholder="번호/문자 입력..." onkeyup="searchGuide()">
+            <div id="guide-display" class="guide-box">가이드 내용 표시</div>
 
-            <h2 style="margin-top:20px;">📊 실적 현황</h2>
             <div class="perf-area">
                 <table>
-                    <thead><tr><th>날짜</th><th>완료</th><th>비율</th><th style="color:var(--blue);">누적</th></tr></thead>
+                    <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
                     <tbody id="perf-list"></tbody>
                 </table>
             </div>
@@ -86,34 +82,24 @@
 </div>
 
 <script>
-    // ⚠️ [필수] 모든 사용자로 권한 설정 후 받은 새 URL을 넣으세요!
+    // ⚠️ 꽃게님의 URL을 꼭 넣어주세요!
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-    
     let db = { notice: [], ment: [], perf: [] };
 
     async function loadData() {
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
-            
-            document.getElementById('notice-list').innerHTML = db.notice.map(n => 
-                `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('');
-            
+            document.getElementById('notice-list').innerHTML = db.notice.map(n => `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('');
             const select = document.getElementById('ment-select');
-            db.ment.filter(m => m.type).forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
-            });
-
+            db.ment.filter(m => m.type).forEach(m => { const opt = document.createElement('option'); opt.value = m.type; opt.innerText = m.type; select.appendChild(opt); });
             let cum = 0;
             document.getElementById('perf-list').innerHTML = db.perf.map(p => {
                 const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
                 cum += val;
-                return `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td><td style="color:var(--blue); font-weight:bold;">${cum.toLocaleString()}건</td></tr>`;
+                return `<tr><td>${p.date}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
             }).join('');
-        } catch(e) { 
-            document.getElementById('notice-list').innerText = "❌ 데이터 연결 실패 (권한 설정 확인 필수)"; 
-        }
+        } catch(e) { document.getElementById('notice-list').innerText = "❌ 연결 실패"; }
     }
 
     function updateMentBox(v) {
@@ -126,7 +112,7 @@
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
         const found = db.ment.find(m => String(m.num).includes(q) || m.key.toLowerCase().includes(q));
-        display.innerHTML = found ? `<b>[${found.num}] ${found.key}</b><p>${found.pos}</p>` : "결과 없음";
+        display.innerHTML = found ? `<b>[${found.num}] ${found.key}</b><p style="margin:5px 0;">${found.pos}</p>` : "결과 없음";
     }
     window.onload = loadData;
 </script>
