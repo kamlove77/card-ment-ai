@@ -2,40 +2,82 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>카드 상담 지원 시스템</title>
   <style>
-    /* 전체 레이아웃 설정 */
-    body { font-family: 'Malgun Gothic', sans-serif; background:#f4f7f9; margin:0; padding:20px; color: #333; }
+    body { font-family: 'Malgun Gothic', sans-serif; background:#f0f2f5; margin:0; padding:20px; }
     .main-container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
     
-    /* 좌측 패널: 멘트 생성기 */
-    .left-panel { flex: 1.2; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    /* 좌측 패널: 멘트 생성 */
+    .left-panel { flex: 1.2; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     
-    /* 우측 패널: 독립적 실무 가이드 조회 (도안 반영) */
-    .right-panel { flex: 0.8; background: #ffffff; padding: 25px; border-radius: 15px; border: 2.5px solid #007bff; position: sticky; top: 20px; }
+    /* 우측 패널: 업무 가이드 및 독립 조회 */
+    .right-panel { flex: 0.8; background: #ffffff; padding: 25px; border-radius: 15px; border: 3px solid #007bff; position: sticky; top: 20px; }
     
-    h1 { font-size: 22px; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-    h2 { font-size: 18px; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-top: 0; }
+    h2 { font-size: 18px; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; }
+    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #444; }
+    select, textarea, input, button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
     
-    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #555; }
-    select, textarea, input, button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 14px; }
-    
-    /* 입력창 및 버튼 강조 */
     textarea { height: 80px; resize: none; border: 1px solid #007bff; }
-    button#gen { background: #007bff; color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 15px; }
-    button#clear { background: #6c757d; color: #fff; border: none; cursor: pointer; margin-top: 8px; }
+    button#gen { background: #007bff; color: #fff; font-weight: bold; border: none; cursor: pointer; }
     
-    /* 우측 조회 영역 전용 스타일 */
-    .search-section { background: #e7f3ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    .btn-search { background: #0056b3 !important; color: white !important; font-weight: bold; border: none !important; cursor: pointer; }
+    /* 조회 영역 전용 스타일 */
+    .search-area { background: #eef6ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px inset #d0e4ff; }
+    #btn-search { background: #222; color: #fff; border: none; cursor: pointer; margin-top: 10px; font-weight: bold; }
 
-    /* 결과 박스 스타일 */
-    .info-box { margin-bottom: 18px; }
-    .info-label { display: block; font-weight: bold; color: #007bff; margin-bottom: 5px; font-size: 13px; }
-    .info-value { background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #eee; min-height: 24px; font-size: 14px; color: #333; line-height: 1.6; }
+    .info-box { margin-bottom: 15px; }
+    .info-label { display: block; font-weight: bold; color: #007bff; font-size: 13px; margin-bottom: 4px; }
+    .info-value { background: #f8f9fa; padding: 12px; border-radius: 8px; border: 1px solid #eee; min-height: 20px; font-size: 14px; line-height: 1.6; }
     
-    /* 생성된 멘트 카드 */
-    .card { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 10px; margin-top: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .pill { display: inline-block; background: #007bff; color: #fff; padding: 3px 10px; border-radius: 5px; font-size: 12
+    .card { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 10px; margin-top: 15px; }
+    .copy-btn { background: #28a745; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: auto; font-size: 13px; }
+  </style>
+</head>
+<body>
 
+<div class="main-container">
+  <div class="left-panel">
+    <h2>💳 멘트 생성기</h2>
+    <label>상황 유형</label>
+    <select id="type"><option>로딩 중...</option></select>
+    
+    <label>말투 설정</label>
+    <select id="tone">
+      <option value="default">기본형</option>
+      <option value="short">단정형 (~다.)</option>
+      <option value="soft">정중형 (고객님...)</option>
+    </select>
+
+    <label>상세 상황 입력</label>
+    <textarea id="detail" placeholder="추가할 내용을 적어주세요."></textarea>
+    
+    <button id="gen" style="margin-top:15px;">멘트 만들기</button>
+    <div id="out"></div>
+  </div>
+
+  <div class="right-panel">
+    <h2>📋 업무 가이드 조회</h2>
+    
+    <div class="search-area">
+      <label style="margin-top:0;">화면번호 직접 조회</label>
+      <input type="text" id="quick-search" placeholder="예: 8974">
+      <button id="btn-search">정보 확인하기</button>
+    </div>
+
+    <div class="info-box">
+      <span class="info-label">🖥️ 화면번호</span>
+      <div id="view-screen" class="info-value">-</div>
+    </div>
+    <div class="info-box">
+      <span class="info-label">🔍 검색어</span>
+      <div id="view-keywords" class="info-value">-</div>
+    </div>
+    <div class="info-box">
+      <span class="info-label">📌 상세 설명</span>
+      <div id="view-desc" class="info-value" style="min-height: 250px; white-space: pre-wrap;">-</div>
+    </div>
+  </div>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
