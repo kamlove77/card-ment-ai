@@ -50,3 +50,80 @@
 <body>
 
 <div class="wrapper">
+    <div class="notice-container">
+        <div id="notice-scroll" class="notice-scroll">📢 데이터를 불러오고 있습니다...</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="panel">
+            <h2>📑 상담 멘트 생성기</h2>
+            <select id="ment-select" class="select-box" onchange="showSingleMent(this.value)">
+                <option value="">-- 상황 유형 선택 --</option>
+            </select>
+            <div id="ment-display" class="ment-box"></div>
+        </div>
+
+        <div class="panel">
+            <h2>🔍 화면 가이드</h2>
+            <input type="text" id="keyword" class="search-input" placeholder="화면번호 또는 문자 입력..." onkeyup="searchGuide()">
+            <div id="guide-display" class="guide-box">번호나 문자를 입력하면 정보가 표시됩니다.</div>
+
+            <h2 style="margin-top:30px;">📊 실적 현황</h2>
+            <div class="perf-area">
+                <table>
+                    <thead><tr><th>날짜</th><th>완료</th><th>비율</th></tr></thead>
+                    <tbody id="perf-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    let db = { notice: [], ment: [], perf: [] };
+
+    async function init() {
+        try {
+            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
+            db = res;
+            
+            // ⭐ 공지사항: 날짜 + 내용 조합하여 스크롤
+            const noticeText = db.notice.map(n => `[${n.date}] ${n.content}`).join(' 　　/　　 ');
+            document.getElementById('notice-scroll').innerText = "📢 " + (noticeText || "등록된 공지사항이 없습니다.");
+            
+            const select = document.getElementById('ment-select');
+            db.ment.filter(m => m.type).forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
+            });
+
+            document.getElementById('perf-list').innerHTML = db.perf.map(p => 
+                `<tr><td>${p.date}</td><td>${p.val}건</td><td>${p.rate}</td></tr>`
+            ).join('');
+        } catch(e) { document.getElementById('notice-scroll').innerText = "❌ 연결 실패"; }
+    }
+
+    function showSingleMent(type) {
+        const display = document.getElementById('ment-display');
+        const item = db.ment.find(m => m.type === type);
+        if(item && item.talk) {
+            display.innerText = item.talk;
+            display.style.display = 'block';
+        } else { display.style.display = 'none'; }
+    }
+
+    function searchGuide() {
+        const val = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        if(!val) { display.innerText = "번호나 문자를 입력하면 정보가 표시됩니다."; return; }
+        
+        const found = db.ment.find(m => String(m.num).includes(val) || m.key.toLowerCase().includes(val) || m.pos.toLowerCase().includes(val));
+        if(found) {
+            display.innerHTML = `<b style="color:var(--red); font-size:1.1rem;">[${found.num}] ${found.key}</b><br><p style="margin-top:10px;">${found.pos}</p>`;
+        } else { display.innerText = "검색 결과가 없습니다."; }
+    }
+    window.onload = init;
+</script>
+</body>
+</html>
