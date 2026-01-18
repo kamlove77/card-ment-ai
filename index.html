@@ -5,64 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>카드 상담 가이드</title>
     <style>
-        :root { --bg: #f2f4f7; --yellow-bg: #fffbe6; --border-grey: #ddd; }
+        :root { --bg: #f2f4f7; --yellow-bg: #fffbe6; --border-grey: #ddd; --blue: #007bff; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         
         .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* ✅ 공지사항 박스 수정 */
+        /* ✅ 공지사항: 박스 높이 및 내부 구조 수정 */
         .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 110px; padding: 12px; flex-shrink: 0; display: flex; flex-direction: column; box-sizing: border-box; }
         .notice-title { font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 0.9rem; }
         .notice-list { overflow-y: auto; flex: 1; }
         
-        /* ✅ 공지사항 점선 및 줄바꿈 처리 */
-        .notice-item { display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1.5px dashed #ffd666 !important; word-break: break-all; }
+        /* ✅ 공지사항 아이템: 점선 추가 및 글자 밖으로 안 나가게 수정 */
+        .notice-item { display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1.5px dashed #ffd666 !important; width: 100%; box-sizing: border-box; }
         .notice-item:last-child { border-bottom: none !important; }
-        .notice-date { background: #fff; color: #856404; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-right: 10px; border: 1px solid #ffe58f; font-size: 0.75rem; flex-shrink: 0; }
-        .notice-content { font-size: 0.85rem; line-height: 1.4; color: #444; flex: 1; }
+        
+        /* ✅ 날짜: 흰색 박스 제거 */
+        .notice-date { color: #856404; font-weight: bold; margin-right: 10px; font-size: 0.8rem; flex-shrink: 0; background: none !important; border: none !important; padding: 2px 0 !important; }
+        
+        /* ✅ 공지 내용: 자동 줄바꿈 강제 적용 */
+        .notice-content { font-size: 0.85rem; line-height: 1.4; color: #444; flex: 1; white-space: normal !important; word-break: break-all; }
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         
-        /* ✅ 패널 스타일: 회색 톤으로 변경 */
+        /* ✅ 패널: 촌스러운 색 빼고 회색으로 통일 */
         .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid var(--border-grey); }
         .panel-blue, .panel-red { border-top: 1.2px solid var(--border-grey); } 
 
         h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; color: #333; }
         
-        /* ✅ 검색창: 튀어나옴 방지 (box-sizing) */
+        /* ✅ 검색창: 튀어나옴 방지 */
         #keyword { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 8px; border: 1.2px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; }
         
         .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
         .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 65px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; }
         
-        /* ✅ 테이블 스타일: 무채색 깔끔하게 */
-        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; }
+        /* ✅ 테이블: 연한 회색 무채색 스타일 */
+        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { background: #f1f3f5 !important; color: #495057 !important; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #dee2e6; font-weight: bold; }
         td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; color: #333; background-color: #ffffff !important; }
         .cum-cell { font-weight: bold; color: #000 !important; background-color: #fafafa !important; }
 
-        .voice-btn { background: #007bff; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        /* ✅ 하단 버튼: 여백 추가 */
+        .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
+        
+        /* 스크롤바 디자인 */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
 </head>
 <body>
 <div class="wrapper">
     <div class="notice-container">
         <div class="notice-title">📢 공지사항</div>
-        <div id="notice-list" class="notice-list">데이터 불러오는 중...</div>
+        <div id="notice-list" class="notice-list">데이터 로딩 중...</div>
     </div>
+    
     <div class="main-layout">
         <div class="panel panel-blue">
             <h2>📑 상담 멘트</h2>
-            <select id="ment-select" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;" onchange="updateMentBox(this.value)"><option value="">-- 선택 --</option></select>
+            <select id="ment-select" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;" onchange="updateMentBox(this.value)">
+                <option value="">-- 상황 선택 --</option>
+            </select>
             <div id="ment-display" class="ment-box">상황을 선택하세요.</div>
         </div>
+        
         <div class="panel panel-red">
             <h2>📊 실적 및 가이드</h2>
             <input type="text" id="keyword" placeholder="화면번호/키워드 검색..." onkeyup="searchGuide()">
             <div id="guide-display" class="guide-box">가이드 내용 표시</div>
             <div class="perf-area">
-                <table><thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead><tbody id="perf-list"></tbody></table>
+                <table>
+                    <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
+                    <tbody id="perf-list"></tbody>
+                </table>
             </div>
             <button class="voice-btn" onclick="startVoice()">🎙️ 실적 음성 기록</button>
         </div>
@@ -70,6 +86,7 @@
 </div>
 
 <script>
+    // ✅ GAS 배포 URL을 여기에 넣으세요
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let db = { notice: [], ment: [], perf: [] };
 
@@ -77,7 +94,8 @@
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
-            // ✅ 스크립트에서 공지사항 구조 매칭
+            
+            // 공지사항 렌더링 (수정된 클래스 적용)
             document.getElementById('notice-list').innerHTML = res.notice.map(n => `
                 <div class="notice-item">
                     <span class="notice-date">${n.date}</span>
@@ -90,6 +108,7 @@
             res.ment.filter(m => m.type).forEach(m => {
                 const opt = document.createElement('option'); opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
             });
+            
             let cum = 0;
             document.getElementById('perf-list').innerHTML = res.perf.map(p => {
                 const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
@@ -112,7 +131,8 @@
 
     function startVoice() {
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        rec.lang = 'ko-KR'; rec.start();
+        rec.lang = 'ko-KR'; 
+        rec.start();
         rec.onresult = async (e) => {
             const val = e.results[0][0].transcript.replace(/[^0-9]/g, '');
             if(val && confirm(val + "건을 저장할까요?")) {
