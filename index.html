@@ -2,57 +2,73 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카드 상담 스마트 가이드</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 상담 가이드 시스템</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .top-info-bar { border: 1px solid #e0e6ed; padding: 15px; border-radius: 10px; margin-bottom: 20px; background: #fafbfc; }
-        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        .nav button { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: #e9ecef; }
-        .nav button.active { background: #007bff; color: white; }
-        .content { display: none; }
+        :root { --primary: #007bff; --bg: #f4f7f9; --text: #333; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); line-height: 1.5; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        
+        /* 공지사항 스타일 */
+        .notice-box { background: #fafbfc; border: 1px solid #e0e6ed; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .notice-title { font-weight: bold; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; }
+        #notice-list { max-height: 120px; overflow-y: auto; font-size: 0.9rem; }
+        .notice-item { margin-bottom: 4px; border-bottom: 1px dashed #eee; padding-bottom: 2px; }
+
+        /* 네비게이션 */
+        .nav { display: flex; gap: 8px; margin-bottom: 20px; }
+        .nav button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #eee; transition: 0.3s; }
+        .nav button.active { background: var(--primary); color: white; }
+
+        .content { display: none; animation: fadeIn 0.3s; }
         .content.active { display: block; }
-        .card { border: 1px solid #eee; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
-        .btn-search { background: #007bff; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 20px; }
-        .summary-box { background: #e7f1ff; padding: 18px; border-radius: 10px; text-align: center; margin-bottom: 15px; border: 1px solid #d0e3ff; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
-        .guide-item { border-bottom: 1px solid #eee; padding: 15px 0; }
-        #search-res { white-space: pre-wrap; line-height: 1.6; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 실적 섹션 */
+        .stat-card { background: #e7f1ff; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 15px; border: 1px solid #d0e3ff; }
+        .stat-val { font-size: 1.8rem; font-weight: bold; color: var(--primary); }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        th { background: #f8f9fa; padding: 12px; font-size: 0.85rem; border-bottom: 2px solid #dee2e6; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; }
+
+        /* 가이드 섹션 */
+        .search-box { margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .guide-card { border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 12px; background: #fff; }
+        .guide-header { display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; margin-bottom: 8px; }
+        .screen-num { font-weight: bold; color: var(--primary); }
+        .guide-body { white-space: pre-wrap; font-size: 0.95rem; color: #444; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-info-bar">
-        <div style="font-weight:bold; color:#007bff; margin-bottom:5px;">📢 실시간 공지</div>
-        <div id="notice-container">데이터 로딩 중...</div>
+    <div class="notice-box">
+        <div class="notice-title">📢 실시간 업무 공지</div>
+        <div id="notice-list">데이터를 불러오는 중...</div>
     </div>
 
     <div class="nav">
-        <button id="btn-h" class="active" onclick="showTab('h')">📜 가이드 & 멘트</button>
-        <button id="btn-p" onclick="showTab('p')">📈 실적 통계</button>
+        <button id="btn-h" class="active" onclick="showTab('h')">📜 가이드</button>
+        <button id="btn-p" onclick="showTab('p')">📊 실적</button>
     </div>
 
     <div id="sec-h" class="content active">
-        <div class="card">
-            <h3>🔍 가이드 검색</h3>
-            <input type="text" id="keyword" placeholder="화면번호나 멘트 내용 입력..." onkeyup="if(window.event.keyCode==13){searchGuide()}">
-            <button onclick="searchGuide()" class="btn-search">조회하기</button>
-            <div id="search-res">가이드를 불러오고 있습니다...</div>
+        <div class="search-box">
+            <input type="text" id="keyword" placeholder="화면번호 또는 멘트 검색..." onkeyup="searchGuide()">
         </div>
+        <div id="guide-list">가이드를 로딩 중입니다...</div>
     </div>
 
     <div id="sec-p" class="content">
-        <div class="card">
-            <h3>📊 실적 현황</h3>
-            <div class="summary-box">이번 달 누적 완료(C열): <span id="total-val" style="font-weight:bold; color:#007bff; font-size:1.6rem;">0</span>건</div>
-            <table>
-                <thead><tr style="background:#f8f9fa;"><th>날짜</th><th>완료콜수</th><th>달성률</th></tr></thead>
-                <tbody id="perf-list"></tbody>
-            </table>
+        <div class="stat-card">
+            <div>이번 달 누적 완료</div>
+            <div class="stat-val"><span id="total-val">0</span>건</div>
         </div>
+        <table>
+            <thead><tr><th>날짜</th><th>완료콜수(C)</th><th>달성률</th></tr></thead>
+            <tbody id="perf-list"></tbody>
+        </table>
     </div>
 </div>
 
@@ -67,58 +83,56 @@
         document.getElementById('btn-' + m).classList.add('active');
     }
 
-    async function loadAllData() {
+    async function init() {
         try {
-            const response = await fetch(`${API_URL}?t=${new Date().getTime()}`);
-            const res = await response.json();
+            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
 
-            // 1. 공지사항 표시
-            document.getElementById("notice-container").innerHTML = res.notice.map(i => `<div><b>[${i.date}]</b> ${i.content}</div>`).join('') || "공지가 없습니다.";
+            // 1. 공지사항 (중복 제거 및 로드)
+            const noticeHtml = res.notice.map(n => `<div class="notice-item"><b>[${n.date}]</b> ${n.content}</div>`).join('');
+            document.getElementById("notice-list").innerHTML = noticeHtml || "공지가 없습니다.";
 
-            // 2. 가이드 표시 (B열/E열 매칭)
+            // 2. 가이드 (B열 화면번호, E열 멘트)
             guideData = res.ment;
-            displayGuides(guideData);
+            renderGuides(guideData);
 
-            // 3. 실적 합산 (이미지 기준 C열만 합계)
-            let total = 0;
-            const pBody = document.getElementById("perf-list");
-            pBody.innerHTML = res.perf.map(r => {
-                // r.current는 시트의 C열(완료콜수) 값입니다.
-                const val = parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
-                total += val;
-                return `<tr><td>${r.date}</td><td>${r.current}</td><td>${r.rate}</td></tr>`;
+            // 3. 실적 (C열 합산)
+            let sum = 0;
+            const perfHtml = res.perf.map(p => {
+                const val = parseInt(String(p.current).replace(/[^0-9]/g, "")) || 0;
+                sum += val;
+                return `<tr><td>${p.date}</td><td>${p.current}</td><td>${p.rate}</td></tr>`;
             }).join('');
-            document.getElementById("total-val").innerText = total.toLocaleString();
+            document.getElementById("perf-list").innerHTML = perfHtml;
+            document.getElementById("total-val").innerText = sum.toLocaleString();
 
-        } catch(e) {
-            document.getElementById("search-res").innerText = "로딩 실패. 배포 주소를 확인하세요.";
+        } catch (e) {
+            document.getElementById("notice-list").innerText = "데이터 연결 실패";
         }
     }
 
-    function displayGuides(data) {
-        const resBox = document.getElementById("search-res");
-        if(!data || data.length === 0) {
-            resBox.innerHTML = "표시할 데이터가 없습니다.";
-            return;
-        }
-        resBox.innerHTML = data.map(f => `
-            <div class="guide-item">
-                <b style="color:#007bff;">[${f.screenNum}]</b> <span style="color:#888;">${f.type}</span>
-                <div style="margin-top:8px;">${f.text || '멘트 내용이 없습니다.'}</div>
+    function renderGuides(data) {
+        const container = document.getElementById("guide-list");
+        if(!data.length) { container.innerHTML = "내용이 없습니다."; return; }
+        container.innerHTML = data.map(g => `
+            <div class="guide-card">
+                <div class="guide-header">
+                    <span class="screen-num">번호: ${g.screenNum}</span>
+                    <span style="font-size:0.8rem; color:#999;">${g.type}</span>
+                </div>
+                <div class="guide-body">${g.text || "내용 없음"}</div>
             </div>
         `).join('');
     }
 
     function searchGuide() {
-        const k = document.getElementById("keyword").value.trim().toLowerCase();
-        if(!k) { displayGuides(guideData); return; }
-        const filtered = guideData.filter(i => 
-            String(i.screenNum).toLowerCase().includes(k) || String(i.text).toLowerCase().includes(k)
+        const k = document.getElementById("keyword").value.toLowerCase();
+        const filtered = guideData.filter(g => 
+            String(g.screenNum).includes(k) || String(g.text).toLowerCase().includes(k)
         );
-        displayGuides(filtered);
+        renderGuides(filtered);
     }
 
-    window.onload = loadAllData;
+    window.onload = init;
 </script>
 </body>
 </html>
