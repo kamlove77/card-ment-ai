@@ -2,59 +2,62 @@ const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbz0jAAwOj2VB2Kq_W
 
 const $ = (id) => document.getElementById(id);
 
-// 전역 변수로 템플릿 저장
-let cachedTemplates = null;
-
-async function loadTemplatesFromSheet() {
-  if (cachedTemplates) return cachedTemplates; // 캐시가 있으면 재사용
-  
+// 시트에서 데이터 로드
+async function loadData() {
   try {
     const res = await fetch(SHEET_API_URL);
-    const data = await res.json();
-
-    const map = {};
-    data.forEach((r) => {
-      if (!map[r.type]) map[r.type] = [];
-      map[r.type].push(r.text);
-    });
-    cachedTemplates = map;
-    return map;
+    return await res.json();
   } catch (e) {
-    console.error("데이터 로딩 실패:", e);
-    alert("시트 데이터를 가져오지 못했습니다.");
-    return {};
+    console.error("데이터 로드 실패:", e);
+    return [];
   }
 }
 
-// 페이지 로드 시 실행: Select 박스에 유형 채우기
+// 초기 로딩: 유형 선택 박스 채우기
 window.onload = async () => {
-  const templates = await loadTemplatesFromSheet();
+  const data = await loadData();
   const typeSelect = $("type");
-  typeSelect.innerHTML = ""; // 로딩 메시지 제거
+  typeSelect.innerHTML = ""; 
 
-  Object.keys(templates).forEach(typeName => {
+  const types = [...new Set(data.map(item => item.type))];
+  types.forEach(t => {
     const opt = document.createElement("option");
-    opt.value = typeName;
-    opt.textContent = typeName;
+    opt.value = t;
+    opt.textContent = t;
     typeSelect.appendChild(opt);
   });
 };
 
-// ... (기본 제공해주신 polishTone, withDetail, render 함수는 그대로 유지) ...
+function polishTone(text, tone) {
+  if (tone === "short") return text.split(".")[0] + ".";
+  if (tone === "soft") return "고객님, 이용에 불편을 드려 죄송합니다. " + text;
+  return text;
+}
 
 $("gen").onclick = async () => {
+  const data = await loadData();
   const type = $("type").value;
   const tone = $("tone").value;
   const detail = $("detail").value;
-  
-  if (!type) return alert("유형을 선택해주세요.");
-  
-  const list = await makeMentions(type, tone, detail);
-  render(list);
+
+  const filtered = data.filter(item => item.type === type);
+  const out = $("out");
+  out.innerHTML = "";
+
+  filtered.forEach((item, idx) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const ment = polishTone(item.text, tone) + (detail ? `\n\n(참고: ${detail})` : "");
+    card.innerHTML = `
+      <div class="pill">추천 ${idx + 1}</div>
+      <div style="white-space:pre-wrap;">${ment}</div>
+      <button style="margin-top:10px; background:#28a745;" onclick="navigator.clipboard.writeText(\`${ment}\`)">복사하기</button>
+    `;
+    out.appendChild(card);
+  });
 };
 
 $("clear").onclick = () => {
   $("detail").value = "";
   $("out").innerHTML = "";
 };
-
