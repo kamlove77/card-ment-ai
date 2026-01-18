@@ -8,9 +8,9 @@
     .main-container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
     
     /* 좌측 패널: 멘트 생성 */
-    .left-panel { flex: 1.2; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .left-panel { flex: 1; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     
-    /* 우측 패널: 업무 가이드 및 독립 조회 */
+    /* 우측 패널: 가이드 및 개별 조회 */
     .right-panel { flex: 0.8; background: #ffffff; padding: 25px; border-radius: 15px; border: 3px solid #007bff; position: sticky; top: 20px; }
     
     h2 { font-size: 18px; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; }
@@ -20,9 +20,10 @@
     textarea { height: 80px; resize: none; border: 1px solid #007bff; }
     button#gen { background: #007bff; color: #fff; font-weight: bold; border: none; cursor: pointer; }
     
-    /* 조회 영역 전용 스타일 */
-    .search-area { background: #eef6ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px inset #d0e4ff; }
-    #btn-search { background: #222; color: #fff; border: none; cursor: pointer; margin-top: 10px; font-weight: bold; }
+    /* 개별 조회 영역 스타일 */
+    .search-area { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #dee2e6; }
+    #btn-search { background: #333; color: #fff; border: none; cursor: pointer; margin-top: 10px; font-weight: bold; }
+    #btn-search:hover { background: #000; }
 
     .info-box { margin-bottom: 15px; }
     .info-label { display: block; font-weight: bold; color: #007bff; font-size: 13px; margin-bottom: 4px; }
@@ -39,24 +40,20 @@
     <h2>💳 멘트 생성기</h2>
     <label>상황 유형</label>
     <select id="type"><option>로딩 중...</option></select>
-    
     <label>말투 설정</label>
     <select id="tone">
       <option value="default">기본형</option>
-      <option value="short">단정형 (~다.)</option>
-      <option value="soft">정중형 (고객님...)</option>
+      <option value="short">단정형</option>
+      <option value="soft">정중형</option>
     </select>
-
     <label>상세 상황 입력</label>
-    <textarea id="detail" placeholder="추가할 내용을 적어주세요."></textarea>
-    
+    <textarea id="detail" placeholder="상황을 입력하세요."></textarea>
     <button id="gen" style="margin-top:15px;">멘트 만들기</button>
     <div id="out"></div>
   </div>
 
   <div class="right-panel">
     <h2>📋 업무 가이드 조회</h2>
-    
     <div class="search-area">
       <label style="margin-top:0;">화면번호 직접 조회</label>
       <input type="text" id="quick-search" placeholder="예: 8974">
