@@ -1,4 +1,4 @@
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyNfRKQLL2yMiiXT8aP2e03QfeVfOKFt4QsLw0467NxMnrqegKbufooiowT0W0aIjCgKA/exec";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyoPZY9kc88IQE5We11u8ysQA4TBhfPgWcPrdY_r2KoIALOCfmrAHWTc-YGubq8oM_E/exec";
 let mentData = []; 
 
 // 1. 초기 데이터 로드
@@ -48,3 +48,4 @@ document.getElementById("btn-search").onclick = () => {
 };
 
 window.onload = loadInitialData;
+
