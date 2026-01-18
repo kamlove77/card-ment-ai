@@ -8,11 +8,11 @@
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
 
-        /* ✅ 공지사항: 세로 리스트 + 내용 길면 스크롤 생성 */
+        /* ✅ 공지사항: 세로 리스트 박스 + 스크롤 */
         .notice-container { 
             background: var(--yellow); border-left: 5px solid #fbc02d; 
             margin-bottom: 20px; border-radius: 8px; 
-            height: 120px; overflow-y: auto; /* 세로 스크롤 핵심 */
+            height: 110px; overflow-y: auto; /* 내용 길면 스크롤 생성 */
             padding: 10px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .notice-item { border-bottom: 1px dotted #d1cca4; padding: 8px 0; font-size: 0.95rem; display: flex; }
@@ -20,10 +20,10 @@
         .notice-content { color: #333; line-height: 1.4; white-space: pre-wrap; }
 
         .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 600px; display: flex; flex-direction: column; }
+        .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 620px; display: flex; flex-direction: column; }
         h2 { font-size: 1.2rem; border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-top: 0; }
 
-        /* 왼쪽: 상담 멘트 선택창 */
+        /* 왼쪽: 상담 멘트 */
         .select-box { width: 100%; padding: 15px; border: 2px solid var(--blue); border-radius: 10px; font-size: 1.1rem; margin-top: 15px; cursor: pointer; }
         .ment-box { 
             background: #ffffff; border: 2px solid var(--blue); padding: 25px; border-radius: 12px; 
@@ -35,7 +35,7 @@
         .search-input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.1rem; margin-top: 15px; }
         .guide-box { 
             background: #fff1f0; border-left: 5px solid var(--red); padding: 20px; border-radius: 10px; 
-            height: 160px; overflow-y: auto; margin-top: 15px; line-height: 1.7; 
+            height: 180px; overflow-y: auto; margin-top: 15px; line-height: 1.7; 
         }
         
         .perf-area { margin-top: 30px; flex-grow: 1; overflow-y: auto; }
@@ -53,7 +53,7 @@
         <div class="panel">
             <h2>📑 상담 멘트 생성기</h2>
             <select id="ment-select" class="select-box" onchange="updateMentBox(this.value)">
-                <option value="">-- 상황 유형 선택 --</option>
+                <option value="">-- 상황 유형 선택 (하나만 표시) --</option>
             </select>
             <div id="ment-display" class="ment-box"></div>
         </div>
@@ -75,7 +75,7 @@
 </div>
 
 <script>
-    // ⚠️ 꽃게님의 구글 앱스 스크립트 배포 주소를 아래에 정확히 넣어주세요!
+    // ⚠️ 아래 주소를 꽃게님의 최신 배포 URL로 꼭 바꿔주세요!
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     
     let db = { notice: [], ment: [], perf: [] };
@@ -85,7 +85,7 @@
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
             
-            // 1. 공지사항 세로 목록 생성
+            // 1. 공지사항 세로 목록 렌더링
             const noticeArea = document.getElementById('notice-area');
             if(db.notice && db.notice.length > 0) {
                 noticeArea.innerHTML = db.notice.map(n => `
@@ -96,20 +96,19 @@
                 `).join('');
             } else { noticeArea.innerText = "📢 등록된 공지사항이 없습니다."; }
             
-            // 2. 드롭다운 목록 생성
+            // 2. 드롭다운 목록 추가
             const select = document.getElementById('ment-select');
             db.ment.filter(m => m.type).forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
             });
 
-            // 3. 실적 현황 출력
+            // 3. 실적 데이터 출력
             document.getElementById('perf-list').innerHTML = db.perf.map(p => 
                 `<tr><td>${p.date}</td><td>${p.val}건</td><td>${p.rate}</td></tr>`
             ).join('');
         } catch(e) { 
-            document.getElementById('notice-area').innerText = "❌ 연결 실패. API 주소 또는 시트 이름을 확인하세요."; 
-            console.error(e);
+            document.getElementById('notice-area').innerText = "❌ 연결 실패. 배포 주소 또는 시트 이름을 확인하세요."; 
         }
     }
 
