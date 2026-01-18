@@ -1,94 +1,77 @@
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzum84HO-733vm3uN-RNU8Kn9buRLx_Eg4N_SZgoFyBD6SXH4imoeqSLjYBscCTIbb63Q/exec";
-const $ = (id) => document.getElementById(id);
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyWdSeyTjHZeDXjSvk0YheBzsCEZ2vrJHCFj24aYilF-6yZV0E0zwOP3zWc9vgtYQAfqQ/exec";
+let mentData = []; 
 
-// 1. 데이터 로드 공통 함수
-async function fetchData(mode = "ment") {
+// 초기 데이터(상담 멘트 및 가이드) 로드
+async function loadInitialData() {
     try {
-        const response = await fetch(`${SHEET_API_URL}?mode=${mode}`);
-        return await response.json();
-    } catch (e) {
-        console.error("데이터 로드 에러:", e);
-        return [];
-    }
-}
-
-// 2. 실적 관리 화면 (표) 업데이트 함수
-async function loadPerformance() {
-    const listBody = $("perf-list");
-    listBody.innerHTML = "<tr><td colspan='4'>엑셀 자료를 가져오는 중...</td></tr>";
-
-    const data = await fetchData("perf"); // mode=perf로 호출
-
-    listBody.innerHTML = "";
-    if (data.length === 0) {
-        listBody.innerHTML = "<tr><td colspan='4'>기록된 실적 데이터가 없습니다.</td></tr>";
-        return;
-    }
-
-    data.forEach(row => {
-        const tr = document.createElement("tr");
-        // 목표 135 대비 달성률 계산
-        const rateNum = ((row.current / 135) * 100).toFixed(1);
-        const color = rateNum >= 100 ? "#28a745" : "#d9534f";
-
-        tr.innerHTML = `
-            <td>${row.date}</td>
-            <td>${row.current}콜</td>
-            <td style="font-weight:bold; color:${color}">${rateNum}%</td>
-            <td>${row.memo || "-"}</td>
-        `;
-        listBody.appendChild(tr);
-    });
-}
-
-// 3. 페이지 로드 시 초기 세팅
-window.onload = async () => {
-    // 멘트 유형 드롭다운 초기화
-    const mentData = await fetchData("ment");
-    const typeSelect = $("type");
-    
-    if (mentData.length > 0) {
+        const res = await fetch(`${SHEET_API_URL}?mode=ment`);
+        const data = await res.json();
+        mentData = data;
+        
+        // 드롭다운 메뉴 채우기
+        const typeSelect = document.getElementById("type");
+        const types = [...new Set(data.map(item => item.type))];
         typeSelect.innerHTML = "<option value=''>유형을 선택하세요</option>";
-        const types = [...new Set(mentData.map(item => item.type))];
         types.forEach(t => {
             const opt = document.createElement("option");
             opt.value = t; opt.textContent = t;
             typeSelect.appendChild(opt);
         });
+        console.log("상담 데이터 로드 완료");
+    } catch (e) {
+        console.error("상담 데이터 로드 실패:", e);
     }
+}
 
-    // [멘트 만들기] 버튼 이벤트
-    $("gen").onclick = async () => {
-        const type = $("type").value;
-        if (!type) return alert("유형을 선택해주세요.");
-        
-        const filtered = mentData.filter(item => item.type === type);
-        const out = $("out");
-        out.innerHTML = "";
-        filtered.forEach((item, idx) => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
-                <div style="font-weight:bold; color:#007bff;">추천 ${idx + 1}</div>
-                <div style="white-space:pre-wrap; margin:10px 0;">${item.text}</div>
-                <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${item.text}\`).then(()=>alert('복사되었습니다!'))">복사</button>
-            `;
-            out.appendChild(card);
-        });
-    };
+// 실적 히스토리 로드 (엑셀 연동)
+async function loadPerformance() {
+    const listBody = document.getElementById("perf-list");
+    listBody.innerHTML = "<tr><td colspan='4'>엑셀 자료를 가져오는 중...</td></tr>";
 
-    // [화면번호 조회] 버튼 이벤트
-    $("btn-search").onclick = () => {
-        const keyword = $("quick-search").value.trim();
-        if (!keyword) return alert("번호를 입력하세요.");
-        
-        const found = mentData.find(item => String(item.screenNum).includes(keyword));
-        if (found) {
-            $("view-screen").textContent = found.screenNum;
-            $("view-keywords").textContent = found.keywords;
-            $("view-desc").textContent = found.description;
-        } else {
-            alert("조회된 정보가 없습니다.");
+    try {
+        const res = await fetch(`${SHEET_API_URL}?mode=perf`);
+        const data = await res.json();
+
+        listBody.innerHTML = "";
+        if (!data || data.length === 0) {
+            listBody.innerHTML = "<tr><td colspan='4'>기록된 실적 데이터가 없습니다.</td></tr>";
+            return;
         }
-    };
+
+        data.forEach(row => {
+            const tr = document.createElement("tr");
+            // 달성률 숫자에 따라 색상 변경 (100% 이상 녹색, 미만 빨간색)
+            const rateValue = parseFloat(row.rate);
+            const color = rateValue >= 100 ? "#28a745" : "#d9534f";
+
+            tr.innerHTML = `
+                <td>${row.date}</td>
+                <td>${row.current}콜</td>
+                <td style="font-weight:bold; color:${color}">${row.rate}</td>
+                <td>${row.memo || "-"}</td>
+            `;
+            listBody.appendChild(tr);
+        });
+    } catch (e) {
+        listBody.innerHTML = "<tr><td colspan='4'>데이터 로드 실패. 시트와 배포 설정을 확인하세요.</td></tr>";
+    }
+}
+
+// 업무 가이드 조회 (검색) 버튼
+document.getElementById("btn-search").onclick = () => {
+    const keyword = document.getElementById("quick-search").value.trim();
+    if (!keyword) return alert("조회할 화면번호를 입력하세요.");
+
+    // 숫자와 문자 구분 없이 비교
+    const found = mentData.find(item => String(item.screenNum).trim() === keyword);
+
+    if (found) {
+        document.getElementById("view-screen").textContent = found.screenNum;
+        document.getElementById("view-keywords").textContent = found.keywords;
+        document.getElementById("view-desc").textContent = found.description;
+    } else {
+        alert("해당 번호의 정보를 찾을 수 없습니다.");
+    }
 };
+
+window.onload = loadInitialData;
