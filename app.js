@@ -1,4 +1,4 @@
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwuL7frRVVvewOcSxdPejC5xG1fGFwueoqdr7_k6VdSKlkHwB3YZZCFBSlUwp2psd3-cg/exec";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxOwMvXHz_yn8NE02pwDO66Xlo9aLFcgvAb7iQu_zwnq802FPAQfHnRgNMBPBosPQNcyA/exec";
 let mentData = [];
 
 // 1. 초기 로드 (실적과 가이드를 각각 독립적으로 실행)
@@ -93,3 +93,4 @@ if (btnGen) {
 }
 
 window.onload = init;
+
