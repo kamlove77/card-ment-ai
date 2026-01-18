@@ -2,39 +2,66 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 통합 가이드</title>
     <style>
         :root { --blue: #007bff; --red: #ff4d4f; --bg: #f0f2f5; --yellow: #fff9c4; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
 
-        /* 공지사항 전광판 스크롤 */
+        /* ⭐ 공지사항: 세로 스크롤 박스로 변경 ⭐ */
         .notice-container { 
             background: var(--yellow); border-left: 5px solid #fbc02d; 
-            margin-bottom: 20px; border-radius: 8px; overflow: hidden; position: relative; height: 45px;
-            display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px; border-radius: 8px; 
+            height: 100px; /* 고정 높이 */
+            overflow-y: auto; /* 내용 길면 세로 스크롤 생성 */
+            padding: 10px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .notice-scroll {
-            white-space: nowrap; position: absolute; padding-left: 100%;
-            animation: marquee 30s linear infinite; font-weight: bold; font-size: 1.05rem;
-        }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-180%); } }
-        .notice-container:hover .notice-scroll { animation-play-state: paused; }
+        .notice-item { border-bottom: 1px dotted #e6e0a8; padding: 5px 0; font-size: 0.95rem; }
+        .notice-item:last-child { border-bottom: none; }
+        .notice-date { color: #888; font-size: 0.85rem; margin-right: 10px; font-weight: bold; }
 
         .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 650px; display: flex; flex-direction: column; }
-        h2 { font-size: 1.25rem; border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-top: 0; flex-shrink: 0; }
+        .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 600px; display: flex; flex-direction: column; }
+        h2 { font-size: 1.2rem; border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-top: 0; }
 
-        /* 왼쪽: 상담 멘트 (드롭다운 + 스크롤) */
-        .select-box { width: 100%; padding: 15px; border: 2px solid var(--blue); border-radius: 10px; font-size: 1.1rem; margin-top: 15px; flex-shrink: 0; }
+        /* 왼쪽: 상담 멘트 */
+        .select-box { width: 100%; padding: 15px; border: 2px solid var(--blue); border-radius: 10px; font-size: 1.1rem; margin-top: 15px; }
         .ment-box { 
             background: #ffffff; border: 2px solid var(--blue); padding: 25px; border-radius: 12px; 
-            flex-grow: 1; font-size: 1.2rem; line-height: 1.8; white-space: pre-wrap; 
+            flex-grow: 1; font-size: 1.15rem; line-height: 1.8; white-space: pre-wrap; 
             margin-top: 20px; display: none; overflow-y: auto; 
         }
 
-        /* 오른쪽: 가이드 검색 (긴 내용 스크롤) */
-        .search-input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.1rem; flex-shrink: 0; margin-top: 15px; }
+        /* 오른쪽: 가이드 검색 & 스크롤 */
+        .search-input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.1rem; margin-top: 15px; }
         .guide-box { 
-            background: #fff1f0; border-left: 5px solid var(--red); padding: 20px;
+            background: #fff1f0; border-left: 5px solid var(--red); padding: 20px; border-radius: 10px; 
+            height: 150px; overflow-y: auto; margin-top: 15px; line-height: 1.7; font-size: 1.05rem;
+        }
+        
+        .perf-area { margin-top: 30px; flex-grow: 1; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f1f3f5; padding: 10px; border-bottom: 2px solid #dee2e6; position: sticky; top: 0; }
+        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div id="notice-area" class="notice-container">
+        📢 데이터를 불러오고 있습니다...
+    </div>
+
+    <div class="main-layout">
+        <div class="panel">
+            <h2>📑 상담 멘트 생성기</h2>
+            <select id="ment-select" class="select-box" onchange="showMent(this.value)">
+                <option value="">-- 상황 유형 선택 --</option>
+            </select>
+            <div id="ment-display" class="ment-box"></div>
+        </div>
+
+        <div class="panel">
+            <h2>🔍 화면 가이드</h2>
+            <input type="text" id="keyword" class="search-input" placeholder="화면번호 또는 문자 입력..." onkeyup="searchGuide()">
+            <div id="guide-display" class="guide-box">번호나 문자를 입력하면 정보가 표시됩니다.
