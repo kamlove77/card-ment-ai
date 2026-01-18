@@ -1,22 +1,23 @@
+// 1. 사용자님의 최신 URL 적용
 const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzF6PiiQG6jmkT6JQDiMlTRMOjbwSLomnhZu8xHvBjYQTf31SPxaBLZLU6K1hqBIlTadQ/exec";
 let mentData = [];
 
-// 1. 초기 로드: 데이터 가져오기 및 화면 업데이트
+// 2. 초기 로딩: 가이드와 실적을 모두 가져옵니다.
 async function init() {
     try {
-        console.log("데이터 로드 시작...");
+        console.log("데이터 로딩 중...");
         const mentRes = await fetch(`${SHEET_API_URL}?mode=ment`);
         mentData = await mentRes.json();
         
-        updateTypeDropdown(); // 드롭다운 채우기
+        updateTypeDropdown(); // 드롭다운 업데이트
         await loadPerformance(); // 실적 로드
-        console.log("전체 로드 완료");
+        console.log("로딩 완료!");
     } catch (e) {
-        console.error("초기화 오류:", e);
+        console.error("데이터를 불러오지 못했습니다:", e);
     }
 }
 
-// 2. 실적 히스토리 로드 (날짜 버그 수정본)
+// 3. 실적 로드 (날짜를 MM/DD 형식으로 강제 변환)
 async function loadPerformance() {
     const listBody = document.getElementById("perf-list");
     if (!listBody) return;
@@ -33,14 +34,17 @@ async function loadPerformance() {
             if (row.date) {
                 const dateObj = new Date(row.date);
                 if (!isNaN(dateObj.getTime())) {
+                    // 표준 날짜 객체에서 월/일 추출
                     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                     const day = String(dateObj.getDate()).padStart(2, '0');
                     displayDate = `${month}/${day}`;
                 } else {
-                    // Sun Jan 18... 형태 대응
+                    // 문자열(Sun Jan 18...)에서 직접 추출
                     const parts = String(row.date).split(" ");
                     const monthMap = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" };
-                    if (parts.length >= 3) displayDate = `${monthMap[parts[1]] || "01"}/${parts[2].padStart(2, '0')}`;
+                    if (parts.length >= 3) {
+                        displayDate = `${monthMap[parts[1]] || "01"}/${parts[2].padStart(2, '0')}`;
+                    }
                 }
             }
 
@@ -57,7 +61,7 @@ async function loadPerformance() {
     }
 }
 
-// 3. 상황 유형 드롭다운 생성
+// 4. 드롭다운 업데이트
 function updateTypeDropdown() {
     const typeSelect = document.getElementById("type");
     if (!typeSelect) return;
@@ -72,7 +76,7 @@ function updateTypeDropdown() {
     });
 }
 
-// 4. 가이드 정보 검색 (번호/키워드)
+// 5. 가이드 검색 기능 (번호/키워드)
 document.getElementById("btn-search").onclick = () => {
     const input = document.getElementById("quick-search").value.trim().toLowerCase();
     if (!input) return alert("검색어를 입력하세요.");
@@ -87,18 +91,18 @@ document.getElementById("btn-search").onclick = () => {
         document.getElementById("view-keywords").textContent = found.keywords || "-";
         document.getElementById("view-desc").textContent = found.description || "내용 없음";
     } else {
-        alert("일치하는 가이드 정보를 찾을 수 없습니다.");
+        alert("일치하는 가이드 정보가 없습니다.");
     }
 };
 
-// 5. 멘트 만들기 버튼
+// 6. 멘트 생성 버튼
 document.getElementById("btn-generate").onclick = () => {
     const selectedType = document.getElementById("type").value;
     if (!selectedType) return alert("유형을 선택하세요.");
 
     const found = mentData.find(item => String(item.type || "").trim() === selectedType);
     if (found) {
-        document.getElementById("ment-output").value = found.text || "멘트가 없습니다.";
+        document.getElementById("ment-output").value = found.text || "";
     }
 };
 
