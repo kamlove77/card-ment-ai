@@ -1,106 +1,153 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>카드 상담 지원 시스템</title>
-  <style>
-    body { font-family: 'Malgun Gothic', sans-serif; background:#f0f2f5; margin:0; padding:20px; }
-    
-    /* 상단 네비게이션 버튼 */
-    .nav-bar { display: flex; gap: 10px; max-width: 1200px; margin: 0 auto 20px auto; }
-    .nav-btn { flex: 1; padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; border-radius: 12px; background: #fff; color: #333; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; }
-    .nav-btn.active { background: #007bff; color: #fff; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 상담 스마트 가이드</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #28a745;
+            --bg-color: #f0f2f5;
+        }
 
-    /* 화면 전환 섹션 스타일 */
-    .content-section { display: none; }
-    .content-section.active { display: block; }
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    /* 메인 컨테이너 */
-    .main-container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
-    .left-panel { flex: 1; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .right-panel { flex: 0.8; background: #ffffff; padding: 25px; border-radius: 15px; border: 3px solid #007bff; position: sticky; top: 20px; }
-    
-    h2 { font-size: 18px; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; }
-    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #444; }
-    select, textarea, input, button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-    
-    /* 실적 테이블 전용 스타일 */
-    .perf-container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .perf-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    .perf-table th, .perf-table td { padding: 12px; border: 1px solid #eee; text-align: center; }
-    .perf-table th { background: #28a745; color: #fff; }
-    .perf-table tr:nth-child(even) { background: #f9f9f9; }
+        /* 상단 네비게이션 */
+        .nav-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
 
-    .card { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 10px; margin-top: 15px; }
-    .copy-btn { background: #28a745; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: auto; font-size: 13px; margin-top:10px; }
-  </style>
+        .nav-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+
+        .nav-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* 메인 컨텐츠 영역 */
+        .content-section {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* 실적 합계 대시보드 */
+        .summary-box {
+            background: #fff;
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .summary-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .summary-value {
+            font-weight: bold;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        /* 테이블 스타일 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: var(--secondary-color);
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        /* 입력 및 선택 도구 */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .info-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 5px solid var(--primary-color);
+        }
+    </style>
 </head>
 <body>
 
-  <div class="nav-bar">
-    <button id="nav-home" class="nav-btn active" onclick="switchPage('home')">💳 상담 멘트 / 가이드</button>
-    <button id="nav-perf" class="nav-btn" onclick="switchPage('perf')">📊 실적 히스토리 (엑셀연동)</button>
-  </div>
-
-  <div id="page-home" class="content-section active">
-    <div class="main-container">
-      <div class="left-panel">
-        <h2>💳 멘트 생성기</h2>
-        <label>상황 유형</label>
-        <select id="type"><option>로딩 중...</option></select>
-        <label>말투 설정</label>
-        <select id="tone"><option value="default">기본형</option><option value="short">단정형</option></select>
-        <textarea id="detail" placeholder="상세 내용을 입력하세요."></textarea>
-        <button id="gen" style="background:#007bff; color:#fff; border:none; margin-top:15px; cursor:pointer; font-weight:bold;">멘트 만들기</button>
-        <div id="out"></div>
-      </div>
-      <div class="right-panel">
-        <h2>📋 업무 가이드 조회</h2>
-        <div style="background:#f8f9fa; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #dee2e6;">
-          <input type="text" id="quick-search" placeholder="화면번호 입력 (예: 8974)">
-          <button id="btn-search" style="background:#333; color:#fff; cursor:pointer; font-weight:bold;">정보 확인하기</button>
-        </div>
-        <div id="view-screen" style="padding:10px; background:#f8f9fa; border-radius:8px; margin-top:10px;">-</div>
-        <div id="view-desc" style="padding:10px; background:#f8f9fa; border-radius:8px; margin-top:10px; min-height:200px; white-space:pre-wrap;">-</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="page-perf" class="content-section">
-    <div class="perf-container">
-      <h2 style="color: #28a745; border-color: #28a745;">📈 나의 실적 기록부 </h2>
-      <table class="perf-table">
-        <thead>
-          <tr>
-            <th>날짜</th>
-            <th>완료 콜수</th>
-            <th>달성률</th>
-            <th>메모</th>
-          </tr>
-        </thead>
-        <tbody id="perf-list">
-          <tr><td colspan="4">시트 데이터를 불러오는 중...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <script src="./app.js"></script>
-  <script>
-    function switchPage(pageId) {
-      document.querySelectorAll('.content-section').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      
-      if(pageId === 'home') {
-        document.getElementById('page-home').classList.add('active');
-        document.getElementById('nav-home').classList.add('active');
-      } else {
-        document.getElementById('page-perf').classList.add('active');
-        document.getElementById('nav-perf').classList.add('active');
-        if(typeof loadPerformance === 'function') loadPerformance(); 
-      }
-    }
-  </script>
-</body>
-</html>
-
+    <div class="nav-bar">
+        <button class="nav-btn active
