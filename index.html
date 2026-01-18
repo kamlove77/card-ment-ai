@@ -2,63 +2,97 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카드 상담 가이드 시스템</title>
+    <title>카드 상담 통합 포털</title>
     <style>
-        :root { --primary: #007bff; --bg: #f4f7f9; --accent: #ff6b6b; }
-        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
-        .container { max-width: 650px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        :root { --primary: #007bff; --bg: #f4f7f9; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .container { max-width: 1100px; margin: 0 auto; }
         
-        .notice-section { background: #fff9c4; border-left: 5px solid #fbc02d; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem; }
-        .search-area { position: sticky; top: 0; background: white; padding-bottom: 15px; z-index: 10; border-bottom: 2px solid #eee; margin-bottom: 15px; }
-        input { width: 100%; padding: 15px; border: 2px solid var(--primary); border-radius: 10px; box-sizing: border-box; font-size: 1.1rem; }
+        /* 공지사항 (상단 고정) */
+        .notice-bar { background: #fff9c4; border-left: 5px solid #fbc02d; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; }
 
-        .guide-card { border: 1px solid #dee2e6; border-radius: 12px; margin-bottom: 15px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        /* ⭐ 상담 멘트 (A-E) 영역 ⭐ */
-        .ment-top { padding: 15px; border-bottom: 1px dashed #ddd; }
-        .type-tag { display: inline-block; background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 10px; }
-        .talk-text { font-size: 1.1rem; line-height: 1.6; color: #111; white-space: pre-wrap; background: #f9f9f9; padding: 12px; border-radius: 8px; }
+        /* 좌우 메인 레이아웃 */
+        .main-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); min-height: 500px; }
+        h2 { font-size: 1.1rem; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-top: 0; }
+
+        /* 왼쪽: 멘트 생성기 (A-E) */
+        .ment-item { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
+        .type-tag { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 8px; display: inline-block; }
+        .talk-txt { font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; }
+
+        /* 오른쪽: 가이드 & 실적 */
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; }
+        .guide-box { background: #fff0f0; padding: 15px; border-radius: 8px; border-left: 5px solid #ff4d4f; margin-bottom: 20px; }
         
-        /* ⭐ 가이드 (B-C-D) 영역 ⭐ */
-        .guide-bottom { padding: 10px 15px; background: #f1f3f5; display: flex; justify-content: space-between; font-size: 0.9rem; }
-        .screen-info { font-weight: bold; color: #555; }
-        .pos-info { color: var(--accent); font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        th { background: #f1f3f5; padding: 8px; border-bottom: 2px solid #dee2e6; }
+        td { padding: 8px; border-bottom: 1px solid #eee; text-align: center; }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <div id="notice-list" class="notice-section">📢 공지사항 로딩 중...</div>
-    <div class="search-area"><input type="text" id="keyword" placeholder="화면번호 또는 멘트 검색..." onkeyup="filterData()"></div>
-    <div id="guide-list">데이터 로딩 중...</div>
+    <div id="notice-list" class="notice-bar">📢 실시간 업무 공지 로딩 중...</div>
+
+    <div class="main-grid">
+        <div class="card">
+            <h2>📑 상담 멘트 생성기</h2>
+            <div id="ment-list">로딩 중...</div>
+        </div>
+
+        <div class="card">
+            <h2>🔍 화면 가이드</h2>
+            <input type="text" id="keyword" placeholder="화면번호 입력 후 엔터" onkeyup="searchGuide()">
+            <div id="guide-result" class="guide-box">번호를 입력해 주세요.</div>
+
+            <h2 style="margin-top:30px;">📊 실적 현황</h2>
+            <table>
+                <thead><tr><th>날짜</th><th>완료</th><th>비율</th></tr></thead>
+                <tbody id="perf-list"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
 <script>
-    const API_URL = "꽃게님의_배포_주소_여기에_입력"; // ⚠️ 본인의 주소로 교체하세요!
-    let allData = [];
+    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    let data = { ment: [], notice: [], perf: [] };
+
     async function init() {
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
-            document.getElementById("notice-list").innerHTML = "📢 " + (res.notice[0]?.content || "공지 없음");
-            allData = res.ment;
-            render(allData);
-        } catch(e) { document.getElementById("guide-list").innerText = "연결 실패"; }
-    }
-    function render(data) {
-        document.getElementById("guide-list").innerHTML = data.map(g => `
-            <div class="guide-card">
-                <div class="ment-top">
-                    <div class="type-tag">${g.type}</div>
-                    <div class="talk-text">${g.talkMent || "멘트 없음"}</div>
+            data = res;
+            
+            // 공지 띄우기
+            document.getElementById('notice-list').innerHTML = "📢 " + (data.notice[0]?.content || "공지 없음");
+            
+            // 멘트 리스트 (A-E)
+            document.getElementById('ment-list').innerHTML = data.ment.map(m => `
+                <div class="ment-item">
+                    <div class="type-tag">${m.type}</div>
+                    <div class="talk-txt">${m.talk}</div>
                 </div>
-                <div class="guide-bottom">
-                    <span class="screen-info">번호: ${g.screenNum} (${g.searchKey})</span>
-                    <span class="pos-info">📍 ${g.detailPos}</span>
-                </div>
-            </div>
-        `).join('');
+            `).join('');
+
+            // 실적 리스트
+            document.getElementById('perf-list').innerHTML = data.perf.map(p => `
+                <tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>
+            `).join('');
+
+        } catch(e) { console.error(e); }
     }
-    function filterData() {
-        const k = document.getElementById("keyword").value.toLowerCase();
-        render(allData.filter(g => String(g.screenNum).includes(k) || g.searchKey.includes(k) || g.talkMent.includes(k)));
+
+    // 가이드 검색 (B-C-D)
+    function searchGuide() {
+        const k = document.getElementById('keyword').value;
+        const found = data.ment.find(m => String(m.num) === k);
+        const resBox = document.getElementById('guide-result');
+        if(found) {
+            resBox.innerHTML = `<strong>검색어:</strong> ${found.key}<br><strong>상세설명:</strong> ${found.pos}`;
+        } else {
+            resBox.innerText = "번호를 다시 확인해 주세요.";
+        }
     }
     window.onload = init;
 </script>
