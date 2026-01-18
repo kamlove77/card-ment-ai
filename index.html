@@ -2,28 +2,28 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카드 상담 통합 시스템</title>
+    <title>카드 상담 통합 가이드</title>
     <style>
         :root { --blue: #007bff; --red: #ff4d4f; --bg: #f0f2f5; --yellow: #fff9c4; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
 
-        /* 공지사항: 고정 높이 + 세로 스크롤 */
+        /* ✅ 공지사항: 세로 리스트 + 내용 길면 스크롤 생성 */
         .notice-container { 
             background: var(--yellow); border-left: 5px solid #fbc02d; 
             margin-bottom: 20px; border-radius: 8px; 
-            height: 110px; overflow-y: auto; 
+            height: 120px; overflow-y: auto; /* 세로 스크롤 핵심 */
             padding: 10px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 8px 0; font-size: 0.95rem; display: flex; align-items: flex-start; }
-        .notice-date { color: #666; font-size: 0.85rem; min-width: 85px; font-weight: bold; }
-        .notice-content { color: #333; line-height: 1.4; }
+        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 8px 0; font-size: 0.95rem; display: flex; }
+        .notice-date { color: #666; font-size: 0.85rem; min-width: 90px; font-weight: bold; }
+        .notice-content { color: #333; line-height: 1.4; white-space: pre-wrap; }
 
         .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 600px; display: flex; flex-direction: column; }
         h2 { font-size: 1.2rem; border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-top: 0; }
 
-        /* 왼쪽: 드롭다운 + 멘트 스크롤 */
+        /* 왼쪽: 상담 멘트 선택창 */
         .select-box { width: 100%; padding: 15px; border: 2px solid var(--blue); border-radius: 10px; font-size: 1.1rem; margin-top: 15px; cursor: pointer; }
         .ment-box { 
             background: #ffffff; border: 2px solid var(--blue); padding: 25px; border-radius: 12px; 
@@ -31,7 +31,7 @@
             margin-top: 20px; display: none; overflow-y: auto; 
         }
 
-        /* 오른쪽: 검색 + 가이드 상세 스크롤 */
+        /* 오른쪽: 가이드 상세 스크롤 */
         .search-input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.1rem; margin-top: 15px; }
         .guide-box { 
             background: #fff1f0; border-left: 5px solid var(--red); padding: 20px; border-radius: 10px; 
@@ -52,8 +52,8 @@
     <div class="main-layout">
         <div class="panel">
             <h2>📑 상담 멘트 생성기</h2>
-            <select id="ment-select" class="select-box" onchange="updateMentDisplay(this.value)">
-                <option value="">-- 상황 유형 선택 (하나만 표시) --</option>
+            <select id="ment-select" class="select-box" onchange="updateMentBox(this.value)">
+                <option value="">-- 상황 유형 선택 --</option>
             </select>
             <div id="ment-display" class="ment-box"></div>
         </div>
@@ -75,15 +75,62 @@
 </div>
 
 <script>
-    // ⚠️ [필수] 아래 큰따옴표 안에 꽃게님의 구글 앱스 스크립트 배포 주소를 넣으세요!
+    // ⚠️ 꽃게님의 구글 앱스 스크립트 배포 주소를 아래에 정확히 넣어주세요!
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     
     let db = { notice: [], ment: [], perf: [] };
 
-    async function fetchData() {
+    async function loadData() {
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
             
-            // 공지사항 렌더링 (세로 스크롤)
-            const noticeArea
+            // 1. 공지사항 세로 목록 생성
+            const noticeArea = document.getElementById('notice-area');
+            if(db.notice && db.notice.length > 0) {
+                noticeArea.innerHTML = db.notice.map(n => `
+                    <div class="notice-item">
+                        <span class="notice-date">[${n.date}]</span>
+                        <span class="notice-content">${n.content}</span>
+                    </div>
+                `).join('');
+            } else { noticeArea.innerText = "📢 등록된 공지사항이 없습니다."; }
+            
+            // 2. 드롭다운 목록 생성
+            const select = document.getElementById('ment-select');
+            db.ment.filter(m => m.type).forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
+            });
+
+            // 3. 실적 현황 출력
+            document.getElementById('perf-list').innerHTML = db.perf.map(p => 
+                `<tr><td>${p.date}</td><td>${p.val}건</td><td>${p.rate}</td></tr>`
+            ).join('');
+        } catch(e) { 
+            document.getElementById('notice-area').innerText = "❌ 연결 실패. API 주소 또는 시트 이름을 확인하세요."; 
+            console.error(e);
+        }
+    }
+
+    function updateMentBox(val) {
+        const box = document.getElementById('ment-display');
+        const item = db.ment.find(m => m.type === val);
+        if(item && item.talk) {
+            box.innerText = item.talk; box.style.display = 'block';
+        } else { box.style.display = 'none'; }
+    }
+
+    function searchGuideData() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        if(!q) { display.innerText = "번호나 문자를 입력하면 정보가 표시됩니다."; return; }
+        const found = db.ment.find(m => String(m.num).includes(q) || m.key.toLowerCase().includes(q) || m.pos.toLowerCase().includes(q));
+        if(found) {
+            display.innerHTML = `<b style="color:var(--red);">[${found.num}] ${found.key}</b><br><p style="margin-top:10px;">${found.pos}</p>`;
+        } else { display.innerText = "검색 결과가 없습니다."; }
+    }
+    window.onload = loadData;
+</script>
+</body>
+</html>
