@@ -1,31 +1,121 @@
-<style>
-    /* ✅ 모바일에서도 2열 구조를 강제 유지하여 테이블이 내려가지 않게 함 */
-    .main-layout { 
-        display: grid; 
-        grid-template-columns: 1fr 1.2fr; /* 왼쪽보다 오른쪽(실적)을 약간 더 넓게 */
-        gap: 8px; 
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>카드 상담 통합 가이드</title>
+    <style>
+        :root { --blue: #007bff; --red: #ff4d4f; --bg: #f2f4f7; --yellow: #fff9c4; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 5px; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* 공지사항 콤팩트화 */
+        .notice-container { 
+            background: var(--yellow); border: 1.5px solid #fbc02d; 
+            border-radius: 8px; height: 85px; display: flex; flex-direction: column;
+            padding: 8px; margin-bottom: 5px; flex-shrink: 0;
+        }
+        .notice-list { overflow-y: auto; flex-grow: 1; font-size: 0.8rem; -webkit-overflow-scrolling: touch; }
+        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 2px 0; display: flex; }
+        .notice-date { color: #777; min-width: 60px; font-weight: bold; }
+
+        /* ✅ 모바일 가로 2단 강제 고정 */
+        .main-layout { display: flex; gap: 5px; flex: 1; overflow: hidden; }
+        .panel { 
+            background: white; border-radius: 10px; padding: 10px; 
+            border: 1px solid #e1e4e8; display: flex; flex-direction: column; flex: 1; min-width: 0;
+        }
+        .panel-right { flex: 1.1; } 
+
+        h2 { font-size: 0.85rem; color: #222; border-bottom: 2px solid var(--blue); padding-bottom: 3px; margin: 0 0 8px 0; }
+        .select-box { width: 100%; padding: 6px; border-radius: 6px; font-size: 0.85rem; border: 1.5px solid #ddd; }
+        
+        /* 멘트 박스 */
+        .ment-box { background: #f8fbff; border: 1.5px solid var(--blue); padding: 8px; border-radius: 6px; flex: 1; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; margin-top: 5px; overflow-y: auto; }
+        
+        .search-input { width: 100%; padding: 6px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 4px; border: 1.5px solid #ddd; box-sizing: border-box; }
+        .guide-box { background: #fff5f5; border-left: 3px solid var(--red); padding: 8px; border-radius: 6px; height: 60px; overflow-y: auto; margin-bottom: 8px; font-size: 0.8rem; }
+        
+        /* 실적 현황 */
+        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f9fafb; padding: 4px; border-bottom: 1px solid #edf0f2; position: sticky; top: 0; font-size: 0.7rem; }
+        td { padding: 4px; border-bottom: 1px solid #f1f3f5; text-align: center; font-size: 0.75rem; }
+        .cum-cell { font-weight: bold; color: var(--blue); }
+
+        /* ✅ 음성 저장 버튼 디자인 */
+        .voice-btn { width: 100%; padding: 8px; background: var(--blue); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 0.85rem; margin-top: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="notice-container">
+    <div id="notice-list" class="notice-list">연결 중...</div>
+</div>
+
+<div class="main-layout">
+    <div class="panel">
+        <h2>📑 상담 멘트</h2>
+        <select id="ment-select" class="select-box" onchange="updateMentBox(this.value)">
+            <option value="">-- 선택 --</option>
+        </select>
+        <div id="ment-display" class="ment-box">멘트를 선택하세요</div>
+    </div>
+
+    <div class="panel panel-right">
+        <h2>📊 실적 & 가이드</h2>
+        <input type="text" id="keyword" class="search-input" placeholder="번호 입력..." onkeyup="searchGuide()">
+        <div id="guide-display" class="guide-box">가이드 표시</div>
+
+        <div class="perf-area">
+            <table>
+                <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
+                <tbody id="perf-list"></tbody>
+            </table>
+        </div>
+        <button class="voice-btn" onclick="startVoice()">🎙️ 실적 말로 저장</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    let db = { notice: [], ment: [], perf: [] };
+
+    async function loadData() {
+        try {
+            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
+            db = res;
+            document.getElementById('notice-list').innerHTML = db.notice.map(n => `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('');
+            const select = document.getElementById('ment-select');
+            db.ment.filter(m => m.type).forEach(m => { const opt = document.createElement('option'); opt.value = m.type; opt.innerText = m.type; select.appendChild(opt); });
+            let cum = 0;
+            document.getElementById('perf-list').innerHTML = db.perf.map(p => {
+                const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
+                cum += val;
+                return `<tr><td>${p.date}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
+            }).join('');
+        } catch(e) { document.getElementById('notice-list').innerText = "❌ 연결 실패"; }
     }
 
-    /* ✅ 전체적인 높이와 글자 크기를 줄여 콤팩트하게 변경 */
-    .panel { 
-        padding: 10px; 
-        height: 480px; /* 높이를 더 줄임 */
-        font-size: 0.85rem; 
+    function updateMentBox(v) {
+        const box = document.getElementById('ment-display');
+        const item = db.ment.find(m => m.type === v);
+        box.innerText = item ? item.talk : "멘트를 선택하세요";
+        box.style.display = 'block';
     }
 
-    h2 { font-size: 0.9rem; margin-bottom: 8px; }
-
-    /* 실적 테이블을 더 작고 촘촘하게 */
-    .perf-area { max-height: 200px; }
-    td, th { padding: 6px 4px; font-size: 0.75rem; }
-
-    /* 공지사항 높이 최소화 */
-    .notice-container { height: 90px; padding: 8px; margin-bottom: 10px; }
-
-    /* 모바일에서 글자가 깨지지 않게 방지 */
-    @media (max-width: 480px) {
-        body { padding: 5px; }
-        .main-layout { grid-template-columns: 1fr 1.1fr; gap: 5px; }
-        .panel { padding: 8px; }
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        const found = db.ment.find(m => String(m.num).includes(q) || m.key.toLowerCase().includes(q));
+        display.innerHTML = found ? `<b>[${found.num}] ${found.key}</b><p style="margin:2px 0;">${found.pos}</p>` : "결과 없음";
     }
-</style>
+
+    // 🎙️ 음성 인식 기능 기초
+    function startVoice() {
+        alert("음성 저장 기능을 연결하려면 구글 시트 쓰기 권한 설정이 필요합니다. 곧 코드를 드릴게요!");
+    }
+
+    window.onload = loadData;
+</script>
+</body>
+</html>
