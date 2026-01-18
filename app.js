@@ -25,26 +25,27 @@ async function loadPerformance() {
         data.forEach(row => {
             const tr = document.createElement("tr");
             
-            // [날짜 처리 로직 강화]
-            let rawDate = String(row.date);
-            let displayDate = rawDate;
-
-            if (rawDate.includes("Jan")) displayDate = "01/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Feb")) displayDate = "02/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Mar")) displayDate = "03/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Apr")) displayDate = "04/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("May")) displayDate = "05/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Jun")) displayDate = "06/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Jul")) displayDate = "07/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Aug")) displayDate = "08/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Sep")) displayDate = "09/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Oct")) displayDate = "10/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Nov")) displayDate = "11/" + rawDate.split(" ")[2];
-            else if (rawDate.includes("Dec")) displayDate = "12/" + rawDate.split(" ")[2];
-            // 만약 시트 날짜가 "2026-01-18" 형식이면 "01/18"로 변경
-            else if (rawDate.includes("-")) {
-                const parts = rawDate.split("-");
-                displayDate = parts[1] + "/" + parts[2].substring(0,2);
+            // [날짜 처리 로직 최종 강화]
+            let displayDate = "-";
+            if (row.date) {
+                try {
+                    const dateObj = new Date(row.date);
+                    // 날짜가 유효한지 확인 후 월/일 추출
+                    if (!isNaN(dateObj.getTime())) {
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        displayDate = `${month}/${day}`;
+                    } else {
+                        // 날짜 객체 생성 실패 시 문자열에서 직접 추출 (Sun Jan 18... 대응)
+                        const parts = String(row.date).split(" ");
+                        if (parts.length >= 3) {
+                            const monthMap = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" };
+                            displayDate = `${monthMap[parts[1]] || "01"}/${parts[2].padStart(2, '0')}`;
+                        }
+                    }
+                } catch (e) {
+                    displayDate = String(row.date).substring(5, 10); // 최후의 수단
+                }
             }
 
             tr.innerHTML = `
@@ -95,4 +96,5 @@ document.getElementById("btn-generate").onclick = () => {
 };
 
 window.onload = init;
+
 
