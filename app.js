@@ -1,5 +1,5 @@
 const SHEET_API_URL =
-  "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjIfS0GETl9l4R3ZZCo_NwYX6WC11c54mRBQ_jGum5GtKONydQUjUCO_8-Fse5s0mhrFnGhFkxEnjnVka-iR6RQVQGEcLfCcF9-LQtP2UesRe1808MXyl8Qtdc-5WsyTlkGUioC0xF_monSm676mRcQZOSxlJJzfslt9-5mMPX8tM6N1JH1NU5US6dPOqPPMtH3jmcblTs0AHba1YJ7XV8Andqj4LinPkqOKycrw02cVss1gYpthle1Rt3IYrOjWVKX88J0imgk6jpZOgk6FdqIxLm-X93ckGDn-M5a&lib=MM7SRkiSWCQevGc_B4wXr4uM1RqYclKxX";
+  "https://script.google.com/macros/s/AKfycbzdqUoV2pjnG2aYWP4NASY-isAjbTDibX5GeMS5gmOfcp-06ua8Z1A2vkcAJVh8STpo6w/exec";
 
 const $ = (id) => document.getElementById(id);
 
