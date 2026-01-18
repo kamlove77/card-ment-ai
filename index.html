@@ -10,69 +10,30 @@
         
         .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* ✅ 공지사항 박스: 5줄 이상 보이도록 높이를 230px로 조정 */
-        .notice-container { 
-            background: var(--yellow-bg); 
-            border: 1.5px solid #ffe58f; 
-            border-radius: 12px; 
-            height: 230px; 
-            padding: 12px; 
-            flex-shrink: 0; 
-            display: flex; 
-            flex-direction: column; 
-            box-sizing: border-box; 
-        }
+        /* ✅ 공지사항: 5줄 이상 확보 (230px) */
+        .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 230px; padding: 12px; flex-shrink: 0; display: flex; flex-direction: column; box-sizing: border-box; }
         .notice-title { font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 0.9rem; }
         .notice-list { overflow-y: auto; flex: 1; }
         
-        /* ✅ 공지사항 아이템: 점선 구분선 */
-        .notice-item { 
-            display: flex; 
-            align-items: flex-start; 
-            padding: 10px 0; 
-            border-bottom: 1.5px dashed #ffd666 !important; 
-            width: 100%; 
-            box-sizing: border-box; 
-        }
+        .notice-item { display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1.5px dashed #ffd666 !important; width: 100%; box-sizing: border-box; }
         .notice-item:last-child { border-bottom: none !important; }
         
-        /* ✅ 날짜: 흰색 박스 제거 (텍스트만 깔끔하게) */
-        .notice-date { 
-            color: #856404; 
-            font-weight: bold; 
-            margin-right: 12px; 
-            font-size: 0.85rem; 
-            flex-shrink: 0; 
-            background: none !important; 
-            border: none !important; 
-            padding: 2px 0 !important; 
-        }
-        
-        /* ✅ 공지 내용: 자동 줄바꿈 및 글자 튀어나옴 방지 */
-        .notice-content { 
-            font-size: 0.9rem; 
-            line-height: 1.5; 
-            color: #444; 
-            flex: 1; 
-            white-space: normal !important; 
-            word-break: break-all; 
-        }
+        /* ✅ 날짜: 흰 박스 제거 */
+        .notice-date { color: #856404; font-weight: bold; margin-right: 12px; font-size: 0.85rem; flex-shrink: 0; background: none !important; border: none !important; padding: 2px 0 !important; }
+        .notice-content { font-size: 0.9rem; line-height: 1.5; color: #444; flex: 1; white-space: normal !important; word-break: break-all; }
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         
-        /* ✅ 패널 스타일: 깔끔한 회색 톤 */
         .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid var(--border-grey); }
         .panel-blue, .panel-red { border-top: 1.2px solid var(--border-grey); } 
 
         h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; color: #333; }
         
-        /* ✅ 검색창: 튀어나옴 방지 (box-sizing) */
         #keyword { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 8px; border: 1.2px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; }
         
         .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
         .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 65px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; }
         
-        /* ✅ 테이블 스타일 */
         .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { background: #f1f3f5 !important; color: #495057 !important; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #dee2e6; font-weight: bold; }
@@ -81,7 +42,6 @@
 
         .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
         
-        /* 스크롤바 디자인 */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
@@ -121,15 +81,21 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let db = { notice: [], ment: [], perf: [] };
 
+    // ✅ 날짜 형식을 "MM/DD"로 변환하는 함수 추가
+    function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr; // 변환 실패 시 원본 반환
+        return `${d.getMonth() + 1}/${d.getDate()}`;
+    }
+
     async function loadData() {
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
             
-            // ✅ 날짜 텍스트만 깔끔하게 출력
             document.getElementById('notice-list').innerHTML = res.notice.map(n => `
                 <div class="notice-item">
-                    <span class="notice-date">${n.date}</span>
+                    <span class="notice-date">${formatDate(n.date)}</span>
                     <span class="notice-content">${n.content}</span>
                 </div>
             `).join('');
@@ -144,7 +110,8 @@
             document.getElementById('perf-list').innerHTML = res.perf.map(p => {
                 const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
                 cum += val;
-                return `<tr><td>${p.date}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
+                // ✅ 테이블 날짜도 월/일로 표시
+                return `<tr><td>${formatDate(p.date)}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
             }).join('');
         } catch(e) { console.error(e); }
     }
