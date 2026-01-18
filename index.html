@@ -21,7 +21,6 @@
             align-items: center;
         }
 
-        /* 상단 네비게이션 */
         .nav-bar {
             display: flex;
             gap: 10px;
@@ -39,7 +38,6 @@
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: 0.3s;
         }
 
         .nav-btn.active {
@@ -47,7 +45,6 @@
             color: white;
         }
 
-        /* 메인 컨텐츠 영역 */
         .content-section {
             display: none;
             width: 100%;
@@ -56,41 +53,38 @@
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-sizing: border-box;
         }
 
         .content-section.active {
             display: block;
         }
 
-        /* 실적 합계 대시보드 */
+        /* [중요] 누적 합계 박스 스타일 */
         .summary-box {
-            background: #fff;
+            background: #f8f9fa;
             border: 2px solid var(--primary-color);
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         .summary-title {
             font-weight: bold;
             color: var(--primary-color);
             margin-bottom: 8px;
-            font-size: 1.1rem;
         }
 
         .summary-value {
             font-weight: bold;
-            font-size: 2rem;
+            font-size: 2.2rem;
             color: #333;
         }
 
-        /* 테이블 스타일 */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
         }
 
         th {
@@ -105,49 +99,44 @@
             text-align: center;
         }
 
-        /* 입력 및 선택 도구 */
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        select, input, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        .btn-main {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .btn-main { width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        
         .info-display {
-            background: #f8f9fa;
+            background: #fff9e6;
             padding: 15px;
             border-radius: 8px;
-            margin-top: 15px;
-            border-left: 5px solid var(--primary-color);
+            border-left: 5px solid #ffc107;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
     <div class="nav-bar">
-        <button class="nav-btn active
+        <button class="nav-btn active" onclick="showPage('page-home')">🎫 상담 멘트 / 가이드</button>
+        <button class="nav-btn" onclick="showPage('page-perf')">📊 실적 히스토리</button>
+    </div>
+
+    <div id="page-home" class="content-section active">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h3>📝 멘트 생성기</h3>
+                <div class="input-group">
+                    <label>상황 유형</label>
+                    <select id="type"><option>로딩 중...</option></select>
+                </div>
+                <button id="btn-generate" class="btn-main">멘트 만들기</button>
+                <textarea id="ment-output" rows="8" style="margin-top:10px;" placeholder="결과가 여기 표시됩니다."></textarea>
+            </div>
+
+            <div>
+                <h3>🔍 가이드 조회</h3>
+                <div class="input-group">
+                    <input type="text" id="quick-search" placeholder="화면번호 또는 키워드">
+                </div>
+                <button id="btn-search" class="btn-main" style="background:#444;">정보 확인하기</button>
+                <div class="info-display">
+                    <p>
