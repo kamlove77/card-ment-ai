@@ -2,13 +2,14 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카드 상담 통합 시스템</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 상담 통합 가이드</title>
     <style>
         :root { --blue: #007bff; --red: #ff4d4f; --bg: #f0f2f5; --yellow: #fff9c4; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
 
-        /* 공지사항 전광판 (날짜 + 내용) */
+        /* 공지사항 전광판 스크롤 */
         .notice-container { 
             background: var(--yellow); border-left: 5px solid #fbc02d; 
             margin-bottom: 20px; border-radius: 8px; overflow: hidden; position: relative; height: 45px;
@@ -16,114 +17,24 @@
         }
         .notice-scroll {
             white-space: nowrap; position: absolute; padding-left: 100%;
-            animation: marquee 25s linear infinite; font-weight: bold; font-size: 1.05rem;
+            animation: marquee 30s linear infinite; font-weight: bold; font-size: 1.05rem;
         }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-150%); } }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-180%); } }
         .notice-container:hover .notice-scroll { animation-play-state: paused; }
 
         .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 620px; display: flex; flex-direction: column; }
-        h2 { font-size: 1.2rem; border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-top: 0; flex-shrink: 0; }
+        .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 650px; display: flex; flex-direction: column; }
+        h2 { font-size: 1.25rem; border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-top: 0; flex-shrink: 0; }
 
-        /* 왼쪽: 상담 멘트 */
+        /* 왼쪽: 상담 멘트 (드롭다운 + 스크롤) */
         .select-box { width: 100%; padding: 15px; border: 2px solid var(--blue); border-radius: 10px; font-size: 1.1rem; margin-top: 15px; flex-shrink: 0; }
         .ment-box { 
             background: #ffffff; border: 2px solid var(--blue); padding: 25px; border-radius: 12px; 
-            flex-grow: 1; font-size: 1.15rem; line-height: 1.8; white-space: pre-wrap; 
+            flex-grow: 1; font-size: 1.2rem; line-height: 1.8; white-space: pre-wrap; 
             margin-top: 20px; display: none; overflow-y: auto; 
         }
 
-        /* 오른쪽: 가이드 검색 & 스크롤 적용 */
-        .search-input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.1rem; flex-shrink: 0; }
+        /* 오른쪽: 가이드 검색 (긴 내용 스크롤) */
+        .search-input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.1rem; flex-shrink: 0; margin-top: 15px; }
         .guide-box { 
-            background: #fff1f0; border-left: 5px solid var(--red); padding: 20px; border-radius: 10px; 
-            height: 180px; overflow-y: auto; margin-top: 15px; line-height: 1.7; /* 내용 길면 스크롤 발생 */
-        }
-        
-        /* 실적 영역 */
-        .perf-area { margin-top: 30px; flex-grow: 1; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f1f3f5; padding: 10px; border-bottom: 2px solid #dee2e6; position: sticky; top: 0; }
-        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
-    </style>
-</head>
-<body>
-
-<div class="wrapper">
-    <div class="notice-container">
-        <div id="notice-scroll" class="notice-scroll">📢 데이터를 불러오고 있습니다...</div>
-    </div>
-
-    <div class="main-layout">
-        <div class="panel">
-            <h2>📑 상담 멘트 생성기</h2>
-            <select id="ment-select" class="select-box" onchange="showSingleMent(this.value)">
-                <option value="">-- 상황 유형 선택 --</option>
-            </select>
-            <div id="ment-display" class="ment-box"></div>
-        </div>
-
-        <div class="panel">
-            <h2>🔍 화면 가이드</h2>
-            <input type="text" id="keyword" class="search-input" placeholder="화면번호 또는 문자 입력..." onkeyup="searchGuide()">
-            <div id="guide-display" class="guide-box">번호나 문자를 입력하면 정보가 표시됩니다.</div>
-
-            <h2 style="margin-top:30px;">📊 실적 현황</h2>
-            <div class="perf-area">
-                <table>
-                    <thead><tr><th>날짜</th><th>완료</th><th>비율</th></tr></thead>
-                    <tbody id="perf-list"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-    let db = { notice: [], ment: [], perf: [] };
-
-    async function init() {
-        try {
-            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
-            db = res;
-            
-            // ⭐ 공지사항: 날짜 + 내용 조합하여 스크롤
-            const noticeText = db.notice.map(n => `[${n.date}] ${n.content}`).join(' 　　/　　 ');
-            document.getElementById('notice-scroll').innerText = "📢 " + (noticeText || "등록된 공지사항이 없습니다.");
-            
-            const select = document.getElementById('ment-select');
-            db.ment.filter(m => m.type).forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
-            });
-
-            document.getElementById('perf-list').innerHTML = db.perf.map(p => 
-                `<tr><td>${p.date}</td><td>${p.val}건</td><td>${p.rate}</td></tr>`
-            ).join('');
-        } catch(e) { document.getElementById('notice-scroll').innerText = "❌ 연결 실패"; }
-    }
-
-    function showSingleMent(type) {
-        const display = document.getElementById('ment-display');
-        const item = db.ment.find(m => m.type === type);
-        if(item && item.talk) {
-            display.innerText = item.talk;
-            display.style.display = 'block';
-        } else { display.style.display = 'none'; }
-    }
-
-    function searchGuide() {
-        const val = document.getElementById('keyword').value.toLowerCase().trim();
-        const display = document.getElementById('guide-display');
-        if(!val) { display.innerText = "번호나 문자를 입력하면 정보가 표시됩니다."; return; }
-        
-        const found = db.ment.find(m => String(m.num).includes(val) || m.key.toLowerCase().includes(val) || m.pos.toLowerCase().includes(val));
-        if(found) {
-            display.innerHTML = `<b style="color:var(--red); font-size:1.1rem;">[${found.num}] ${found.key}</b><br><p style="margin-top:10px;">${found.pos}</p>`;
-        } else { display.innerText = "검색 결과가 없습니다."; }
-    }
-    window.onload = init;
-</script>
-</body>
-</html>
+            background: #fff1f0; border-left: 5px solid var(--red); padding: 20px;
