@@ -5,17 +5,16 @@
   <title>카드 상담 지원 시스템</title>
   <style>
     body { font-family: 'Malgun Gothic', sans-serif; background:#f0f2f5; margin:0; padding:20px; }
+    
+    /* 최상단 실적 카드 스타일 */
+    .performance-card { 
+      max-width: 1160px; margin: 0 auto 20px auto; 
+      background: #fff; padding: 20px; border-radius: 15px; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-left: 5px solid #28a745; 
+    }
+
     .main-container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
-    <div class="performance-card" style="background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid #28a745;">
-  <h2 style="color: #333; margin-top:0; font-size: 18px; display: flex; align-items: center; gap: 8px;">
-    📊 실적 체크 <span style="font-size: 13px; color: #666; font-weight: normal;">(오늘의 목표: 135콜)</span>
-  </h2>
-  <div style="display: flex; gap: 10px;">
-    <input type="number" id="current-cols" placeholder="현재 완료한 콜수" style="flex: 2; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
-    <button id="btn-check-perf" style="flex: 1; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">확인</button>
-  </div>
-  <div id="perf-result" style="margin-top: 15px; display: none; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold;"></div>
-</div>
+    
     /* 좌측 패널: 멘트 생성 */
     .left-panel { flex: 1; background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     
@@ -24,6 +23,7 @@
     
     h2 { font-size: 18px; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; }
     label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #444; }
+    
     select, textarea, input, button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
     
     textarea { height: 80px; resize: none; border: 1px solid #007bff; }
@@ -44,47 +44,60 @@
 </head>
 <body>
 
-<div class="main-container">
-  <div class="left-panel">
-    <h2>💳 멘트 생성기</h2>
-    <label>상황 유형</label>
-    <select id="type"><option>로딩 중...</option></select>
-    <label>말투 설정</label>
-    <select id="tone">
-      <option value="default">기본형</option>
-      <option value="short">단정형</option>
-      <option value="soft">정중형</option>
-    </select>
-    <label>상세 상황 입력</label>
-    <textarea id="detail" placeholder="상황을 입력하세요."></textarea>
-    <button id="gen" style="margin-top:15px;">멘트 만들기</button>
-    <div id="out"></div>
+  <div class="performance-card">
+    <h2 style="color: #333; border:none; margin-bottom:10px;">📊 오늘의 실적 관리</h2>
+    <div style="display: flex; gap: 10px; align-items: flex-end;">
+      <div style="flex: 2;">
+        <span style="font-size: 13px; color: #666;">현재 완료한 콜수 (목표: 135콜)</span>
+        <input type="number" id="current-cols" placeholder="예: 85">
+      </div>
+      <div style="flex: 1;">
+        <button id="btn-check-perf" style="background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold;">달성 확인</button>
+      </div>
+    </div>
+    <div id="perf-result" style="margin-top: 15px; display: none; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid #eee;"></div>
   </div>
 
-  <div class="right-panel">
-    <h2>📋 업무 가이드 조회</h2>
-    <div class="search-area">
-      <label style="margin-top:0;">화면번호 직접 조회</label>
-      <input type="text" id="quick-search" placeholder="예: 8974">
-      <button id="btn-search">정보 확인하기</button>
+  <div class="main-container">
+    <div class="left-panel">
+      <h2>💳 멘트 생성기</h2>
+      <label>상황 유형</label>
+      <select id="type"><option>로딩 중...</option></select>
+      <label>말투 설정</label>
+      <select id="tone">
+        <option value="default">기본형</option>
+        <option value="short">단정형</option>
+        <option value="soft">정중형</option>
+      </select>
+      <label>상세 상황 입력</label>
+      <textarea id="detail" placeholder="상황을 입력하세요."></textarea>
+      <button id="gen" style="margin-top:15px;">멘트 만들기</button>
+      <div id="out"></div>
     </div>
 
-    <div class="info-box">
-      <span class="info-label">🖥️ 화면번호</span>
-      <div id="view-screen" class="info-value">-</div>
-    </div>
-    <div class="info-box">
-      <span class="info-label">🔍 검색어</span>
-      <div id="view-keywords" class="info-value">-</div>
-    </div>
-    <div class="info-box">
-      <span class="info-label">📌 상세 설명</span>
-      <div id="view-desc" class="info-value" style="min-height: 250px; white-space: pre-wrap;">-</div>
+    <div class="right-panel">
+      <h2>📋 업무 가이드 조회</h2>
+      <div class="search-area">
+        <label style="margin-top:0;">화면번호 직접 조회</label>
+        <input type="text" id="quick-search" placeholder="예: 8974">
+        <button id="btn-search">정보 확인하기</button>
+      </div>
+
+      <div class="info-box">
+        <span class="info-label">🖥️ 화면번호</span>
+        <div id="view-screen" class="info-value">-</div>
+      </div>
+      <div class="info-box">
+        <span class="info-label">🔍 검색어</span>
+        <div id="view-keywords" class="info-value">-</div>
+      </div>
+      <div class="info-box">
+        <span class="info-label">📌 상세 설명</span>
+        <div id="view-desc" class="info-value" style="min-height: 250px; white-space: pre-wrap;">-</div>
+      </div>
     </div>
   </div>
-</div>
 
-<script src="./app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
-
