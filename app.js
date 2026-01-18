@@ -1,5 +1,5 @@
 // 제공해주신 배포 URL을 적용했습니다.
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzOEq506W4mtmrxa2tADs2op-6Pm3N5za76xPKROJQiWpwWafYh5NcghZMsx0qO-DbYtw/exec"; 
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec"; 
 let mentData = [];
 
 async function init() {
@@ -117,6 +117,7 @@ async function loadPerformance() {
 }
 
 window.onload = init;
+
 
 
 
