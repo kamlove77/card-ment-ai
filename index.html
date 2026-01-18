@@ -10,12 +10,12 @@
         
         .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* ✅ 공지사항 박스: 높이를 200px로 확장 */
+        /* ✅ 공지사항 박스: 5줄 이상 보이도록 높이를 230px로 조정 */
         .notice-container { 
             background: var(--yellow-bg); 
             border: 1.5px solid #ffe58f; 
             border-radius: 12px; 
-            height: 200px; 
+            height: 230px; 
             padding: 12px; 
             flex-shrink: 0; 
             display: flex; 
@@ -25,11 +25,11 @@
         .notice-title { font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 0.9rem; }
         .notice-list { overflow-y: auto; flex: 1; }
         
-        /* ✅ 공지사항 아이템: 점선 및 너비 최적화 */
+        /* ✅ 공지사항 아이템: 점선 구분선 */
         .notice-item { 
             display: flex; 
             align-items: flex-start; 
-            padding: 8px 0; 
+            padding: 10px 0; 
             border-bottom: 1.5px dashed #ffd666 !important; 
             width: 100%; 
             box-sizing: border-box; 
@@ -40,18 +40,18 @@
         .notice-date { 
             color: #856404; 
             font-weight: bold; 
-            margin-right: 10px; 
-            font-size: 0.8rem; 
+            margin-right: 12px; 
+            font-size: 0.85rem; 
             flex-shrink: 0; 
             background: none !important; 
             border: none !important; 
             padding: 2px 0 !important; 
         }
         
-        /* ✅ 공지 내용: 자동 줄바꿈 강제 적용 (밖으로 안 나감) */
+        /* ✅ 공지 내용: 자동 줄바꿈 및 글자 튀어나옴 방지 */
         .notice-content { 
-            font-size: 0.85rem; 
-            line-height: 1.4; 
+            font-size: 0.9rem; 
+            line-height: 1.5; 
             color: #444; 
             flex: 1; 
             white-space: normal !important; 
@@ -60,19 +60,19 @@
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         
-        /* ✅ 패널 스타일: 회색 톤 통일 */
+        /* ✅ 패널 스타일: 깔끔한 회색 톤 */
         .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid var(--border-grey); }
         .panel-blue, .panel-red { border-top: 1.2px solid var(--border-grey); } 
 
         h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; color: #333; }
         
-        /* ✅ 검색창: 너비 100% 맞춤 */
+        /* ✅ 검색창: 튀어나옴 방지 (box-sizing) */
         #keyword { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 8px; border: 1.2px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; }
         
         .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
         .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 65px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; }
         
-        /* ✅ 테이블: 연회색 깔끔한 디자인 */
+        /* ✅ 테이블 스타일 */
         .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { background: #f1f3f5 !important; color: #495057 !important; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #dee2e6; font-weight: bold; }
@@ -81,7 +81,7 @@
 
         .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
         
-        /* 스크롤바 최적화 */
+        /* 스크롤바 디자인 */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
@@ -90,7 +90,7 @@
 <div class="wrapper">
     <div class="notice-container">
         <div class="notice-title">📢 공지사항</div>
-        <div id="notice-list" class="notice-list">데이터 로딩 중...</div>
+        <div id="notice-list" class="notice-list">데이터 불러오는 중...</div>
     </div>
     
     <div class="main-layout">
@@ -126,7 +126,7 @@
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
             
-            // ✅ 날짜 박스 없는 버전으로 렌더링
+            // ✅ 날짜 텍스트만 깔끔하게 출력
             document.getElementById('notice-list').innerHTML = res.notice.map(n => `
                 <div class="notice-item">
                     <span class="notice-date">${n.date}</span>
