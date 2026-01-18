@@ -41,13 +41,23 @@ async function loadNotice() {
                 const div = document.createElement("div");
                 div.className = "notice-item";
                 
-                // [수정] 시트 컬럼명이 '날짜'이므로 item.날짜 또는 item.date를 확인
-                const dateVal = item.날짜 || item.date;
-                const dateLabel = (dateVal && dateVal !== "undefined") ? `[${dateVal}] ` : "";
+                // --- [날짜 형식 깔끔하게 만들기] ---
+                let dateLabel = "";
+                const rawDate = item.날짜 || item.date;
                 
-                // [수정] 시트 컬럼명이 '공지내용'이므로 item.공지내용 또는 item.content를 확인
+                if (rawDate && rawDate !== "undefined") {
+                    const d = new Date(rawDate);
+                    // 날짜가 정상적이라면 "1/19" 형태로 변환
+                    if (!isNaN(d.getTime())) {
+                        dateLabel = `[${d.getMonth() + 1}/${d.getDate()}] `;
+                    } else {
+                        // 날짜 형식이 아니면(글자 등) 있는 그대로 표시
+                        dateLabel = `[${rawDate}] `;
+                    }
+                }
+                // ---------------------------------
+
                 const contentVal = item.공지내용 || item.content || "";
-                
                 div.innerText = `• ${dateLabel}${contentVal}`; 
                 container.appendChild(div);
             });
@@ -127,5 +137,6 @@ async function loadPerformance() {
 }
 
 window.onload = init;
+
 
 
