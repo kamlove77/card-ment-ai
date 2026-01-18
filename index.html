@@ -5,143 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 스마트 가이드</title>
     <style>
-        /* 기본 레이아웃 */
-        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
+        /* 기본 레이아웃 및 밝은 배경 */
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f8f9fa; margin: 0; padding: 15px; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; }
         
-        /* [수정] 상단 정보 바 - 흐르는 효과 제거 및 정적 리스트 구조 */
+        /* [수정] 상단 공지 바 - 밝은 파란색 계열로 변경 */
         .top-info-bar { 
             display: flex; 
-            align-items: flex-start; 
-            background: #333; 
-            color: white; 
-            padding: 15px 20px; 
-            border-radius: 8px; 
-            margin-bottom: 15px; 
-            font-size: 0.95rem; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            align-items: stretch; 
+            background: #ffffff; 
+            border: 2px solid #e1e4e8;
+            color: #333; 
+            padding: 0; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
+        
+        /* 오늘 날짜 영역 */
         #today-date { 
+            background: #eef5ff;
+            color: #007bff;
             font-weight: bold; 
-            border-right: 1px solid #555; 
-            padding-right: 20px; 
-            margin-right: 20px;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid #e1e4e8;
             white-space: nowrap; 
-            color: #007bff; /* 날짜 색상 포인트 */
         }
+
+        /* 공지사항 컨테이너 */
         #notice-container { 
             flex: 1; 
-            line-height: 1.6;
+            padding: 10px 20px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        .notice-item {
-            display: block;
-            margin-bottom: 5px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
+
+        /* [핵심] A열(날짜)과 B열(내용)을 구분하는 행 스타일 */
+        .notice-row {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px dashed #f0f0f0;
         }
-        .notice-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .notice-row:last-child { border-bottom: none; }
+
+        /* A열: 날짜 칸 */
+        .col-date {
+            width: 70px;
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        /* B열: 내용 칸 */
+        .col-content {
+            flex: 1;
+            color: #333;
+            font-weight: 500;
+            padding-left: 10px;
+        }
 
         /* 네비게이션 탭 */
         .nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        .nav button { flex: 1; padding: 15px; border: none; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s; }
-        .nav button.active { background: #007bff; color: white; }
+        .nav button { flex: 1; padding: 15px; border: 1px solid #e1e4e8; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; transition: 0.2s; color: #666; }
+        .nav button.active { background: #007bff; color: white; border-color: #007bff; box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
 
-        /* 메인 컨텐츠 레이아웃 */
+        /* 메인 컨텐츠 */
         .content { display: none; }
         .content.active { display: block; }
         .flex-row { display: flex; gap: 20px; align-items: flex-start; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; min-width: 320px; }
+        .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e1e4e8; flex: 1; min-width: 320px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
 
-        /* 입력 및 결과창 스타일 */
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
+        /* 입력 및 결과창 */
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .btn-blue { background: #007bff; color: white; }
-        .btn-black { background: #333; color: white; }
-        .result-box { background: #fff9e6; padding: 15px; border-radius: 8px; border-left: 5px solid #ffc107; margin-top: 15px; min-height: 150px; font-size: 0.95rem; }
+        .btn-blue:hover { background: #0056b3; }
+        .btn-gray { background: #6c757d; color: white; }
         
-        /* 실적 요약 테이블 */
-        .summary { background: #e7f3ff; border: 2px solid #007bff; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
-        .summary-val { font-size: 2.5rem; font-weight: bold; color: #007bff; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
-        th { background: #28a745; color: white; padding: 12px; }
+        .result-box { background: #fdfdfd; padding: 15px; border-radius: 8px; border: 1px solid #eee; border-left: 5px solid #007bff; margin-top: 15px; min-height: 120px; }
+        
+        /* 실적 테이블 */
+        .summary { background: #f0f7ff; border: 1px solid #d0e3ff; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+        .summary-val { font-size: 2.2rem; font-weight: bold; color: #007bff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f8f9fa; color: #666; padding: 12px; border-bottom: 2px solid #dee2e6; }
         td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
 
-        /* 반응형 설정 */
-        @media (max-width: 900px) { .flex-row { flex-direction: column; } .card { min-width: auto; } }
+        @media (max-width: 900px) { .flex-row { flex-direction: column; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="top-info-bar">
-        <div id="today-date">날짜 로딩...</div>
+        <div id="today-date">로딩 중...</div>
         <div id="notice-container">
-            <div class="notice-item">공지사항을 불러오는 중입니다...</div>
+            <div class="notice-row">공지사항을 불러오고 있습니다.</div>
         </div>
     </div>
 
     <div class="nav">
-        <button id="t1" class="active" onclick="tab('home')">🎫 가이드 & 멘트 생성</button>
-        <button id="t2" onclick="tab('perf')">📊 실적 합계 확인</button>
-    </div>
-
-    <div id="home" class="content active">
-        <div class="flex-row">
-            <div class="card">
-                <h3 style="margin-top:0; color:#333;">🔍 업무 가이드 조회</h3>
-                <input type="text" id="quick-search" placeholder="화면번호 또는 키워드 입력">
-                <button id="btn-search" class="btn btn-black">정보 확인하기</button>
-                <div class="result-box">
-                    <p><strong>화면번호:</strong> <span id="view-screen">-</span></p>
-                    <p><strong>상세내용:</strong></p>
-                    <div id="view-desc" style="white-space:pre-wrap; line-height: 1.6;">-</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-top:0; color:#007bff;">📝 전문 멘트 생성기</h3>
-                <label style="font-size: 0.85rem; font-weight: bold;">상황 유형 선택</label>
-                <select id="type"><option>데이터 로딩 중...</option></select>
-                <button id="btn-generate" class="btn btn-blue">멘트 만들기</button>
-                <textarea id="ment-output" rows="16" style="margin-top: 15px;" placeholder="선택한 유형의 모든 멘트가 이곳에 표시됩니다."></textarea>
-            </div>
-        </div>
-    </div>
-
-    <div id="perf" class="content">
-        <div class="card" style="max-width: 700px; margin: 0 auto;">
-            <h3 style="margin-top:0;">📊 이달의 실적 누적</h3>
-            <div class="summary">
-                <div style="font-weight: bold; margin-bottom: 5px; color: #555;">이번 달 완료 콜수 합계</div>
-                <div class="summary-val"><span id="total-calls">0</span>건</div>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>날짜</th>
-                        <th>콜수</th>
-                        <th>달성률</th>
-                    </tr>
-                </thead>
-                <tbody id="perf-list">
-                    </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script src="./app.js"></script>
-<script>
-    // 탭 전환 기능
-    function tab(id) {
-        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'home') document.getElementById('t1').classList.add('active');
-        else document.getElementById('t2').classList.add('active');
-    }
-</script>
-</body>
-</html>
+        <button id="t1" class="active" onclick="tab('home')">🎫 가이드 & 멘트</button>
