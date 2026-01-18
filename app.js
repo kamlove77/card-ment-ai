@@ -1,5 +1,5 @@
 // 제공해주신 배포 URL을 적용했습니다.
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzAYeP4vweeivikwidpfViXiw0H8L-VS0gEr1sb1be75nI4yrjFMNnwncfJ7dnWC0qFoA/exec"; 
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbx4H9_6o3T0WdGE-yG0CSSt0hJqhH_jlxd7iykRazQznDoQg5DC34j202rnZTuoBxEz8w/exec"; 
 let mentData = [];
 
 async function init() {
@@ -41,32 +41,14 @@ async function loadNotice() {
                 const div = document.createElement("div");
                 div.className = "notice-item";
                 
-                // --- [날짜 형식 깔끔하게 만들기] ---
-                let dateLabel = "";
-                const rawDate = item.날짜 || item.date;
+                // 날짜가 있으면 [날짜] 형태로 표시
+                const datePart = item.date ? `[${item.date}] ` : "";
+                div.innerText = `• ${datePart}${item.content}`; 
                 
-                if (rawDate && rawDate !== "undefined") {
-                    const d = new Date(rawDate);
-                    // 날짜가 정상적이라면 "1/19" 형태로 변환
-                    if (!isNaN(d.getTime())) {
-                        dateLabel = `[${d.getMonth() + 1}/${d.getDate()}] `;
-                    } else {
-                        // 날짜 형식이 아니면(글자 등) 있는 그대로 표시
-                        dateLabel = `[${rawDate}] `;
-                    }
-                }
-                // ---------------------------------
-
-                const contentVal = item.공지내용 || item.content || "";
-                div.innerText = `• ${dateLabel}${contentVal}`; 
                 container.appendChild(div);
             });
-        } else {
-            container.innerHTML = "<div class='notice-item'>현재 등록된 공지가 없습니다.</div>";
         }
-    } catch (e) {
-        console.error("공지 로드 실패:", e);
-    }
+    } catch (e) { console.error(e); }
 }
 // 멘트 유형 드롭다운 업데이트
 function updateTypeDropdown() {
@@ -137,6 +119,7 @@ async function loadPerformance() {
 }
 
 window.onload = init;
+
 
 
 
