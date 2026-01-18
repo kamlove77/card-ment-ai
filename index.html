@@ -5,100 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>카드 상담 가이드</title>
     <style>
-        :root { --blue: #007bff; --bg: #f2f4f7; --yellow: #fff9c4; }
+        :root { --blue: #007bff; --red: #ff4d4f; --bg: #f2f4f7; --yellow: #fff9c4; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 5px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* 공지사항 최적화 */
-        .notice-container { background: var(--yellow); border: 1px solid #fbc02d; border-radius: 8px; height: 80px; padding: 8px; margin-bottom: 5px; flex-shrink: 0; display: flex; flex-direction: column; }
-        .notice-list { overflow-y: auto; flex-grow: 1; font-size: 0.8rem; }
+        /* 공지사항: 노란색 굵은 선 */
+        .notice-container { 
+            background: var(--yellow); border: 2.5px solid #fbc02d; 
+            border-radius: 10px; height: 85px; padding: 8px; margin-bottom: 5px; flex-shrink: 0; display: flex; flex-direction: column; 
+        }
+        .notice-list { overflow-y: auto; flex-grow: 1; font-size: 0.85rem; }
         .notice-item { border-bottom: 1px dotted #d1cca4; padding: 2px 0; display: flex; }
-        .notice-date { color: #777; min-width: 60px; font-weight: bold; }
+        .notice-date { color: #555; min-width: 65px; font-weight: bold; }
 
-        /* ✅ 휴대폰 가로 2단 강제 고정 */
-        .main-layout { display: flex; gap: 5px; flex: 1; overflow: hidden; }
-        .panel { background: white; border-radius: 10px; padding: 10px; border: 1px solid #ddd; display: flex; flex-direction: column; flex: 1; min-width: 0; }
+        /* 가로 2단 강제 고정 */
+        .main-layout { display: flex; gap: 8px; flex: 1; overflow: hidden; }
+        
+        /* 패널 디자인: 선명한 테두리 적용 */
+        .panel { 
+            background: white; border-radius: 12px; padding: 12px; 
+            border: 2px solid #ddd; /* 기본 회색 선 */
+            display: flex; flex-direction: column; flex: 1; min-width: 0; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
 
-        h2 { font-size: 0.85rem; border-bottom: 2px solid var(--blue); margin: 0 0 5px 0; padding-bottom: 3px; }
-        select, input { width: 100%; padding: 5px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.8rem; box-sizing: border-box; }
+        /* 멘트 패널: 굵은 파란색 선 */
+        .panel-blue { border: 2.5px solid var(--blue); }
+        h2 { font-size: 0.95rem; font-weight: bold; border-bottom: 2px solid #eee; margin: 0 0 8px 0; padding-bottom: 4px; }
         
-        .ment-box { background: #f8fbff; border: 1.5px solid var(--blue); padding: 8px; border-radius: 5px; flex: 1; font-size: 0.85rem; line-height: 1.4; overflow-y: auto; margin-top: 5px; white-space: pre-wrap; }
-        .guide-box { background: #fff5f5; border-left: 3px solid #ff4d4f; padding: 5px; height: 50px; overflow-y: auto; margin: 5px 0; font-size: 0.75rem; }
+        /* 가이드 패널: 굵은 빨간색 선 */
+        .panel-red { border: 2.5px solid var(--red); }
+
+        select, input { 
+            width: 100%; padding: 8px; border-radius: 6px; 
+            border: 2px solid #ccc; font-size: 0.9rem; font-weight: bold; box-sizing: border-box; 
+        }
         
-        /* 실적 테이블 */
-        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-        th { background: #f9fafb; position: sticky; top: 0; padding: 3px; border-bottom: 1px solid #ddd; }
-        td { padding: 3px; border-bottom: 1px solid #eee; text-align: center; }
-        .cum-cell { font-weight: bold; color: var(--blue); }
+        /* 멘트 박스: 파란색 테두리 강조 */
+        .ment-box { 
+            background: #f8fbff; border: 2px solid var(--blue); 
+            padding: 10px; border-radius: 8px; flex: 1; 
+            font-size: 0.9rem; line-height: 1.5; overflow-y: auto; 
+            margin-top: 8px; white-space: pre-wrap; color: #111;
+        }
+
+        /* 가이드 박스: 빨간색 배경+선 */
+        .guide-box { 
+            background: #fff5f5; border: 2px solid var(--red); 
+            padding: 8px; height: 60px; overflow-y: auto; 
+            margin: 5px 0; font-size: 0.85rem; border-radius: 8px;
+        }
+        
+        /* 실적 테이블 선명하게 */
+        .perf-area { flex: 1; overflow-y: auto; border: 1.5px solid #eee; border-radius: 8px; margin-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th { background: #f0f4f8; position: sticky; top: 0; padding: 5px; border-bottom: 2px solid #ddd; color: #333; }
+        td { padding: 5px; border-bottom: 1px solid #eee; text-align: center; }
+        .cum-cell { font-weight: bold; color: var(--blue); background-color: #f0f7ff; }
+
+        /* 음성 저장 버튼 */
+        .voice-btn { 
+            background: var(--blue); color: white; border: none; 
+            padding: 10px; border-radius: 8px; font-weight: bold; 
+            font-size: 0.9rem; cursor: pointer; transition: 0.2s;
+        }
+        .voice-btn:active { background: #004494; transform: scale(0.98); }
     </style>
 </head>
 <body>
 
 <div class="notice-container">
-    <div id="notice-list" class="notice-list">데이터 로딩 중...</div>
+    <div id="notice-list" class="notice-list">데이터를 불러오는 중...</div>
 </div>
 
 <div class="main-layout">
-    <div class="panel">
-        <h2>📑 상담 멘트</h2>
-        <select id="ment-select" onchange="updateMentBox(this.value)"><option value="">-- 선택 --</option></select>
-        <div id="ment-display" class="ment-box">멘트를 선택하세요</div>
-    </div>
-    <div class="panel">
-        <h2>📊 실적/가이드</h2>
-        <input type="text" id="keyword" placeholder="검색..." onkeyup="searchGuide()">
-        <div id="guide-display" class="guide-box">가이드 표시</div>
-        <div class="perf-area">
-            <table>
-                <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
-                <tbody id="perf-list"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-    // ⚠️ 여기에 꽃게님의 주소를 꼭 넣어주세요!
-    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-
-    async function loadData() {
-        try {
-            const res = await fetch(API_URL).then(r => r.json());
-            
-            // 공지사항
-            document.getElementById('notice-list').innerHTML = res.notice.map(n => 
-                `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('');
-            
-            // 멘트 선택
-            const select = document.getElementById('ment-select');
-            res.ment.filter(m => m.type).forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
-            });
-
-            // 실적 및 누적
-            let cum = 0;
-            document.getElementById('perf-list').innerHTML = res.perf.map(p => {
-                const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
-                cum += val;
-                return `<tr><td>${p.date}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
-            }).join('');
-
-            window.db = res; // 검색용 데이터 저장
-        } catch(e) { document.getElementById('notice-list').innerText = "❌ 연결 실패 (주소 확인)"; }
-    }
-
-    function updateMentBox(v) {
-        const item = window.db.ment.find(m => m.type === v);
-        document.getElementById('ment-display').innerText = item ? item.talk : "멘트를 선택하세요";
-    }
-
-    function searchGuide() {
-        const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const found = window.db.ment.find(m => String(m.num).includes(q) || m.key.toLowerCase().includes(q));
-        document.getElementById('guide-display').innerHTML = found ? `<b>${found.key}</b><br>${found.pos}` : "결과 없음";
-    }
-    window.onload = loadData;
-</script>
-</body>
-</html>
