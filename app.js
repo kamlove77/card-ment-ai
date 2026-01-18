@@ -1,5 +1,5 @@
 // 제공해주신 배포 URL을 적용했습니다.
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyG3uXw5excmSqtkhLrv2QbHx0s0VRlHV-Nx9zpae7PzMKgp6zrTM13BZB7S8_tTViWGQ/exec"; 
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbx_Je3Ximw_WfHKAGICTETnVWJ5prGIPnygl-qFEK2gkai3TQyubocpyw8cSbrhpswGhQ/exec"; 
 let mentData = [];
 
 async function init() {
@@ -34,18 +34,19 @@ async function loadNotice() {
         const res = await fetch(`${SHEET_API_URL}?mode=notice`);
         const data = await res.json();
         const container = document.getElementById("notice-container");
+        
         if (data && data.length > 0) {
             container.innerHTML = "";
             data.forEach(item => {
                 const div = document.createElement("div");
                 div.className = "notice-item";
-                // date가 "1/18" 처럼 들어오므로 그대로 출력
+                // 이미 code.js에서 "1/18" 형식으로 보내주므로 바로 사용
                 const datePart = item.date ? `[${item.date}] ` : "";
                 div.innerText = `• ${datePart}${item.content}`;
                 container.appendChild(div);
             });
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("공지 로드 에러:", e); }
 }
 // 멘트 유형 드롭다운 업데이트
 function updateTypeDropdown() {
@@ -116,6 +117,7 @@ async function loadPerformance() {
 }
 
 window.onload = init;
+
 
 
 
