@@ -6,17 +6,14 @@
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
         .container { max-width: 1200px; margin: 0 auto; }
-        /* 공지사항 디자인 */
         .top-info-bar { background: #ffffff; border: 1px solid #dcdfe6; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .notice-title { font-size: 1.1rem; font-weight: bold; color: #007bff; margin-bottom: 12px; border-bottom: 2px solid #e7f1ff; padding-bottom: 8px; }
         .notice-row { display: flex; padding: 6px 0; border-bottom: 1px solid #f2f2f2; }
         .col-date { width: 80px; font-weight: bold; color: #666; }
         .col-content { flex: 1; padding-left: 10px; }
-        /* 탭 버튼 디자인 */
         .nav { display: flex; gap: 8px; margin-bottom: 20px; }
         .nav button { flex: 1; padding: 15px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; font-size: 1rem; }
         .nav button.active { background: #007bff !important; color: white !important; }
-        /* 컨텐츠 영역 */
         .content { display: none; }
         .content.active { display: block; }
         .flex-row { display: flex; gap: 20px; }
@@ -35,7 +32,7 @@
 <div class="container">
     <div class="top-info-bar">
         <div class="notice-title">📢 공지사항</div>
-        <div id="notice-container">데이터를 불러오는 중...</div>
+        <div id="notice-container">로딩 중... (안 나오면 F5)</div>
     </div>
 
     <div class="nav">
@@ -56,7 +53,7 @@
             </div>
             <div class="card">
                 <h3 style="color:#007bff;">✍️ 멘트 생성</h3>
-                <select id="sel-type"><option>로딩 중...</option></select>
+                <select id="sel-type"><option value="">선택하세요</option></select>
                 <button onclick="fnMent()" class="btn btn-blue">멘트 생성</button>
                 <textarea id="out-ment" rows="12" style="margin-top:10px;"></textarea>
             </div>
@@ -76,33 +73,46 @@
 </div>
 
 <script>
-    // 1. 구글 URL
+    // 1. 설정 및 변수
     const API = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec";
     let allData = [];
 
-    // 2. 탭 전환 (버튼 클릭 안되는 문제 해결)
+    // 2. 탭 전환 기능 (데이터와 상관없이 무조건 작동하도록 상단 배치)
     function goTab(mode) {
-        document.getElementById('sec-home').style.display = (mode === 'home') ? 'block' : 'none';
-        document.getElementById('sec-perf').style.display = (mode === 'perf') ? 'block' : 'none';
-        document.getElementById('tab-home').className = (mode === 'home') ? 'active' : '';
-        document.getElementById('tab-perf').className = (mode === 'perf') ? 'active' : '';
+        console.log("탭 전환 클릭:", mode);
+        const sHome = document.getElementById('sec-home');
+        const sPerf = document.getElementById('sec-perf');
+        const tHome = document.getElementById('tab-home');
+        const tPerf = document.getElementById('tab-perf');
+
+        if(mode === 'home') {
+            sHome.style.display = 'block';
+            sPerf.style.display = 'none';
+            tHome.classList.add('active');
+            tPerf.classList.remove('active');
+        } else {
+            sHome.style.display = 'none';
+            sPerf.style.display = 'block';
+            tHome.classList.remove('active');
+            tPerf.classList.add('active');
+        }
     }
 
-    // 3. 날짜 변환 (월-일 형식)
-    function fixDate(val) {
-        try {
-            const d = new Date(val);
-            if (!isNaN(d.getTime())) {
-                return (d.getMonth() + 1).toString().padStart(2, '0') + "-" + d.getDate().toString().padStart(2, '0');
-            }
-            return val;
-        } catch (e) { return val; }
+    // 3. 날짜 포맷 (월-일)
+    function fixDate(v) {
+        const d = new Date(v);
+        if(!isNaN(d.getTime())) {
+            return (d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getDate().toString().padStart(2,'0');
+        }
+        return v;
     }
 
-    // 4. 데이터 로드 (로딩 안되는 문제 해결)
+    // 4. 데이터 로드
     async function init() {
         try {
-            // 공지사항
+            console.log("데이터 로드 시작...");
+            
+            // 공지사항 로드
             const r1 = await fetch(API + "?mode=notice");
             const d1 = await r1.json();
             const b1 = document.getElementById("notice-container");
@@ -111,7 +121,7 @@
                 b1.innerHTML += `<div class="notice-row"><div class="col-date">${i.date}</div><div class="col-content">• ${i.content}</div></div>`;
             });
 
-            // 멘트/가이드
+            // 멘트 및 가이드 로드
             const r2 = await fetch(API + "?mode=ment");
             allData = await r2.json();
             const sel = document.getElementById("sel-type");
@@ -119,7 +129,7 @@
             sel.innerHTML = '<option value="">선택하세요</option>';
             ts.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
 
-            // 실적
+            // 실적 로드
             const r3 = await fetch(API + "?mode=perf");
             const d3 = await r3.json();
             const b3 = document.getElementById("list-perf");
@@ -130,19 +140,34 @@
                 b3.innerHTML += `<tr><td>${fixDate(r.date)}</td><td>${r.current}콜</td><td>${r.rate}</td></tr>`;
             });
             document.getElementById("txt-total").innerText = total.toLocaleString();
-
-        } catch (e) { console.error(e); }
+            
+            console.log("데이터 로드 완료!");
+        } catch (e) {
+            console.error("오류 발생:", e);
+            document.getElementById("notice-container").innerHTML = "<b style='color:red'>서버 연결 오류! F5를 눌러주세요.</b>";
+        }
     }
 
+    // 검색 및 멘트 생성 함수
     function fnSearch() {
         const v = document.getElementById("in-search").value.trim().toLowerCase();
-        const f = allData.find(i => String(i.screenNum).toLowerCase() === v || String(i.keywords).includes(v));
+        if(!v) return;
+        const f = allData.find(i => String(i.screenNum).toLowerCase() === v || (i.keywords && i.keywords.includes(v)));
         if(f) {
             document.getElementById("out-num").innerText = f.screenNum;
             document.getElementById("out-desc").innerText = f.description;
-        } else { alert("없음"); }
+        } else { alert("검색 결과가 없습니다."); }
     }
 
     function fnMent() {
         const s = document.getElementById("sel-type").value;
+        if(!s) return alert("유형을 선택하세요.");
         const res = allData.filter(i => i.type === s);
+        document.getElementById("out-ment").value = res.map((i, idx) => `[멘트 ${idx+1}]\n${i.text}`).join("\n\n---\n\n");
+    }
+
+    // 페이지 로드 시 실행
+    window.onload = init;
+</script>
+</body>
+</html>
