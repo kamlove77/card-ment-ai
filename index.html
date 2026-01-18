@@ -1,43 +1,75 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>카드 상담 멘트 생성기</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family: Arial, sans-serif; background:#f5f6f8; padding: 20px; }
-    .wrap { max-width:600px; margin:0 auto; background:#fff; padding:30px; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    h1 { text-align:center; font-size: 24px; margin-bottom: 20px; }
-    label { display: block; margin-top: 15px; font-weight: bold; }
-    select, textarea, button { width:100%; padding:12px; margin-top:8px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-    button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
-    button#clear { background: #6c757d; margin-top: 8px; }
-    .card { border:1px solid #eee; border-radius:8px; padding:15px; margin-top:15px; background: #fafafa; }
-    .pill { display: inline-block; background: #e7f3ff; color: #007bff; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-bottom: 8px; }
+    body { font-family: 'Malgun Gothic', sans-serif; background:#f0f2f5; margin:0; padding:20px; }
+    .main-container { display: flex; gap: 20px; max-width: 1100px; margin: 0 auto; }
+    
+    /* 왼쪽 생성기 영역 */
+    .left-panel { flex: 1.2; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    
+    /* 오른쪽 업무정보 영역 (그려주신 도안 반영) */
+    .right-panel { flex: 0.8; background: #ffffff; padding: 25px; border-radius: 12px; border: 2px solid #007bff; position: sticky; top: 20px; height: fit-content; }
+    
+    h1 { font-size: 22px; color: #333; margin-top: 0; margin-bottom: 20px; text-align: center; }
+    h2 { font-size: 18px; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-top: 0; }
+    
+    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: #555; }
+    select, textarea, button { width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+    
+    textarea { height: 80px; resize: none; }
+    button#gen { background: #007bff; color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 15px; }
+    button#clear { background: #6c757d; color: #fff; border: none; cursor: pointer; margin-top: 8px; }
+    
+    .info-box { margin-bottom: 18px; }
+    .info-label { display: block; font-weight: bold; color: #007bff; margin-bottom: 5px; font-size: 13px; }
+    .info-value { background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #eee; min-height: 20px; font-size: 14px; color: #333; line-height: 1.5; }
+    
+    .card { background: #fdfdfd; border: 1px solid #e1e4e8; padding: 15px; border-radius: 10px; margin-top: 15px; }
+    .pill { display: inline-block; background: #e7f3ff; color: #007bff; padding: 3px 10px; border-radius: 5px; font-size: 12px; margin-bottom: 8px; font-weight: bold; }
+    .copy-btn { background: #28a745; color: white; border: none; padding: 10px; cursor: pointer; font-size: 14px; font-weight: bold; border-radius: 6px; }
+    .copy-btn:hover { background: #218838; }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>카드 상담 멘트 생성기</h1>
 
-  <label>상황 유형</label>
-  <select id="type"><option>데이터 로딩 중...</option></select>
+<div class="main-container">
+  <div class="left-panel">
+    <h1>💳 카드 상담 멘트 생성기</h1>
+    <label>상황 유형</label>
+    <select id="type"><option>데이터 불러오는 중...</option></select>
+    <label>말투 설정</label>
+    <select id="tone">
+      <option value="default">기본형</option>
+      <option value="short">단정형 (~다.)</option>
+      <option value="soft">정중형 (사과 포함)</option>
+    </select>
+    <label>고객 상황 (상세)</label>
+    <textarea id="detail" placeholder="추가 상황을 입력해 보세요."></textarea>
+    <button id="gen">멘트 만들기</button>
+    <button id="clear">초기화</button>
+    <div id="out"></div>
+  </div>
 
-  <label>말투 설정</label>
-  <select id="tone">
-    <option value="default">기본형</option>
-    <option value="short">단정형 (~다.)</option>
-    <option value="soft">정중형 (사과 포함)</option>
-  </select>
-
-  <label>고객 상황</label>
-  <textarea id="detail" placeholder="고객의 구체적인 상황을 입력하세요"></textarea>
-
-  <button id="gen">멘트 만들기</button>
-  <button id="clear">초기화</button>
-
-  <div id="out"></div>
+  <div class="right-panel">
+    <h2>📋 실무 가이드</h2>
+    <div class="info-box">
+      <span class="info-label">화면번호</span>
+      <div id="view-screen" class="info-value">-</div>
+    </div>
+    <div class="info-box">
+      <span class="info-label">검색어</span>
+      <div id="view-keywords" class="info-value">-</div>
+    </div>
+    <div class="info-box">
+      <span class="info-label">상세 설명</span>
+      <div id="view-desc" class="info-value" style="min-height: 250px; white-space: pre-wrap;">-</div>
+    </div>
+  </div>
 </div>
-<script src="./app.js?v=2"></script>
+
+<script src="./app.js"></script>
 </body>
 </html>
