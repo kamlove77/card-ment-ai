@@ -5,110 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>카드 상담 가이드</title>
     <style>
-        :root { --blue: #007bff; --red: #ff4d4f; --bg: #f2f4f7; --yellow-bg: #fffbe6; }
+        :root { --bg: #f2f4f7; --yellow-bg: #fffbe6; --border-grey: #ddd; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         
         .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* 공지사항 전체 박스 */
-.notice-container { 
-    background: #fffbe6; /* 연한 노란색 유지 */
-    border: 1.2px solid #ffe58f; 
-    border-radius: 12px; 
-    padding: 12px; 
-    height: 100px; /* 높이 살짝 조절 */
-    flex-shrink: 0; 
-    box-sizing: border-box;
-}
-
-/* 공지사항 내부 리스트 줄 만들기 */
-.notice-item {
-    display: flex;
-    align-items: center;
-    padding: 8px 4px;
-    border-bottom: 1px dashed #ffd666; /* 점선으로 세련된 구분선 */
-    font-size: 0.85rem;
-}
-
-.notice-item:last-child {
-    border-bottom: none; /* 마지막 줄은 구분선 제거 */
-}
-
-/* 날짜 라벨 포인트 */
-.notice-date {
-    background: #fff;
-    color: #856404;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-right: 10px;
-    border: 1px solid #ffe58f;
-    font-size: 0.75rem;
-    white-space: nowrap;
-}
+        /* ✅ 공지사항 박스 수정 */
+        .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 110px; padding: 12px; flex-shrink: 0; display: flex; flex-direction: column; box-sizing: border-box; }
+        .notice-title { font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 0.9rem; }
+        .notice-list { overflow-y: auto; flex: 1; }
+        
+        /* ✅ 공지사항 점선 및 줄바꿈 처리 */
+        .notice-item { display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1.5px dashed #ffd666 !important; word-break: break-all; }
+        .notice-item:last-child { border-bottom: none !important; }
+        .notice-date { background: #fff; color: #856404; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-right: 10px; border: 1px solid #ffe58f; font-size: 0.75rem; flex-shrink: 0; }
+        .notice-content { font-size: 0.85rem; line-height: 1.4; color: #444; flex: 1; }
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         
-       /* 기본 박스 테두리와 같은 연한 회색으로 통일 */
-.panel { 
-    background: white; 
-    border-radius: 12px; 
-    padding: 15px; 
-    display: flex; 
-    flex-direction: column; 
-    flex: 1; 
-    min-width: 0; 
-    border: 1.2px solid #ddd; 
-}
+        /* ✅ 패널 스타일: 회색 톤으로 변경 */
+        .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid var(--border-grey); }
+        .panel-blue, .panel-red { border-top: 1.2px solid var(--border-grey); } 
 
-/* 윗줄 파란색을 회색(#ddd)으로 변경 */
-.panel-blue { 
-    border-top: 1.2px solid #ddd; 
-} 
-
-/* 윗줄 빨간색을 회색(#ddd)으로 변경 */
-.panel-red { 
-    border-top: 1.2px solid #ddd; 
-}
-
-        h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; }
+        h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; color: #333; }
+        
+        /* ✅ 검색창: 튀어나옴 방지 (box-sizing) */
+        #keyword { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 8px; border: 1.2px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; }
         
         .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
         .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 65px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; }
         
-        /* ✅ 테이블 헤더 색상 강제 제거 및 변경 */
-        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; }
+        /* ✅ 테이블 스타일: 무채색 깔끔하게 */
+        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        
-        th { 
-            background-color: #f1f3f5 !important; /* 강제로 연그레이 적용 */
-            color: #495057 !important;           /* 강제로 어두운 회색 글자 적용 */
-            position: sticky; top: 0; padding: 10px 8px; 
-            border-bottom: 2px solid #dee2e6; font-weight: bold;
-        }
-        /* 키워드 검색창 (input) */
-#keyword { 
-    width: 100%;            /* 박스 가로를 꽉 채우되 */
-    box-sizing: border-box; /* ⭐ 여백(padding) 때문에 튀어나오지 않게 가둠 */
-    padding: 10px;          
-    margin-bottom: 8px;     
-    border: 1.2px solid #ddd; 
-    border-radius: 8px;     
-    font-size: 0.9rem;
-}
+        th { background: #f1f3f5 !important; color: #495057 !important; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #dee2e6; font-weight: bold; }
         td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; color: #333; background-color: #ffffff !important; }
-        
-        /* 누적 데이터 셀 강조 */
-        .cum-cell { font-weight: bold; color: #000 !important; background-color: #f8f9fa !important; }
+        .cum-cell { font-weight: bold; color: #000 !important; background-color: #fafafa !important; }
 
-        .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .voice-btn { background: #007bff; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 <div class="wrapper">
     <div class="notice-container">
-        <div style="font-weight:bold; color:#856404; margin-bottom:5px;">📢 공지사항</div>
-        <div id="notice-list" class="notice-list">데이터 로딩 중...</div>
+        <div class="notice-title">📢 공지사항</div>
+        <div id="notice-list" class="notice-list">데이터 불러오는 중...</div>
     </div>
     <div class="main-layout">
         <div class="panel panel-blue">
@@ -118,7 +59,7 @@
         </div>
         <div class="panel panel-red">
             <h2>📊 실적 및 가이드</h2>
-            <input type="text" id="keyword" placeholder="화면번호/키워드 검색..." style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;" onkeyup="searchGuide()">
+            <input type="text" id="keyword" placeholder="화면번호/키워드 검색..." onkeyup="searchGuide()">
             <div id="guide-display" class="guide-box">가이드 내용 표시</div>
             <div class="perf-area">
                 <table><thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead><tbody id="perf-list"></tbody></table>
@@ -136,13 +77,14 @@
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
-           // loadData 함수 안의 공지사항 렌더링 부분 찾아서 교체
-document.getElementById('notice-list').innerHTML = res.notice.map(n => `
-    <div class="notice-item">
-        <span class="notice-date">${n.date}</span>
-        <span class="notice-content">${n.content}</span>
-    </div>
-`).join('');
+            // ✅ 스크립트에서 공지사항 구조 매칭
+            document.getElementById('notice-list').innerHTML = res.notice.map(n => `
+                <div class="notice-item">
+                    <span class="notice-date">${n.date}</span>
+                    <span class="notice-content">${n.content}</span>
+                </div>
+            `).join('');
+            
             const select = document.getElementById('ment-select');
             select.innerHTML = '<option value="">-- 상황 선택 --</option>';
             res.ment.filter(m => m.type).forEach(m => {
@@ -184,7 +126,3 @@ document.getElementById('notice-list').innerHTML = res.notice.map(n => `
 </script>
 </body>
 </html>
-
-
-
-
