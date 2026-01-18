@@ -78,3 +78,76 @@
 </div>
 
 <div class="main-layout">
+    <div class="panel panel-blue">
+        <h2>📑 상담 멘트 생성기</h2>
+        <select id="ment-select" onchange="updateMentBox(this.value)"><option value="">-- 상황 선택 --</option></select>
+        <div id="ment-display" class="ment-box">상황을 선택해 주세요.</div>
+    </div>
+
+    <div class="panel panel-red">
+        <h2>📊 실적 및 가이드</h2>
+        <input type="text" id="keyword" placeholder="번호 또는 문자 입력..." onkeyup="searchGuide()">
+        <div id="guide-display" class="guide-box">가이드 내용이 여기에 표시됩니다.</div>
+        <div class="perf-area">
+            <table>
+                <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
+                <tbody id="perf-list"></tbody>
+            </table>
+        </div>
+        <button class="voice-btn" onclick="startVoice()">🎙️ 실적 말로 하기</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    let dbData = { notice: [], ment: [], perf: [] };
+
+    async function loadData() {
+        try {
+            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
+            dbData = res;
+            
+            document.getElementById('notice-list').innerHTML = res.notice.map(n => 
+                `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('');
+            
+            const select = document.getElementById('ment-select');
+            res.ment.filter(m => m.type).forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
+            });
+
+            let cum = 0;
+            document.getElementById('perf-list').innerHTML = res.perf.map(p => {
+                const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
+                cum += val;
+                return `<tr><td>${p.date}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
+            }).join('');
+        } catch(e) { document.getElementById('notice-list').innerText = "❌ 데이터 연결 실패"; }
+    }
+
+    function updateMentBox(v) {
+        const item = dbData.ment.find(m => m.type === v);
+        document.getElementById('ment-display').innerText = item ? item.talk : "상황을 선택해 주세요.";
+    }
+
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const found = dbData.ment.find(m => String(m.num).includes(q) || m.key.toLowerCase().includes(q));
+        document.getElementById('guide-display').innerHTML = found ? `<b>[${found.num}] ${found.key}</b><br>${found.pos}` : "결과 없음";
+    }
+
+    function startVoice() {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'ko-KR';
+        recognition.start();
+        document.getElementById('notice-list').innerText = "🎤 말씀하세요... (예: 백 건)";
+        recognition.onresult = (event) => {
+            const val = event.results[0][0].transcript.replace(/[^0-9]/g, '');
+            if (val && confirm(val + "건을 저장할까요?")) { /* 저장 로직 */ alert(val + "건 저장 요청됨!"); }
+            loadData();
+        };
+    }
+    window.onload = loadData;
+</script>
+</body>
+</html>
