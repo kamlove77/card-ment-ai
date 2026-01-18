@@ -1,51 +1,55 @@
 const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyoPZY9kc88IQE5We11u8ysQA4TBhfPgWcPrdY_r2KoIALOCfmrAHWTc-YGubq8oM_E/exec";
-let mentData = []; 
+let mentData = [];
 
-// 1. 초기 데이터 로드
 async function loadInitialData() {
     try {
-        const response = await fetch(`${SHEET_API_URL}?mode=ment`);
-        mentData = await response.json();
-        console.log("전체 데이터 로드 성공:", mentData); 
-    } catch (error) {
-        console.error("데이터 로드 중 오류 발생:", error);
+        console.log("데이터 요청 시작...");
+        const res = await fetch(`${SHEET_API_URL}?mode=ment`);
+        const data = await res.json();
+        
+        if (data.error) {
+            console.error("시트 에러 발생:", data.error);
+            alert("시트 설정 오류: " + data.error);
+            return;
+        }
+
+        mentData = data;
+        console.log("데이터 로드 성공:", mentData.length, "건");
+        
+        // 유형 드롭다운 생성 (데이터가 있을 때만 실행)
+        const typeSelect = document.getElementById("type");
+        if (typeSelect && mentData.length > 0) {
+            const types = [...new Set(mentData.map(item => item.type))];
+            typeSelect.innerHTML = "<option value=''>유형을 선택하세요</option>";
+            types.forEach(t => {
+                const opt = document.createElement("option");
+                opt.value = t; opt.textContent = t;
+                typeSelect.appendChild(opt);
+            });
+        }
+    } catch (e) {
+        console.error("네트워크 또는 JSON 파싱 에러:", e);
+        alert("데이터를 가져오지 못했습니다. URL 배포 상태를 확인하세요.");
     }
 }
 
-// 2. 검색 버튼 클릭 시 실행
+// 가이드 조회 로직 (상세설명 출력 보장)
 document.getElementById("btn-search").onclick = () => {
-    const inputField = document.getElementById("quick-search");
-    const searchInput = inputField.value.trim().toLowerCase();
-    
-    if (!searchInput) {
-        alert("번호(8974) 또는 검색어(문자)를 입력하세요.");
-        return;
-    }
+    const searchInput = document.getElementById("quick-search").value.trim().toLowerCase();
+    if (!searchInput) return;
 
-    // [강화된 검색 로직] 번호(B열) 또는 검색어(C열) 어디에든 포함되면 찾음
-    const found = mentData.find(item => {
-        const screenNum = String(item.screenNum || "").trim().toLowerCase();
-        const keywords = String(item.keywords || "").trim().toLowerCase();
-        return screenNum === searchInput || keywords.includes(searchInput);
-    });
+    const found = mentData.find(item => 
+        String(item.screenNum).trim() === searchInput || 
+        String(item.keywords).trim().toLowerCase().includes(searchInput)
+    );
 
     if (found) {
-        // HTML 요소가 존재하는지 확인 후 데이터 입력
-        const setContent = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = value || "-";
-        };
-
-        // 시트의 열 이름(screenNum, keywords, description)과 정확히 매칭
-        setContent("view-screen", found.screenNum);
-        setContent("view-keywords", found.keywords);
-        setContent("view-desc", found.description);
-        
-        console.log("검색 결과 표시 완료:", found);
+        document.getElementById("view-screen").textContent = found.screenNum || "-";
+        document.getElementById("view-keywords").textContent = found.keywords || "-";
+        document.getElementById("view-desc").textContent = found.description || "-";
     } else {
-        alert(`'${searchInput}'에 일치하는 정보가 시트에 없습니다.`);
+        alert("정보를 찾을 수 없습니다.");
     }
 };
 
 window.onload = loadInitialData;
-
