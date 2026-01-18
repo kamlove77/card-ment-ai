@@ -109,15 +109,24 @@ document.getElementById("btn-search").onclick = () => {
 };
 
 // 6. 멘트 만들기 버튼
+// ... (상단 초기화 로직은 동일)
+
+// 6. 멘트 만들기 버튼 (중복 멘트 모두 표시 버전)
 document.getElementById("btn-generate").onclick = () => {
     const selectedType = document.getElementById("type").value;
     const output = document.getElementById("ment-output");
     if (!selectedType) return alert("유형을 선택하세요.");
 
-    const found = mentData.find(item => String(item.type || "").trim() === selectedType);
-    if (found) {
-        output.value = found.text || "";
+    // find 대신 filter를 사용하여 해당 유형의 모든 데이터를 가져옵니다.
+    const results = mentData.filter(item => String(item.type || "").trim() === selectedType);
+    
+    if (results.length > 0) {
+        // 모든 멘트를 구분선(-----------)으로 나누어 하나의 박스에 표시
+        output.value = results.map((item, index) => `[멘트 ${index + 1}]\n${item.text || ""}`).join("\n\n----------------------\n\n");
+    } else {
+        output.value = "등록된 멘트가 없습니다.";
     }
 };
 
 window.onload = init;
+
