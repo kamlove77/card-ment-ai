@@ -5,50 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 스마트 가이드</title>
     <style>
-        /* 기본 스타일 */
+        /* 기본 스타일 설정 */
         body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
-        .container { max-width: 1100px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
         
         /* 상단 탭 메뉴 */
         .nav { display: flex; gap: 10px; margin-bottom: 20px; }
         .nav button { flex: 1; padding: 15px; border: none; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; }
         .nav button.active { background: #007bff; color: white; }
 
-        /* 컨텐츠 박스 설정 */
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none; }
+        /* 컨텐츠 섹션 */
+        .card { display: none; width: 100%; }
         .card.active { display: block; }
 
-        /* [핵심] 좌우 2단 레이아웃 그리드 */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr; /* 왼쪽보다 오른쪽(멘트창)을 약간 더 넓게 */
-            gap: 20px;
-            align-items: start;
+        /* [중요] 좌우 2단 배치를 위한 Flex 설정 */
+        .flex-container { 
+            display: flex; 
+            gap: 20px; 
+            align-items: flex-start; 
+            justify-content: center;
         }
 
-        /* 화면이 768px보다 작아지면 위아래로 자동 전환 */
-        @media (max-width: 850px) {
-            .main-grid { grid-template-columns: 1fr; }
+        /* 개별 기능 박스 스타일 */
+        .sub-card { 
+            flex: 1; 
+            background: white; 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            min-width: 350px; /* 너무 좁아지지 않게 설정 */
         }
 
-        /* 개별 기능 박스 */
-        .sub-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; }
+        /* 모바일/좁은 화면에서는 위아래로 배치 */
+        @media (max-width: 900px) {
+            .flex-container { flex-direction: column; align-items: stretch; }
+            .sub-card { min-width: auto; }
+        }
 
         /* 합계 대시보드 박스 */
         .summary { background: #e7f3ff; border: 2px solid #007bff; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
         .summary-val { font-size: 2.2rem; font-weight: bold; color: #007bff; }
 
-        /* 입력 도구 스타일 */
+        /* 입력창 및 버튼 디자인 */
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
-        .btn:active { opacity: 0.8; }
         .btn-blue { background: #007bff; color: white; }
         .btn-black { background: #333; color: white; margin-top: 10px; }
 
-        /* 결과 창 스타일 */
-        .result-box { background: #fff9e6; padding: 15px; border-radius: 8px; border-left: 5px solid #ffc107; margin-top: 15px; font-size: 0.95rem; min-height: 150px; }
+        /* 가이드 결과 노란 박스 */
+        .result-box { background: #fff9e6; padding: 15px; border-radius: 8px; border-left: 5px solid #ffc107; margin-top: 15px; font-size: 0.95rem; min-height: 180px; }
         
-        /* 테이블 스타일 */
+        /* 실적 테이블 */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background: #28a745; color: white; padding: 12px; }
         td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
@@ -62,21 +69,9 @@
         <button id="tab2" onclick="openTab('perf')">📊 실적 합계 확인</button>
     </div>
 
-    <div id="home" class="card active" style="background: transparent; box-shadow: none; padding: 0;">
-        <div class="main-grid">
+    <div id="home" class="card active">
+        <div class="flex-container">
             <div class="sub-card">
-                <h3 style="margin-top:0;">🔍 업무 가이드 조회</h3>
+                <h3 style="margin-top:0; color: #007bff;">🔍 업무 가이드 조회</h3>
                 <input type="text" id="quick-search" placeholder="화면번호 또는 키워드 입력">
-                <button id="btn-search" class="btn btn-black">정보 확인하기</button>
-                
-                <div class="result-box">
-                    <p><strong>번호:</strong> <span id="view-screen">-</span></p>
-                    <p><strong>키워드:</strong> <span id="view-keywords">-</span></p>
-                    <p><strong>상세내용:</strong></p>
-                    <div id="view-desc" style="white-space:pre-wrap; line-height: 1.6;">-</div>
-                </div>
-            </div>
-
-            <div class="sub-card">
-                <h3 style="margin-top:0;">📝 멘트 생성기</h3>
-                <label style="font-size: 0.85rem; color: #6
+                <button id="btn-search"
