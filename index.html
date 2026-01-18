@@ -6,179 +6,21 @@
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; }
-        
-        /* 공지사항 바 */
         .top-info-bar { background: #ffffff; border: 1px solid #dcdfe6; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .notice-title { font-size: 1.1rem; font-weight: bold; color: #007bff; margin-bottom: 12px; border-bottom: 2px solid #e7f1ff; padding-bottom: 8px; }
         .notice-row { display: flex; padding: 6px 0; border-bottom: 1px solid #f2f2f2; }
         .col-date { width: 80px; font-weight: bold; color: #666; }
         .col-content { flex: 1; padding-left: 10px; }
-        
-        /* 탭 버튼 */
         .nav { display: flex; gap: 8px; margin-bottom: 20px; }
         .nav button { flex: 1; padding: 15px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; font-size: 1rem; color: #606266; }
         .nav button.active { background: #007bff; color: white; border-color: #007bff; }
-
         .content { display: none; }
         .content.active { display: block; }
         .flex-row { display: flex; gap: 20px; }
         .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #dcdfe6; flex: 1; }
-        
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dcdfe6; border-radius: 6px; box-sizing: border-box; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .btn-blue { background: #007bff; color: white; }
         .btn-gray { background: #909399; color: white; }
-        
-        /* 실적 테이블 */
         .summary { background: #f0f7ff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d0e3ff; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ebeef5; text-align: center; }
-        th { background: #f8f9fa; color: #666; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="top-info-bar">
-        <div class="notice-title">📢 공지사항</div>
-        <div id="notice-container">데이터 로딩 중...</div>
-    </div>
-
-    <div class="nav">
-        <button id="tab-home" class="active" onclick="changeTab('home')">📜 가이드 & 멘트</button>
-        <button id="tab-perf" onclick="changeTab('perf')">📈 실적 통계</button>
-    </div>
-
-    <div id="home-sec" class="content active">
-        <div class="flex-row">
-            <div class="card">
-                <h3>🔍 가이드 조회</h3>
-                <input type="text" id="search-input" placeholder="화면번호 혹은 키워드 입력">
-                <button onclick="doSearch()" class="btn btn-gray">조회하기</button>
-                <div style="margin-top:15px; background:#f9f9f9; padding:15px; border-radius:6px; min-height:100px;">
-                    <strong>번호:</strong> <span id="res-num">-</span><br><br>
-                    <strong>내용:</strong><div id="res-desc" style="white-space:pre-wrap;">-</div>
-                </div>
-            </div>
-            <div class="card">
-                <h3 style="color:#007bff;">✍️ 멘트 생성</h3>
-                <select id="ment-sel"><option>유형 로딩 중...</option></select>
-                <button onclick="doMent()" class="btn btn-blue">멘트 생성</button>
-                <textarea id="ment-txt" rows="12" style="margin-top:10px;" placeholder="선택한 유형의 멘트가 표시됩니다."></textarea>
-            </div>
-        </div>
-    </div>
-
-    <div id="perf-sec" class="content">
-        <div class="card" style="max-width: 600px; margin: 0 auto;">
-            <h3>📊 월간 실적 현황</h3>
-            <div class="summary">
-                <span style="color:#666;">이번 달 총 완료:</span> 
-                <span id="all-total" style="font-size:24px; font-weight:bold; color:#007bff;">0</span>건
-            </div>
-            <table>
-                <thead>
-                    <tr><th>날짜</th><th>콜수</th><th>달성률</th></tr>
-                </thead>
-                <tbody id="p-list"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-    const URL = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec";
-    let dataList = [];
-
-    // [중요] 탭 전환 함수
-    function changeTab(mode) {
-        const homeSec = document.getElementById('home-sec');
-        const perfSec = document.getElementById('perf-sec');
-        const btnHome = document.getElementById('tab-home');
-        const btnPerf = document.getElementById('tab-perf');
-
-        if(mode === 'home') {
-            homeSec.classList.add('active');
-            perfSec.classList.remove('active');
-            btnHome.classList.add('active');
-            btnPerf.classList.remove('active');
-        } else {
-            homeSec.classList.remove('active');
-            perfSec.classList.add('active');
-            btnHome.classList.remove('active');
-            btnPerf.classList.add('active');
-        }
-    }
-
-    // 데이터 불러오기
-    async function loadAll() {
-        try {
-            // 1. 공지사항 로드
-            const nRes = await fetch(URL + "?mode=notice");
-            const nData = await nRes.json();
-            const nBox = document.getElementById("notice-container");
-            nBox.innerHTML = "";
-            nData.forEach(i => {
-                nBox.innerHTML += `<div class="notice-row"><div class="col-date">${i.date}</div><div class="col-content">• ${i.content}</div></div>`;
-            });
-
-            // 2. 멘트/가이드 로드
-            const mRes = await fetch(URL + "?mode=ment");
-            dataList = await mRes.json();
-            const sel = document.getElementById("ment-sel");
-            const types = [...new Set(dataList.map(i => i.type).filter(t => t))];
-            sel.innerHTML = '<option value="">상황 유형을 선택하세요</option>';
-            types.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
-
-            // 3. 실적 로드 (날짜 월-일 표시 적용)
-            const pRes = await fetch(URL + "?mode=perf");
-            const pData = await pRes.json();
-            const pBox = document.getElementById("p-list");
-            let total = 0;
-            pBox.innerHTML = "";
-            
-            pData.forEach(r => {
-                total += parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
-                
-                // 날짜를 "01-18" 형식으로 만들기
-                let d = r.date;
-                if(d && d.includes('T')) d = d.split('T')[0]; // "2026-01-18"
-                if(d && d.includes('-')) {
-                    const parts = d.split('-');
-                    if(parts.length >= 3) d = parts[1] + "-" + parts[2]; // "01-18"
-                }
-                
-                pBox.innerHTML += `<tr><td>${d}</td><td>${r.current}콜</td><td>${r.rate}</td></tr>`;
-            });
-            document.getElementById("all-total").innerText = total.toLocaleString();
-
-        } catch(e) {
-            console.error(e);
-            document.getElementById("notice-container").innerText = "데이터 호출 실패 (새 배포 URL 확인 필요)";
-        }
-    }
-
-    // 가이드 검색 함수
-    function doSearch() {
-        const val = document.getElementById("search-input").value.trim().toLowerCase();
-        if(!val) return alert("검색어를 입력하세요.");
-        const f = dataList.find(i => String(i.screenNum).toLowerCase() === val || String(i.keywords).includes(val));
-        if(f) {
-            document.getElementById("res-num").innerText = f.screenNum;
-            document.getElementById("res-desc").innerText = f.description;
-        } else { alert("결과가 없습니다."); }
-    }
-
-    // 멘트 생성 함수
-    function doMent() {
-        const s = document.getElementById("ment-sel").value;
-        if(!s) return alert("유형을 선택하세요.");
-        const res = dataList.filter(i => i.type === s);
-        document.getElementById("ment-txt").value = res.map((i, idx) => `[멘트 ${idx+1}]\n${i.text}`).join("\n\n---\n\n");
-    }
-
-    // 시작 시 실행
-    window.onload = loadAll;
-</script>
-</body>
-</html>
+        table { width: 100%; border-collapse: collapse; margin-top:
