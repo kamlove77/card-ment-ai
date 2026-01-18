@@ -24,19 +24,21 @@
         .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
         .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 65px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; }
         
-        /* ✅ 테이블 디자인: 촌스러운 색상을 빼고 깔끔하게 변경 */
+        /* ✅ 테이블 헤더 색상 강제 제거 및 변경 */
         .perf-area { flex: 1; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        
         th { 
-            background: #f1f3f5; /* 아주 연한 그레이 */
-            color: #495057; 
+            background-color: #f1f3f5 !important; /* 강제로 연그레이 적용 */
+            color: #495057 !important;           /* 강제로 어두운 회색 글자 적용 */
             position: sticky; top: 0; padding: 10px 8px; 
             border-bottom: 2px solid #dee2e6; font-weight: bold;
         }
-        td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; color: #333; }
         
-        /* 누적 데이터만 살짝 강조 */
-        .cum-cell { font-weight: bold; color: #212529; background-color: #fafafa; }
+        td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; color: #333; background-color: #ffffff !important; }
+        
+        /* 누적 데이터 셀 강조 */
+        .cum-cell { font-weight: bold; color: #000 !important; background-color: #f8f9fa !important; }
 
         .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
@@ -66,7 +68,6 @@
 </div>
 
 <script>
-    // ✅ GAS 배포 후 생성된 URL을 여기에 정확히 입력하세요
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let db = { notice: [], ment: [], perf: [] };
 
