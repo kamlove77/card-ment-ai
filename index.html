@@ -9,35 +9,54 @@
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); line-height: 1.5; }
         .container { max-width: 700px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         
-        /* 공지사항 스타일 */
+        /* 공지사항 */
         .notice-box { background: #fafbfc; border: 1px solid #e0e6ed; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .notice-title { font-weight: bold; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; }
+        .notice-title { font-weight: bold; color: var(--primary); margin-bottom: 8px; }
         #notice-list { max-height: 120px; overflow-y: auto; font-size: 0.9rem; }
-        .notice-item { margin-bottom: 4px; border-bottom: 1px dashed #eee; padding-bottom: 2px; }
 
         /* 네비게이션 */
         .nav { display: flex; gap: 8px; margin-bottom: 20px; }
-        .nav button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #eee; transition: 0.3s; }
+        .nav button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #eee; }
         .nav button.active { background: var(--primary); color: white; }
 
-        .content { display: none; animation: fadeIn 0.3s; }
+        .content { display: none; }
         .content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* 실적 섹션 */
         .stat-card { background: #e7f1ff; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 15px; border: 1px solid #d0e3ff; }
         .stat-val { font-size: 1.8rem; font-weight: bold; color: var(--primary); }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-        th { background: #f8f9fa; padding: 12px; font-size: 0.85rem; border-bottom: 2px solid #dee2e6; }
-        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; }
 
-        /* 가이드 섹션 */
+        /* ⭐ 상담 멘트 창 스타일 ⭐ */
         .search-box { margin-bottom: 15px; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .guide-card { border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 12px; background: #fff; }
-        .guide-header { display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; margin-bottom: 8px; }
-        .screen-num { font-weight: bold; color: var(--primary); }
-        .guide-body { white-space: pre-wrap; font-size: 0.95rem; color: #444; }
+        
+        .guide-card { 
+            border: 2px solid #eef2f6; 
+            padding: 18px; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+            background: #ffffff; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .guide-header { 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 1px solid #f0f0f0; 
+            padding-bottom: 10px; 
+            margin-bottom: 10px; 
+        }
+        .screen-num { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+        .guide-body { 
+            white-space: pre-wrap; 
+            font-size: 1rem; 
+            color: #333; 
+            background: #f9f9f9; 
+            padding: 12px; 
+            border-radius: 6px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -45,19 +64,19 @@
 <div class="container">
     <div class="notice-box">
         <div class="notice-title">📢 실시간 업무 공지</div>
-        <div id="notice-list">데이터를 불러오는 중...</div>
+        <div id="notice-list">로딩 중...</div>
     </div>
 
     <div class="nav">
-        <button id="btn-h" class="active" onclick="showTab('h')">📜 가이드</button>
-        <button id="btn-p" onclick="showTab('p')">📊 실적</button>
+        <button id="btn-h" class="active" onclick="showTab('h')">📜 가이드 & 멘트</button>
+        <button id="btn-p" onclick="showTab('p')">📊 실적 현황</button>
     </div>
 
     <div id="sec-h" class="content active">
         <div class="search-box">
-            <input type="text" id="keyword" placeholder="화면번호 또는 멘트 검색..." onkeyup="searchGuide()">
+            <input type="text" id="keyword" placeholder="화면번호나 멘트 내용으로 검색..." onkeyup="searchGuide()">
         </div>
-        <div id="guide-list">가이드를 로딩 중입니다...</div>
+        <div id="guide-list">데이터를 불러오는 중입니다...</div>
     </div>
 
     <div id="sec-p" class="content">
@@ -66,7 +85,7 @@
             <div class="stat-val"><span id="total-val">0</span>건</div>
         </div>
         <table>
-            <thead><tr><th>날짜</th><th>완료콜수(C)</th><th>달성률</th></tr></thead>
+            <thead><tr><th>날짜</th><th>완료콜수</th><th>달성률</th></tr></thead>
             <tbody id="perf-list"></tbody>
         </table>
     </div>
@@ -87,15 +106,14 @@
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
 
-            // 1. 공지사항 (중복 제거 및 로드)
-            const noticeHtml = res.notice.map(n => `<div class="notice-item"><b>[${n.date}]</b> ${n.content}</div>`).join('');
-            document.getElementById("notice-list").innerHTML = noticeHtml || "공지가 없습니다.";
+            // 1. 공지사항 로드
+            document.getElementById("notice-list").innerHTML = res.notice.map(n => `<div><b>[${n.date}]</b> ${n.content}</div>`).join('') || "공지가 없습니다.";
 
-            // 2. 가이드 (B열 화면번호, E열 멘트)
+            // 2. 가이드 데이터 저장 및 전체 노출
             guideData = res.ment;
-            renderGuides(guideData);
+            renderGuides(guideData); // 페이지 열자마자 바로 멘트 창들을 그려줌
 
-            // 3. 실적 (C열 합산)
+            // 3. 실적 로드
             let sum = 0;
             const perfHtml = res.perf.map(p => {
                 const val = parseInt(String(p.current).replace(/[^0-9]/g, "")) || 0;
@@ -106,24 +124,29 @@
             document.getElementById("total-val").innerText = sum.toLocaleString();
 
         } catch (e) {
-            document.getElementById("notice-list").innerText = "데이터 연결 실패";
+            document.getElementById("guide-list").innerText = "데이터 연결 실패. 스크립트 배포 주소를 확인하세요.";
         }
     }
 
+    // ⭐ 멘트 창을 화면에 만드는 핵심 함수 ⭐
     function renderGuides(data) {
         const container = document.getElementById("guide-list");
-        if(!data.length) { container.innerHTML = "내용이 없습니다."; return; }
+        if(!data || data.length === 0) {
+            container.innerHTML = "표시할 상담 멘트가 없습니다.";
+            return;
+        }
         container.innerHTML = data.map(g => `
             <div class="guide-card">
                 <div class="guide-header">
-                    <span class="screen-num">번호: ${g.screenNum}</span>
-                    <span style="font-size:0.8rem; color:#999;">${g.type}</span>
+                    <span class="screen-num">화면번호: ${g.screenNum}</span>
+                    <span style="font-size:0.85rem; color:#666; background:#eee; padding:2px 8px; border-radius:4px;">${g.type || '일반'}</span>
                 </div>
-                <div class="guide-body">${g.text || "내용 없음"}</div>
+                <div class="guide-body">${g.text || "멘트 내용이 비어있습니다."}</div>
             </div>
         `).join('');
     }
 
+    // 검색 기능 (검색 시 실시간으로 창 필터링)
     function searchGuide() {
         const k = document.getElementById("keyword").value.toLowerCase();
         const filtered = guideData.filter(g => 
