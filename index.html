@@ -136,7 +136,13 @@
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
-            document.getElementById('notice-list').innerHTML = res.notice.map(n => `<div>[${n.date}] ${n.content}</div>`).join('');
+           // loadData 함수 안의 공지사항 렌더링 부분 찾아서 교체
+document.getElementById('notice-list').innerHTML = res.notice.map(n => `
+    <div class="notice-item">
+        <span class="notice-date">${n.date}</span>
+        <span class="notice-content">${n.content}</span>
+    </div>
+`).join('');
             const select = document.getElementById('ment-select');
             select.innerHTML = '<option value="">-- 상황 선택 --</option>';
             res.ment.filter(m => m.type).forEach(m => {
@@ -178,6 +184,7 @@
 </script>
 </body>
 </html>
+
 
 
 
