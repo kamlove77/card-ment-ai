@@ -1,40 +1,49 @@
 const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyNfRKQLL2yMiiXT8aP2e03QfeVfOKFt4QsLw0467NxMnrqegKbufooiowT0W0aIjCgKA/exec";
 let mentData = []; 
 
+// 1. 초기 데이터 로드
 async function loadInitialData() {
     try {
         const response = await fetch(`${SHEET_API_URL}?mode=ment`);
         mentData = await response.json();
-    } catch (e) { console.error("데이터 로드 실패"); }
+        console.log("전체 데이터 로드 성공:", mentData); 
+    } catch (error) {
+        console.error("데이터 로드 중 오류 발생:", error);
+    }
 }
 
-// 업무 가이드 조회 버튼 로직 (번호 또는 검색어 모두 대응)
+// 2. 검색 버튼 클릭 시 실행
 document.getElementById("btn-search").onclick = () => {
-    const searchInput = document.getElementById("quick-search").value.trim().toLowerCase();
+    const inputField = document.getElementById("quick-search");
+    const searchInput = inputField.value.trim().toLowerCase();
     
     if (!searchInput) {
-        alert("화면번호나 검색어(예: 문자)를 입력해주세요.");
+        alert("번호(8974) 또는 검색어(문자)를 입력하세요.");
         return;
     }
 
-    // [핵심] 번호(screenNum) 또는 검색어(keywords) 중 하나라도 일치하는 데이터를 찾습니다.
+    // [강화된 검색 로직] 번호(B열) 또는 검색어(C열) 어디에든 포함되면 찾음
     const found = mentData.find(item => {
-        const screenMatch = String(item.screenNum).trim() === searchInput;
-        const keywordMatch = String(item.keywords).trim().toLowerCase().includes(searchInput);
-        return screenMatch || keywordMatch;
+        const screenNum = String(item.screenNum || "").trim().toLowerCase();
+        const keywords = String(item.keywords || "").trim().toLowerCase();
+        return screenNum === searchInput || keywords.includes(searchInput);
     });
 
     if (found) {
-        // 결과 표시
-        document.getElementById("view-screen").textContent = found.screenNum || "-";
-        document.getElementById("view-keywords").textContent = found.keywords || "내용 없음";
-        document.getElementById("view-desc").textContent = found.description || "상세내용 없음";
+        // HTML 요소가 존재하는지 확인 후 데이터 입력
+        const setContent = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value || "-";
+        };
+
+        // 시트의 열 이름(screenNum, keywords, description)과 정확히 매칭
+        setContent("view-screen", found.screenNum);
+        setContent("view-keywords", found.keywords);
+        setContent("view-desc", found.description);
         
-        // 멘트(E열)도 보여주고 싶다면 추가 (HTML에 id="view-text"가 있는 경우)
-        const textElement = document.getElementById("view-text");
-        if (textElement) textElement.textContent = found.text || "";
+        console.log("검색 결과 표시 완료:", found);
     } else {
-        alert(`'${searchInput}'에 대한 정보를 찾을 수 없습니다.`);
+        alert(`'${searchInput}'에 일치하는 정보가 시트에 없습니다.`);
     }
 };
 
