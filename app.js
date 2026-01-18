@@ -1,55 +1,51 @@
 const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyNfRKQLL2yMiiXT8aP2e03QfeVfOKFt4QsLw0467NxMnrqegKbufooiowT0W0aIjCgKA/exec";
 let mentData = []; 
 
-// 1. 초기 데이터 로드 (실적과 동일한 URL 사용)
+// 1. 초기 데이터 로드 (페이지 접속 시 멘트/가이드 데이터 미리 가져오기)
 async function loadInitialData() {
     try {
         const response = await fetch(`${SHEET_API_URL}?mode=ment`);
         mentData = await response.json();
-        console.log("데이터 로드 성공:", mentData); // 데이터가 잘 오는지 개발자 도구(F12)에서 확인 가능
-        
-        // 드롭다운 설정
+        console.log("가이드 데이터 로드 완료");
+
+        // 드롭다운 메뉴 채우기
         const typeSelect = document.getElementById("type");
         const types = [...new Set(mentData.map(item => item.type))];
         typeSelect.innerHTML = "<option value=''>유형을 선택하세요</option>";
-        types.forEach(type => {
-            const option = document.createElement("option");
-            option.value = type;
-            option.textContent = type;
-            typeSelect.appendChild(option);
+        types.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = t; opt.textContent = t;
+            typeSelect.appendChild(opt);
         });
-    } catch (error) {
-        console.error("데이터 로드 에러:", error);
+    } catch (e) {
+        console.error("데이터 로드 실패:", e);
     }
 }
 
-// 2. 업무 가이드 조회 기능 (오류 수정 포인트)
+// 2. 업무 가이드 조회 (강력한 검색 로직)
 document.getElementById("btn-search").onclick = () => {
-    // 입력창의 ID가 'quick-search'인지 확인하세요
-    const searchInput = document.getElementById("quick-search").value.trim(); 
+    // 입력창(quick-search)에서 값을 가져옵니다.
+    const searchInput = document.getElementById("quick-search").value.trim();
     
-    if (!searchInput) {
-        alert("화면번호를 입력해주세요.");
+    // 만약 입력값이 없거나 '문자' 같은 기본값이면 경고
+    if (!searchInput || searchInput === "문자") {
+        alert("화면번호(예: 8974)를 정확히 입력해주세요.");
         return;
     }
 
-    // [핵심] 숫자/문자 차이와 앞뒤 공백을 완전히 무시하고 검색합니다.
-    const found = mentData.find(item => {
-        const sheetValue = String(item.screenNum).trim();
-        return sheetValue === String(searchInput);
-    });
+    // 시트의 데이터(screenNum)와 입력값을 모두 문자로 바꿔서 공백 없이 비교
+    const found = mentData.find(item => String(item.screenNum).trim() === String(searchInput));
 
     if (found) {
-        // 결과창 ID들이 index.html과 일치하는지 확인
-        document.getElementById("view-screen").textContent = found.screenNum || "-";
-        document.getElementById("view-keywords").textContent = found.keywords || "-";
-        document.getElementById("view-desc").textContent = found.description || "-";
+        document.getElementById("view-screen").textContent = found.screenNum;
+        document.getElementById("view-keywords").textContent = found.keywords;
+        document.getElementById("view-desc").textContent = found.description;
     } else {
-        alert(`'${searchInput}' 번호는 가이드 목록에 없습니다.`);
+        alert(`'${searchInput}' 번호에 대한 가이드를 찾을 수 없습니다.\n시트의 'card-ment-db' 탭 B열을 확인해주세요.`);
     }
 };
 
-// 실적 로드 함수 (이미 잘 된다고 하신 기능)
+// 3. 실적 로드 함수 (이미 잘 작동하는 기능)
 async function loadPerformance() {
     const listBody = document.getElementById("perf-list");
     listBody.innerHTML = "<tr><td colspan='4'>로딩 중...</td></tr>";
@@ -59,12 +55,7 @@ async function loadPerformance() {
         listBody.innerHTML = "";
         data.forEach(row => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${row.date}</td>
-                <td>${row.current}콜</td>
-                <td style="font-weight:bold;">${row.rate}</td>
-                <td>${row.memo || "-"}</td>
-            `;
+            tr.innerHTML = `<td>${row.date}</td><td>${row.current}콜</td><td>${row.rate}</td><td>${row.memo || "-"}</td>`;
             listBody.appendChild(tr);
         });
     } catch (e) {
