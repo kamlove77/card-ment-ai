@@ -15,9 +15,27 @@
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         
-        .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid #ddd; }
-        .panel-blue { border-top: 5px solid var(--blue); } 
-        .panel-red { border-top: 5px solid var(--red); }   
+       /* 기본 박스 테두리와 같은 연한 회색으로 통일 */
+.panel { 
+    background: white; 
+    border-radius: 12px; 
+    padding: 15px; 
+    display: flex; 
+    flex-direction: column; 
+    flex: 1; 
+    min-width: 0; 
+    border: 1.2px solid #ddd; 
+}
+
+/* 윗줄 파란색을 회색(#ddd)으로 변경 */
+.panel-blue { 
+    border-top: 1.2px solid #ddd; 
+} 
+
+/* 윗줄 빨간색을 회색(#ddd)으로 변경 */
+.panel-red { 
+    border-top: 1.2px solid #ddd; 
+}
 
         h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; }
         
@@ -117,3 +135,4 @@
 </script>
 </body>
 </html>
+
