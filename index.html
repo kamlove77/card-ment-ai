@@ -2,40 +2,105 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카드 상담 통합 가이드</title>
+    <title>카드 상담 통합 시스템</title>
     <style>
         :root { --blue: #007bff; --red: #ff4d4f; --bg: #f0f2f5; --yellow: #fff9c4; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
 
-        /* ✅ 공지사항: '공지사항' 제목 고정 + 세로 리스트 스크롤 */
+        /* 공지사항: 제목 고정 + 내부 스크롤 */
         .notice-container { 
             background: var(--yellow); border-left: 5px solid #fbc02d; 
             margin-bottom: 20px; border-radius: 8px; 
             height: 130px; display: flex; flex-direction: column;
             padding: 12px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .notice-header { 
-            font-weight: bold; font-size: 1.1rem; color: #444; 
-            margin-bottom: 8px; border-bottom: 1px solid #e6e0a8; 
-            padding-bottom: 5px; flex-shrink: 0; 
-        }
+        .notice-header { font-weight: bold; font-size: 1.1rem; color: #444; margin-bottom: 8px; border-bottom: 1px solid #e6e0a8; padding-bottom: 5px; flex-shrink: 0; }
         .notice-list { overflow-y: auto; flex-grow: 1; }
-        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 6px 0; font-size: 0.95rem; display: flex; align-items: flex-start; }
+        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 6px 0; font-size: 0.95rem; display: flex; }
         .notice-date { color: #666; font-size: 0.85rem; min-width: 90px; font-weight: bold; }
-        .notice-content { color: #333; line-height: 1.4; white-space: pre-wrap; }
 
         .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 620px; display: flex; flex-direction: column; }
-        h2 { font-size: 1.2rem; border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-top: 0; }
+        
+        /* 실적 현황: 스크롤 적용 */
+        .perf-area { margin-top: 20px; flex-grow: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; padding: 12px; border-bottom: 2px solid #dee2e6; position: sticky; top: 0; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
 
-        /* 왼쪽: 상담 멘트 생성기 */
-        .select-box { width: 100%; padding: 15px; border: 2px solid var(--blue); border-radius: 10px; font-size: 1.1rem; margin-top: 15px; cursor: pointer; }
-        .ment-box { 
-            background: #ffffff; border: 2px solid var(--blue); padding: 25px; border-radius: 12px; 
-            flex-grow: 1; font-size: 1.2rem; line-height: 1.8; white-space: pre-wrap; 
-            margin-top: 20px; display: none; overflow-y: auto; 
-        }
+        .ment-box, .guide-box { overflow-y: auto; }
+    </style>
+</head>
+<body>
 
-        /* 오른쪽: 가이드 및 실적 현황 스크롤 */
-        .search
+<div class="wrapper">
+    <div class="notice-container">
+        <div class="notice-header">📢 공지사항</div>
+        <div id="notice-list" class="notice-list">데이터를 불러오는 중...</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="panel">
+            <h2>📑 상담 멘트 생성기</h2>
+            <select id="ment-select" class="select-box" onchange="updateMentBox(this.value)">
+                <option value="">-- 선택 --</option>
+            </select>
+            <div id="ment-display" class="ment-box" style="display:none; margin-top:20px; white-space:pre-wrap; border:2px solid var(--blue); padding:15px; border-radius:10px; flex-grow:1;"></div>
+        </div>
+
+        <div class="panel">
+            <h2>🔍 화면 가이드</h2>
+            <input type="text" id="keyword" class="search-input" placeholder="검색..." onkeyup="searchGuide()" style="width:100%; padding:10px; margin:10px 0;">
+            <div id="guide-display" style="background:#fff1f0; padding:15px; border-radius:10px; height:150px; overflow-y:auto;"></div>
+
+            <h2 style="margin-top:20px;">📊 실적 현황</h2>
+            <div class="perf-area">
+                <table>
+                    <thead><tr><th>날짜</th><th>완료</th><th>비율</th></tr></thead>
+                    <tbody id="perf-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "여기에_꽃게님의_URL을_다시_한번_확인해서_넣으세요";
+    let db = { notice: [], ment: [], perf: [] };
+
+    async function init() {
+        try {
+            const res = await fetch(API_URL).then(r => r.json());
+            db = res;
+            
+            // 공지 렌더링
+            document.getElementById('notice-list').innerHTML = db.notice.map(n => 
+                `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('');
+            
+            // 드롭다운
+            const select = document.getElementById('ment-select');
+            db.ment.forEach(m => { if(m.type) { const opt = document.createElement('option'); opt.value = m.type; opt.innerText = m.type; select.appendChild(opt); }});
+
+            // 실적 렌더링
+            document.getElementById('perf-list').innerHTML = db.perf.map(p => 
+                `<tr><td>${p.date}</td><td>${p.val}건</td><td>${p.rate}</td></tr>`).join('');
+        } catch(e) { document.getElementById('notice-list').innerText = "❌ 데이터 로드 실패 (권한 설정 확인 필요)"; }
+    }
+    
+    function updateMentBox(v) {
+        const item = db.ment.find(m => m.type === v);
+        const d = document.getElementById('ment-display');
+        if(item) { d.innerText = item.talk; d.style.display = 'block'; }
+    }
+    
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase();
+        const found = db.ment.find(m => String(m.num).includes(q) || m.key.toLowerCase().includes(q));
+        document.getElementById('guide-display').innerHTML = found ? `<b>[${found.num}] ${found.key}</b><p>${found.pos}</p>` : "검색 결과 없음";
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
