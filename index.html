@@ -3,106 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>스마트 상담 가이드</title>
+    <title>카드 상담 가이드</title>
     <style>
-        :root { --blue: #3b82f6; --red: #ef4444; --bg: #f8fafc; --yellow: #fffdf2; --border: #e2e8f0; }
-        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 12px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: #1e293b; }
+        :root { --blue-line: #007bff; --blue-bg: #f0f7ff; --red-line: #ff4d4f; --red-bg: #fff5f5; --yellow-bg: #fff9c4; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f2f4f7; margin: 0; padding: 10px; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         
-        /* ✅ 공지사항: 은은한 노란색과 부드러운 그림자 */
+        /* ✅ 전체 너비 제한: 화면이 옆으로 너무 퍼지지 않게 고정 */
+        .wrapper { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* ✅ 공지사항: 노란색 배경 */
         .notice-container { 
-            background: var(--yellow); border: 1px solid #fde68a; 
-            border-radius: 16px; height: 100px; padding: 12px 16px; margin-bottom: 12px; 
-            flex-shrink: 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+            background: var(--yellow-bg); border: 2px solid #fbc02d; 
+            border-radius: 10px; height: 90px; padding: 12px; flex-shrink: 0; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .notice-header { font-weight: 700; font-size: 1rem; color: #b45309; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-        .notice-list { overflow-y: auto; flex-grow: 1; font-size: 0.9rem; line-height: 1.5; }
-        .notice-item { border-bottom: 1px solid #fef3c7; padding: 4px 0; display: flex; gap: 10px; }
-        .notice-date { color: #d97706; font-weight: 600; min-width: 55px; }
+        .notice-list { overflow-y: auto; height: 50px; font-size: 0.9rem; }
+        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 3px 0; }
 
-        /* ✅ 메인 레이아웃: 여백과 간격 최적화 */
-        .main-layout { display: flex; gap: 16px; flex: 1; overflow: hidden; }
-        
-        /* ✅ 패널: 촌스러운 굵은 선 대신 얇은 경계선과 깊이감 있는 그림자 */
+        /* ✅ 레이아웃: 가로 2단 유지 */
+        .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         .panel { 
-            background: white; border-radius: 20px; padding: 20px; 
-            border: 1px solid var(--border); 
+            background: white; border-radius: 15px; padding: 15px; 
             display: flex; flex-direction: column; flex: 1; min-width: 0; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04);
+            border: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        /* 포인트 컬러 바: 상단에만 얇게 배치하여 세련미 강조 */
-        .panel-blue { border-top: 4px solid var(--blue); }
-        .panel-red { border-top: 4px solid var(--red); }
+        h2 { font-size: 1rem; margin: 0 0 10px 0; padding-bottom: 5px; border-bottom: 2px solid #eee; }
 
-        h2 { font-size: 1.1rem; font-weight: 700; margin: 0 0 16px 0; color: #0f172a; display: flex; align-items: center; gap: 8px; }
-        
-        /* ✅ 입력창: 둥글고 깨끗한 디자인 */
-        select, input { 
-            width: 100%; padding: 12px; border-radius: 12px; 
-            border: 1.5px solid #e2e8f0; font-size: 1rem; background: #fcfdfe;
-            transition: all 0.2s ease; box-sizing: border-box; 
-        }
-        select:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); outline: none; }
-        
-        /* ✅ 멘트 박스: 넓고 쾌적한 가독성 */
+        /* ✅ 상담 멘트 박스: 연하늘색 */
         .ment-box { 
-            background: #f1f5f9; border-radius: 14px; padding: 18px; 
-            flex: 1; font-size: 1.05rem; line-height: 1.7; overflow-y: auto; 
-            margin-top: 12px; white-space: pre-wrap; color: #334155; border: 1px solid #f1f5f9;
+            background: var(--blue-bg); border: 2px solid var(--blue-line); 
+            padding: 15px; border-radius: 10px; flex: 1; 
+            font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px;
         }
 
-        /* ✅ 가이드 박스: 부드러운 핑크톤 */
+        /* ✅ 화면 가이드 박스: 연분홍색 */
         .guide-box { 
-            background: #fff1f2; border-radius: 12px; padding: 14px; 
-            height: 80px; overflow-y: auto; margin: 10px 0; 
-            font-size: 0.95rem; border-left: 4px solid var(--red);
+            background: var(--red-bg); border: 2px solid var(--red-line); 
+            padding: 12px; height: 70px; overflow-y: auto; 
+            margin: 8px 0; font-size: 0.9rem; border-radius: 10px;
         }
         
-        /* ✅ 실적 테이블: 깔끔한 라인 디자인 */
-        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #f1f5f9; border-radius: 12px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; position: sticky; top: 0; padding: 10px; font-size: 0.85rem; color: #64748b; border-bottom: 1px solid #e2e8f0; text-align: center; }
-        td { padding: 10px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 0.9rem; }
-        .cum-cell { font-weight: 700; color: var(--blue); }
+        /* ✅ 실적 테이블 */
+        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #f8f9fa; position: sticky; top: 0; padding: 8px; border-bottom: 2px solid #ddd; }
+        td { padding: 8px; border-bottom: 1px solid #eee; text-align: center; }
+        .cum-cell { font-weight: bold; color: var(--blue-line); }
 
-        /* ✅ 음성 버튼: 고급스러운 그라데이션 */
         .voice-btn { 
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
-            color: white; border: none; padding: 14px; border-radius: 14px; 
-            font-weight: 600; font-size: 1rem; cursor: pointer; margin-top: 12px;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); transition: transform 0.1s;
+            background: var(--blue-line); color: white; border: none; padding: 12px; 
+            border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; 
         }
-        .voice-btn:active { transform: scale(0.97); }
+        .voice-btn:active { background: #0056b3; }
     </style>
 </head>
 <body>
 
-<div class="notice-container">
-    <div class="notice-header">📢 공지사항</div>
-    <div id="notice-list" class="notice-list">데이터를 불러오는 중...</div>
-</div>
-
-<div class="main-layout">
-    <div class="panel panel-blue">
-        <h2>📝 상담 멘트</h2>
-        <select id="ment-select" onchange="updateMentBox(this.value)">
-            <option value="">상황 선택</option>
-        </select>
-        <div id="ment-display" class="ment-box">상황을 선택하면 최적의 멘트가 로드됩니다.</div>
+<div class="wrapper">
+    <div class="notice-container">
+        <div style="font-weight:bold; margin-bottom:5px;">📢 공지사항</div>
+        <div id="notice-list" class="notice-list">데이터 로딩 중...</div>
     </div>
 
-    <div class="panel panel-red">
-        <h2>📊 실적 및 가이드</h2>
-        <input type="text" id="keyword" placeholder="화면번호/키워드 검색..." onkeyup="searchGuide()">
-        <div id="guide-display" class="guide-box">가이드 내용이 표시됩니다.</div>
-        
-        <div class="perf-area">
-            <table>
-                <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
-                <tbody id="perf-list"></tbody>
-            </table>
+    <div class="main-layout">
+        <div class="panel">
+            <h2>📑 상담 멘트</h2>
+            <select id="ment-select" style="width:100%; padding:8px; border-radius: 5px; border: 1px solid #ccc;" onchange="updateMentBox(this.value)">
+                <option value="">-- 상황 선택 --</option>
+            </select>
+            <div id="ment-display" class="ment-box">상황을 선택하세요.</div>
         </div>
-        <button class="voice-btn" onclick="startVoice()">🎙️ 실적 음성 기록</button>
+
+        <div class="panel">
+            <h2>📊 실적 및 가이드</h2>
+            <input type="text" id="keyword" placeholder="번호 입력..." style="width:100%; padding:8px; border-radius: 5px; border: 1px solid #ccc;" onkeyup="searchGuide()">
+            <div id="guide-display" class="guide-box">가이드 내용 표시</div>
+            <div class="perf-area">
+                <table>
+                    <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
+                    <tbody id="perf-list"></tbody>
+                </table>
+            </div>
+            <button class="voice-btn" onclick="startVoice()">🎙️ 실적 말로 하기</button>
+        </div>
     </div>
 </div>
 
@@ -114,13 +98,11 @@
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
-            document.getElementById('notice-list').innerHTML = res.notice.map(n => 
-                `<div class="notice-item"><span class="notice-date">${n.date}</span><span>${n.content}</span></div>`).join('');
+            document.getElementById('notice-list').innerHTML = res.notice.map(n => `<div class="notice-item"><span>[${n.date}] ${n.content}</span></div>`).join('');
             const select = document.getElementById('ment-select');
-            select.innerHTML = '<option value="">상황 선택</option>';
+            select.innerHTML = '<option value="">-- 상황 선택 --</option>';
             res.ment.filter(m => m.type).forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
             });
             let cum = 0;
             document.getElementById('perf-list').innerHTML = res.perf.map(p => {
@@ -128,28 +110,26 @@
                 cum += val;
                 return `<tr><td>${p.date}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
             }).join('');
-        } catch(e) { document.getElementById('notice-list').innerText = "⚠️ 연결 오류"; }
+        } catch(e) { console.log(e); }
     }
 
     function updateMentBox(v) {
         const item = db.ment.find(m => m.type === v);
-        document.getElementById('ment-display').innerText = item ? item.talk : "상황을 선택하면 최적의 멘트가 로드됩니다.";
+        document.getElementById('ment-display').innerText = item ? item.talk : "상황을 선택하세요.";
     }
 
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const found = db.ment.find(m => String(m.num).includes(q) || (m.key && m.key.toLowerCase().includes(q)));
-        document.getElementById('guide-display').innerHTML = found ? `<b>${found.key}</b><br>${found.pos}` : "가이드 내용이 표시됩니다.";
+        document.getElementById('guide-display').innerHTML = found ? `<b>${found.key}</b><br>${found.pos}` : "가이드 내용 표시";
     }
 
     function startVoice() {
-        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if(!Speech) return alert("미지원 브라우저");
-        const rec = new Speech(); rec.lang = 'ko-KR'; rec.start();
-        document.getElementById('notice-list').innerText = "🎤 음성 인식 중...";
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        rec.lang = 'ko-KR'; rec.start();
         rec.onresult = (e) => {
             const val = e.results[0][0].transcript.replace(/[^0-9]/g, '');
-            if(val && confirm(`${val}건 저장할까요?`)) alert("저장 요청됨");
+            if(val) confirm(val + "건 저장할까요?") && alert("저장됨");
             loadData();
         };
     }
