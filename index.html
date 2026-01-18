@@ -112,27 +112,27 @@
             // 2. 가이드 데이터 저장
             guideData = res.ment;
 
-            // 3. 실적 테이블 & 정확한 합계 계산
+            // 3. 실적 데이터 & 정밀 합계 계산
             const pList = document.getElementById("perf-list");
-            let totalSum = 0; // 합계 변수 초기화
+            let realSum = 0; // 정확한 합계를 담을 변수
             
             pList.innerHTML = res.perf.map(r => {
-                // [수정된 부분] 숫자 외의 문자(건, 명 등)를 모두 제거하고 순수 숫자만 추출하여 합산
-                const numValue = parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
-                totalSum += numValue;
+                // [정밀 계산 로직] 
+                // 1. 'current' 데이터에서 숫자(0-9)만 남기고 다 지웁니다.
+                // 2. 숫자로 변환한 뒤 합계에 더합니다.
+                const cleanNum = parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
+                realSum += cleanNum;
                 
                 return `<tr><td>${fixDate(r.date)}</td><td>${r.current}</td><td>${r.rate}</td></tr>`;
             }).join('');
 
-            // 최종 합계 표시 (천 단위 콤마 추가)
-            document.getElementById("total-val").innerText = totalSum.toLocaleString();
+            // 최종 합계 박스에 결과 표시
+            document.getElementById("total-val").innerText = realSum.toLocaleString();
 
         } catch(e) {
             document.getElementById("notice-container").innerText = "로딩 실패. 주소를 확인하거나 [새 버전]으로 배포했는지 확인하세요.";
-            console.error(e);
         }
     }
-
     // 가이드 검색 함수
     function searchGuide() {
         const k = document.getElementById("keyword").value.trim().toLowerCase();
@@ -150,4 +150,5 @@
 </script>
 </body>
 </html>
+
 
