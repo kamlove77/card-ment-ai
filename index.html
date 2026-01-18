@@ -5,65 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 스마트 가이드</title>
     <style>
-        /* 기본 배경 및 폰트 */
-        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
+        /* 1. 디자인 및 레이아웃 */
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; line-height: 1.5; }
         .container { max-width: 1200px; margin: 0 auto; }
         
-        /* 상단 공지 바 디자인 */
+        /* 상단 공지 바 (제목 포함) */
         .top-info-bar { 
             background: #ffffff; border: 1px solid #dcdfe6;
             padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        
-        /* [추가] 공지사항 제목 스타일 */
         .notice-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e7f1ff;
-            display: flex;
-            align-items: center;
+            font-size: 1.1rem; font-weight: bold; color: #007bff;
+            margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e7f1ff;
+            display: flex; align-items: center;
         }
 
-        #notice-container { display: flex; flex-direction: column; }
-
-        /* A열 날짜 / B열 내용 분리 스타일 */
-        .notice-row { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #f2f2f2; }
+        /* 공지 리스트 (A열/B열 구분) */
+        #notice-container { display: flex; flex-direction: column; min-height: 20px; }
+        .notice-row { display: flex; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid #f2f2f2; }
         .notice-row:last-child { border-bottom: none; }
-        
-        .col-date { width: 80px; font-weight: bold; color: #555; font-size: 0.95rem; }
-        .col-content { flex: 1; color: #333; padding-left: 15px; font-weight: 500; }
+        .col-date { width: 75px; font-weight: bold; color: #666; font-size: 0.95rem; flex-shrink: 0; }
+        .col-content { flex: 1; color: #333; padding-left: 12px; font-weight: 500; }
 
-        /* 탭 메뉴 */
+        /* 네비게이션 및 카드 */
         .nav { display: flex; gap: 8px; margin-bottom: 20px; }
-        .nav button { flex: 1; padding: 14px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; color: #606266; }
+        .nav button { flex: 1; padding: 14px; border: 1px solid #dcdfe6; border-radius: 8px; background: white; font-weight: bold; cursor: pointer; color: #606266; font-size: 1rem; }
         .nav button.active { background: #007bff; color: white; border-color: #007bff; }
 
-        /* 컨텐츠 영역 */
         .content { display: none; }
         .content.active { display: block; }
         .flex-row { display: flex; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #dcdfe6; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #dcdfe6; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
 
-        /* 입력 및 버튼 */
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dcdfe6; border-radius: 6px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dcdfe6; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
         .btn-blue { background: #007bff; color: white; }
+        .btn-blue:hover { background: #0056b3; }
         .btn-gray { background: #909399; color: white; }
         
-        .result-box { background: #fdfdfd; padding: 15px; border-radius: 6px; border: 1px solid #ebeef5; margin-top: 15px; min-height: 100px; }
+        .result-box { background: #fdfdfd; padding: 15px; border-radius: 6px; border: 1px solid #ebeef5; margin-top: 15px; min-height: 120px; }
         
-        /* 실적 통계 테이블 */
+        /* 실적 통계 */
         .summary { background: #f0f7ff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; border: 1px solid #d0e3ff; }
-        .summary-val { font-size: 2rem; font-weight: bold; color: #007bff; }
+        .summary-val { font-size: 2.2rem; font-weight: bold; color: #007bff; }
         table { width: 100%; border-collapse: collapse; }
         th { background: #f5f7fa; padding: 12px; border-bottom: 2px solid #ebeef5; }
         td { padding: 12px; border-bottom: 1px solid #ebeef5; text-align: center; }
 
-        @media (max-width: 800px) { .flex-row { flex-direction: column; } }
+        @media (max-width: 850px) { .flex-row { flex-direction: column; } }
     </style>
 </head>
 <body>
@@ -71,12 +61,12 @@
 <div class="container">
     <div class="top-info-bar">
         <div class="notice-title">📢 공지사항</div>
-        <div id="notice-container">공지사항을 불러오는 중...</div>
+        <div id="notice-container">공지사항 데이터를 확인 중입니다...</div>
     </div>
 
     <div class="nav">
-        <button id="t1" class="active" onclick="tab('home')">📜 가이드 & 멘트</button>
-        <button id="t2" onclick="tab('perf')">📈 실적 통계</button>
+        <button id="btn-home" class="active" onclick="showTab('home')">📜 가이드 & 멘트</button>
+        <button id="btn-perf" onclick="showTab('perf')">📈 실적 통계</button>
     </div>
 
     <div id="home" class="content active">
@@ -88,23 +78,23 @@
                 <div class="result-box">
                     <p><strong>번호:</strong> <span id="view-screen">-</span></p>
                     <p><strong>내용:</strong></p>
-                    <div id="view-desc" style="white-space:pre-wrap;">-</div>
+                    <div id="view-desc" style="white-space:pre-wrap;">검색 결과가 여기에 표시됩니다.</div>
                 </div>
             </div>
             <div class="card">
                 <h3 style="margin-top:0; color:#007bff;">✍️ 멘트 생성</h3>
-                <select id="type"><option value="">로딩 중...</option></select>
+                <select id="ment-type"><option value="">로딩 중...</option></select>
                 <button onclick="generateMent()" class="btn btn-blue">멘트 생성</button>
-                <textarea id="ment-output" rows="12" style="margin-top:10px;" placeholder="결과가 여기에 표시됩니다."></textarea>
+                <textarea id="ment-output" rows="13" style="margin-top:10px;" placeholder="결과가 여기에 표시됩니다."></textarea>
             </div>
         </div>
     </div>
 
     <div id="perf" class="content">
-        <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card" style="max-width: 650px; margin: 0 auto;">
             <h3 style="margin-top:0;">📊 월간 실적 현황</h3>
             <div class="summary">
-                <div style="font-size: 0.9rem; color: #666;">총 완료 콜수</div>
+                <div style="font-size: 0.95rem; color: #666; margin-bottom: 5px;">이번 달 누적 완료 건수</div>
                 <div class="summary-val"><span id="total-calls">0</span>건</div>
             </div>
             <table>
@@ -116,59 +106,92 @@
 </div>
 
 <script>
-    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec";
-    let mentData = [];
+    // 2. 통합 자바스크립트 엔진
+    const API_URL = "https://script.google.com/macros/s/AKfycbxn9dNC9NvG-cwkwxOBfEVAM8vYKYUrqLX-MvF9OqIr7AHGZEDBml5mqjPftgVFFYK29w/exec";
+    let mentCache = [];
 
-    async function init() {
-        await Promise.all([loadNotice(), loadMents(), loadPerformance()]);
+    // 실행 시작점
+    async function startApp() {
+        console.log("앱 시작...");
+        await Promise.all([loadNotice(), loadMentData(), loadPerfData()]);
     }
 
+    // 공지사항 로드 (A열/B열 분리)
     async function loadNotice() {
         try {
-            const res = await fetch(`${SHEET_API_URL}?mode=notice`);
-            const data = await res.json();
-            const container = document.getElementById("notice-container");
-            container.innerHTML = "";
+            const r = await fetch(`${API_URL}?mode=notice`);
+            const data = await r.json();
+            const box = document.getElementById("notice-container");
+            box.innerHTML = "";
             if (data && data.length > 0) {
                 data.forEach(item => {
                     const row = document.createElement("div");
                     row.className = "notice-row";
-                    row.innerHTML = `
-                        <div class="col-date">${item.date || ""}</div>
-                        <div class="col-content">• ${item.content || ""}</div>
-                    `;
-                    container.appendChild(row);
+                    row.innerHTML = `<div class="col-date">${item.date || ""}</div><div class="col-content">• ${item.content || ""}</div>`;
+                    box.appendChild(row);
                 });
-            }
-        } catch (e) { console.error("공지 로드 실패", e); }
+            } else { box.innerHTML = "등록된 공지사항이 없습니다."; }
+        } catch (e) { console.error("공지 로드 실패:", e); }
     }
 
-    async function loadMents() {
+    // 멘트 및 가이드 데이터
+    async function loadMentData() {
         try {
-            const res = await fetch(`${SHEET_API_URL}?mode=ment`);
-            mentData = await res.json();
-            const select = document.getElementById("type");
-            const types = [...new Set(mentData.map(i => i.type).filter(t => t))];
+            const r = await fetch(`${API_URL}?mode=ment`);
+            mentCache = await r.json();
+            const select = document.getElementById("ment-type");
+            const types = [...new Set(mentCache.map(i => i.type).filter(t => t))];
             select.innerHTML = '<option value="">상황 유형을 선택하세요</option>';
-            types.forEach(t => {
-                const opt = document.createElement("option");
-                opt.value = t; opt.textContent = t;
-                select.appendChild(opt);
-            });
-        } catch (e) { console.error("멘트 로드 실패", e); }
+            types.forEach(t => select.innerHTML += `<option value="${t}">${t}</option>`);
+        } catch (e) { console.error("멘트 로드 실패:", e); }
     }
 
+    // 가이드 검색
     function searchGuide() {
         const val = document.getElementById("quick-search").value.trim().toLowerCase();
-        const f = mentData.find(i => String(i.screenNum).toLowerCase() === val || String(i.keywords).includes(val));
+        if(!val) return alert("검색어를 입력하세요.");
+        const f = mentCache.find(i => String(i.screenNum).toLowerCase() === val || String(i.keywords).includes(val));
         if(f) {
             document.getElementById("view-screen").innerText = f.screenNum;
             document.getElementById("view-desc").innerText = f.description;
-        } else { alert("검색 결과가 없습니다."); }
+        } else { alert("찾으시는 정보가 없습니다."); }
     }
 
+    // 멘트 생성
     function generateMent() {
-        const sel = document.getElementById("type").value;
-        if(!sel) return alert("유형을 먼저 선택하세요.");
-        const res = mentData.filter(i => i.type === sel);
-        document.getElementById("ment-output").value = res.map((i, idx) => `[멘트 ${idx+1}]\n${i
+        const sel = document.getElementById("ment-type").value;
+        if(!sel) return alert("유형을 선택하세요.");
+        const res = mentCache.filter(i => i.type === sel);
+        document.getElementById("ment-output").value = res.map((i, idx) => `[멘트 ${idx+1}]\n${i.text}`).join("\n\n------------------\n\n");
+    }
+
+    // 실적 데이터
+    async function loadPerfData() {
+        try {
+            const r = await fetch(`${API_URL}?mode=perf`);
+            const data = await r.json();
+            const list = document.getElementById("perf-list");
+            let total = 0;
+            list.innerHTML = "";
+            data.forEach(row => {
+                total += parseInt(String(row.current).replace(/[^0-9]/g, "")) || 0;
+                const dateText = row.date.includes('T') ? row.date.split('T')[0] : row.date;
+                list.innerHTML += `<tr><td>${dateText}</td><td>${row.current}콜</td><td>${row.rate}</td></tr>`;
+            });
+            document.getElementById("total-calls").innerText = total.toLocaleString();
+        } catch (e) { console.error("실적 로드 실패:", e); }
+    }
+
+    // 탭 전환 시스템
+    function showTab(id) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-' + id).classList.add('active');
+    }
+
+    // 앱 실행 트리거 (브라우저 로드 시 실행)
+    window.addEventListener('DOMContentLoaded', startApp);
+</script>
+</body>
+</html>
