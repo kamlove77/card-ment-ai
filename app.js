@@ -25,21 +25,26 @@ async function loadPerformance() {
         data.forEach(row => {
             const tr = document.createElement("tr");
             
-            // 날짜 가공 로직: "2026-01-18..." 또는 "Sun Jan 18..." 형태를 "01/18"로 변경
-            let rawDate = row.date;
-            let displayDate = "";
+            // [날짜 처리 로직 강화]
+            let rawDate = String(row.date);
+            let displayDate = rawDate;
 
-            if (rawDate.includes("T")) { // ISO 형식 (2026-01-18T...)
-                const parts = rawDate.split("T")[0].split("-");
-                displayDate = `${parts[1]}/${parts[2]}`;
-            } else if (rawDate.includes(" ")) { // 문자열 형식 (Sun Jan 18...)
-                const monthMap = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" };
-                const parts = rawDate.split(" ");
-                const month = monthMap[parts[1]] || "01";
-                const day = parts[2].padStart(2, '0');
-                displayDate = `${month}/${day}`;
-            } else {
-                displayDate = rawDate;
+            if (rawDate.includes("Jan")) displayDate = "01/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Feb")) displayDate = "02/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Mar")) displayDate = "03/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Apr")) displayDate = "04/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("May")) displayDate = "05/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Jun")) displayDate = "06/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Jul")) displayDate = "07/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Aug")) displayDate = "08/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Sep")) displayDate = "09/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Oct")) displayDate = "10/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Nov")) displayDate = "11/" + rawDate.split(" ")[2];
+            else if (rawDate.includes("Dec")) displayDate = "12/" + rawDate.split(" ")[2];
+            // 만약 시트 날짜가 "2026-01-18" 형식이면 "01/18"로 변경
+            else if (rawDate.includes("-")) {
+                const parts = rawDate.split("-");
+                displayDate = parts[1] + "/" + parts[2].substring(0,2);
             }
 
             tr.innerHTML = `
@@ -51,7 +56,8 @@ async function loadPerformance() {
             listBody.appendChild(tr);
         });
     } catch (e) {
-        listBody.innerHTML = "<tr><td colspan='4'>실적 로드 실패</td></tr>";
+        console.error("실적 로드 실패:", e);
+        listBody.innerHTML = "<tr><td colspan='4'>데이터 로드 실패</td></tr>";
     }
 }
 
@@ -89,3 +95,4 @@ document.getElementById("btn-generate").onclick = () => {
 };
 
 window.onload = init;
+
