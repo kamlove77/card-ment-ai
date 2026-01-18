@@ -1,23 +1,22 @@
-// 1. 사용자님의 최신 URL 적용
+// 1. 최신 배포 URL (TadQ 버전)
 const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzF6PiiQG6jmkT6JQDiMlTRMOjbwSLomnhZu8xHvBjYQTf31SPxaBLZLU6K1hqBIlTadQ/exec";
 let mentData = [];
 
-// 2. 초기 로딩: 가이드와 실적을 모두 가져옵니다.
+// 2. 초기 로딩: 가이드와 실적 데이터를 병렬로 로드
 async function init() {
     try {
-        console.log("데이터 로딩 중...");
+        console.log("데이터 동기화 중...");
         const mentRes = await fetch(`${SHEET_API_URL}?mode=ment`);
         mentData = await mentRes.json();
         
         updateTypeDropdown(); // 드롭다운 업데이트
         await loadPerformance(); // 실적 로드
-        console.log("로딩 완료!");
     } catch (e) {
-        console.error("데이터를 불러오지 못했습니다:", e);
+        console.error("데이터 통신 오류:", e);
     }
 }
 
-// 3. 실적 로드 (날짜를 MM/DD 형식으로 강제 변환)
+// 3. 실적 로드 (성공하셨던 날짜 가공 로직 포함)
 async function loadPerformance() {
     const listBody = document.getElementById("perf-list");
     if (!listBody) return;
@@ -34,17 +33,13 @@ async function loadPerformance() {
             if (row.date) {
                 const dateObj = new Date(row.date);
                 if (!isNaN(dateObj.getTime())) {
-                    // 표준 날짜 객체에서 월/일 추출
                     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                     const day = String(dateObj.getDate()).padStart(2, '0');
                     displayDate = `${month}/${day}`;
                 } else {
-                    // 문자열(Sun Jan 18...)에서 직접 추출
                     const parts = String(row.date).split(" ");
                     const monthMap = { Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06", Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12" };
-                    if (parts.length >= 3) {
-                        displayDate = `${monthMap[parts[1]] || "01"}/${parts[2].padStart(2, '0')}`;
-                    }
+                    if (parts.length >= 3) displayDate = `${monthMap[parts[1]] || "01"}/${parts[2].padStart(2, '0')}`;
                 }
             }
 
@@ -57,11 +52,11 @@ async function loadPerformance() {
             listBody.appendChild(tr);
         });
     } catch (e) {
-        listBody.innerHTML = "<tr><td colspan='4'>실적 로드 실패</td></tr>";
+        listBody.innerHTML = "<tr><td colspan='4'>데이터 로드 중 에러가 발생했습니다.</td></tr>";
     }
 }
 
-// 4. 드롭다운 업데이트
+// 4. 상황 유형 드롭다운 (A열: 유형 기반)
 function updateTypeDropdown() {
     const typeSelect = document.getElementById("type");
     if (!typeSelect) return;
@@ -76,34 +71,50 @@ function updateTypeDropdown() {
     });
 }
 
-// 5. 가이드 검색 기능 (번호/키워드)
-document.getElementById("btn-search").onclick = () => {
-    const input = document.getElementById("quick-search").value.trim().toLowerCase();
-    if (!input) return alert("검색어를 입력하세요.");
+// 5. 가이드 정보 검색 (B열: 화면번호 또는 C열: 키워드)
+const btnSearch = document.getElementById("btn-search");
+if (btnSearch) {
+    btnSearch.onclick = () => {
+        const inputEl = document.getElementById("quick-search");
+        if (!inputEl) return;
+        
+        const input = inputEl.value.trim().toLowerCase();
+        if (!input) return alert("번호나 검색어를 입력하세요.");
 
-    const found = mentData.find(item => 
-        String(item.screenNum || "").toLowerCase() === input || 
-        String(item.keywords || "").toLowerCase().includes(input)
-    );
+        const found = mentData.find(item => 
+            String(item.screenNum || "").toLowerCase() === input || 
+            String(item.keywords || "").toLowerCase().includes(input)
+        );
 
-    if (found) {
-        document.getElementById("view-screen").textContent = found.screenNum || "-";
-        document.getElementById("view-keywords").textContent = found.keywords || "-";
-        document.getElementById("view-desc").textContent = found.description || "내용 없음";
-    } else {
-        alert("일치하는 가이드 정보가 없습니다.");
-    }
-};
+        if (found) {
+            const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).textContent = val || "-"; };
+            setVal("view-screen", found.screenNum);
+            setVal("view-keywords", found.keywords);
+            setVal("view-desc", found.description);
+        } else {
+            alert(`'${input}' 정보를 찾을 수 없습니다. 시트의 내용을 확인해 보세요.`);
+        }
+    };
+}
 
-// 6. 멘트 생성 버튼
-document.getElementById("btn-generate").onclick = () => {
-    const selectedType = document.getElementById("type").value;
-    if (!selectedType) return alert("유형을 선택하세요.");
+// 6. 멘트 만들기 버튼 (E열: 멘트 기반)
+const btnGen = document.getElementById("btn-generate");
+if (btnGen) {
+    btnGen.onclick = () => {
+        const typeEl = document.getElementById("type");
+        const outputEl = document.getElementById("ment-output");
+        if (!typeEl || !outputEl) return;
 
-    const found = mentData.find(item => String(item.type || "").trim() === selectedType);
-    if (found) {
-        document.getElementById("ment-output").value = found.text || "";
-    }
-};
+        const selectedType = typeEl.value;
+        const found = mentData.find(item => String(item.type || "").trim() === selectedType);
+        
+        if (found) {
+            outputEl.value = found.text || "멘트 내용이 비어있습니다.";
+        } else {
+            alert("유형을 먼저 선택해 주세요.");
+        }
+    };
+}
 
+// 전체 로딩 완료 후 실행
 window.onload = init;
