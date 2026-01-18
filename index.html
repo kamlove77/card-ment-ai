@@ -1,40 +1,42 @@
-<style>
-    /* ✅ 휴대폰(모바일) 대응 스크롤 설정 추가 */
-    .notice-container { 
-        background: var(--yellow); 
-        border: 2px solid #fbc02d; 
-        margin-bottom: 15px; 
-        border-radius: 12px; 
-        height: 150px; /* 높이 고정 */
-        display: flex; 
-        flex-direction: column;
-        padding: 10px; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        overflow: hidden; /* 박스 밖으로 안 나가게 함 */
-    }
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 상담 통합 가이드</title>
+    <style>
+        :root { --blue: #007bff; --red: #ff4d4f; --bg: #f8f9fa; --yellow: #fff9c4; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        .wrapper { max-width: 1200px; margin: 0 auto; }
 
-    .notice-list { 
-        overflow-y: scroll; /* 무조건 스크롤 가능하게 설정 */
-        flex-grow: 1; 
-        -webkit-overflow-scrolling: touch; /* 아이폰/안드로이드 부드러운 스크롤 */
-    }
+        /* ✅ 공지사항: 모바일에서도 스크롤바 강제 표시 */
+        .notice-container { 
+            background: var(--yellow); border-left: 6px solid #fbc02d; 
+            margin-bottom: 20px; border-radius: 12px; 
+            height: 140px; display: flex; flex-direction: column;
+            padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .notice-header { font-weight: bold; font-size: 1.1rem; color: #444; margin-bottom: 10px; border-bottom: 1px solid #e6e0a8; padding-bottom: 5px; flex-shrink: 0; }
+        
+        .notice-list { 
+            overflow-y: scroll !important; /* 모바일 스크롤 강제 활성화 */
+            flex-grow: 1; 
+            -webkit-overflow-scrolling: touch; 
+        }
+        /* 스크롤바 스타일 (안 보일 때를 대비) */
+        .notice-list::-webkit-scrollbar { width: 8px; display: block !important; }
+        .notice-list::-webkit-scrollbar-thumb { background: #fbc02d; border-radius: 10px; }
 
-    /* ✅ 모바일에서도 스크롤바가 보이게 하는 마법의 코드 */
-    .notice-list::-webkit-scrollbar {
-        width: 6px; /* 스크롤바 두께 */
-        display: block !important;
-    }
-    .notice-list::-webkit-scrollbar-thumb {
-        background: #fbc02d; /* 스크롤바 색상 */
-        border-radius: 10px;
-    }
-    .notice-list::-webkit-scrollbar-track {
-        background: rgba(0,0,0,0.05);
-    }
+        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 8px 0; font-size: 0.95rem; display: flex; align-items: flex-start; }
+        .notice-date { color: #666; font-size: 0.85rem; min-width: 85px; font-weight: bold; }
 
-    /* 모바일에서 2단 배열이 1단으로 바뀌도록 설정 */
-    @media (max-width: 768px) {
-        .main-layout { grid-template-columns: 1fr; }
-        .panel { height: auto; min-height: 400px; margin-bottom: 15px; }
-    }
-</style>
+        /* 레이아웃 디자인 수정 (세련된 느낌 반영) */
+        .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .panel { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: 600px; display: flex; flex-direction: column; border: 1px solid #eee; }
+        h2 { font-size: 1.15rem; color: #333; border-bottom: 2px solid var(--blue); padding-bottom: 8px; margin-top: 0; }
+
+        .select-box { width: 100%; padding: 12px; border: 2px solid var(--blue); border-radius: 8px; font-size: 1rem; margin-top: 10px; }
+        .ment-box { background: #fff; border: 2px solid var(--blue); padding: 20px; border-radius: 12px; flex-grow: 1; font-size: 1.1rem; line-height: 1.7; white-space: pre-wrap; margin-top: 15px; display: none; overflow-y: auto; }
+        
+        .search-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; margin-top: 10px; box-sizing: border-box; }
+        .guide-box { background: #fff1f0; border-left: 5px solid var(--red); padding: 15px; border-radius: 10px; height: 13
