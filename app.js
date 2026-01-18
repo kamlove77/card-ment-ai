@@ -1,5 +1,5 @@
 // 알려주신 최신 배포 URL입니다.
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycby0_GpJq_z3PNa86KcQ_n-QB8KUQSM1EWh5OO1XW4I9uu9lKQPkXUKmMi-Z-irzu53B_Q/exec";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwduzMwyMd4Da2LQFS8f8u4N97SiB8SKmYvakZy3NoPoadiXVfLvzU2h6uNMe1xICf4EA/exec";
 
 const $ = (id) => document.getElementById(id);
 
@@ -82,3 +82,4 @@ $("clear").onclick = () => {
     $("view-keywords").textContent = "-";
     $("view-desc").textContent = "-";
 };
+
