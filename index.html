@@ -99,38 +99,41 @@
 
     // 통합 데이터 로딩 (속도 최적화)
    // 통합 데이터 로딩 (합산 로직 강화 버전)
-    async function loadAllData() {
+   async function loadAllData() {
         const t = new Date().getTime();
         try {
             const response = await fetch(`${API_URL}?t=${t}`);
             const res = await response.json();
 
-            // 1. 공지사항
+            // 1. 공지사항 표시
             const nBox = document.getElementById("notice-container");
             nBox.innerHTML = res.notice.length ? res.notice.map(i => `<div><b>[${i.date}]</b> ${i.content}</div>`).join('') : "공지사항이 없습니다.";
 
             // 2. 가이드 데이터 저장
             guideData = res.ment;
 
-            // 3. 실적 데이터 & 정밀 합계 계산
+            // 3. 실적 데이터 & C열 숫자만 합산
             const pList = document.getElementById("perf-list");
-            let realSum = 0; // 정확한 합계를 담을 변수
+            let totalSum = 0; 
             
             pList.innerHTML = res.perf.map(r => {
-                // [정밀 계산 로직] 
-                // 1. 'current' 데이터에서 숫자(0-9)만 남기고 다 지웁니다.
-                // 2. 숫자로 변환한 뒤 합계에 더합니다.
-                const cleanNum = parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
-                realSum += cleanNum;
+                // r.current는 시트의 C열(콜수) 데이터입니다.
+                const rawValue = String(r.current).trim();
+                
+                // 데이터가 비어있지 않고 '-' 가 아닐 때만 숫자만 추출해서 합산
+                if (rawValue && rawValue !== "-") {
+                    const numValue = parseInt(rawValue.replace(/[^0-9]/g, "")) || 0;
+                    totalSum += numValue;
+                }
                 
                 return `<tr><td>${fixDate(r.date)}</td><td>${r.current}</td><td>${r.rate}</td></tr>`;
             }).join('');
 
-            // 최종 합계 박스에 결과 표시
-            document.getElementById("total-val").innerText = realSum.toLocaleString();
+            // 상단 요약 박스에 C열 합계 결과 반영
+            document.getElementById("total-val").innerText = totalSum.toLocaleString();
 
         } catch(e) {
-            document.getElementById("notice-container").innerText = "로딩 실패. 주소를 확인하거나 [새 버전]으로 배포했는지 확인하세요.";
+            console.error("데이터 합산 중 오류:", e);
         }
     }
     // 가이드 검색 함수
@@ -150,5 +153,6 @@
 </script>
 </body>
 </html>
+
 
 
