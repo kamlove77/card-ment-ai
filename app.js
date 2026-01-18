@@ -1,5 +1,5 @@
 // 제공해주신 배포 URL을 적용했습니다.
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbx4H9_6o3T0WdGE-yG0CSSt0hJqhH_jlxd7iykRazQznDoQg5DC34j202rnZTuoBxEz8w/exec"; 
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyG3uXw5excmSqtkhLrv2QbHx0s0VRlHV-Nx9zpae7PzMKgp6zrTM13BZB7S8_tTViWGQ/exec"; 
 let mentData = [];
 
 async function init() {
@@ -34,17 +34,14 @@ async function loadNotice() {
         const res = await fetch(`${SHEET_API_URL}?mode=notice`);
         const data = await res.json();
         const container = document.getElementById("notice-container");
-        
         if (data && data.length > 0) {
-            container.innerHTML = ""; 
+            container.innerHTML = "";
             data.forEach(item => {
                 const div = document.createElement("div");
                 div.className = "notice-item";
-                
-                // 날짜가 있으면 [날짜] 형태로 표시
+                // date가 "1/18" 처럼 들어오므로 그대로 출력
                 const datePart = item.date ? `[${item.date}] ` : "";
-                div.innerText = `• ${datePart}${item.content}`; 
-                
+                div.innerText = `• ${datePart}${item.content}`;
                 container.appendChild(div);
             });
         }
@@ -119,6 +116,7 @@ async function loadPerformance() {
 }
 
 window.onload = init;
+
 
 
 
