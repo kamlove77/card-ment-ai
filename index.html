@@ -8,33 +8,36 @@
         :root { --blue: #007bff; --red: #ff4d4f; --bg: #f2f4f7; --yellow-bg: #fffbe6; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         
-        /* ✅ PC 너비 슬림하게 고정 */
         .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* 공지사항 박스 */
         .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 85px; padding: 12px; flex-shrink: 0; }
         .notice-list { overflow-y: auto; height: 50px; font-size: 0.9rem; }
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
         
-        /* ✅ 박스 스타일: 요청하신 이미지 느낌 */
         .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid #ddd; }
-        .panel-blue { border-top: 5px solid var(--blue); } /* 상단 파란 포인트 */
-        .panel-red { border-top: 5px solid var(--red); }   /* 상단 빨간 포인트 */
+        .panel-blue { border-top: 5px solid var(--blue); } 
+        .panel-red { border-top: 5px solid var(--red); }   
 
         h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; }
         
-        /* 멘트 및 가이드 내부 박스 */
         .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
         .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 65px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; }
         
-        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; }
+        /* ✅ 테이블 디자인: 촌스러운 색상을 빼고 깔끔하게 변경 */
+        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 10px; background: #fff; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: #f8f9fa; position: sticky; top: 0; padding: 8px; border-bottom: 1px solid #ddd; }
-        td { padding: 8px; border-bottom: 1px solid #eee; text-align: center; }
-        .cum-cell { font-weight: bold; color: var(--blue); }
+        th { 
+            background: #f1f3f5; /* 아주 연한 그레이 */
+            color: #495057; 
+            position: sticky; top: 0; padding: 10px 8px; 
+            border-bottom: 2px solid #dee2e6; font-weight: bold;
+        }
+        td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; color: #333; }
+        
+        /* 누적 데이터만 살짝 강조 */
+        .cum-cell { font-weight: bold; color: #212529; background-color: #fafafa; }
 
-        /* 음성 기록 버튼 */
         .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
@@ -42,7 +45,7 @@
 <div class="wrapper">
     <div class="notice-container">
         <div style="font-weight:bold; color:#856404; margin-bottom:5px;">📢 공지사항</div>
-        <div id="notice-list" class="notice-list">데이터 불러오는 중...</div>
+        <div id="notice-list" class="notice-list">데이터 로딩 중...</div>
     </div>
     <div class="main-layout">
         <div class="panel panel-blue">
@@ -63,6 +66,7 @@
 </div>
 
 <script>
+    // ✅ GAS 배포 후 생성된 URL을 여기에 정확히 입력하세요
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let db = { notice: [], ment: [], perf: [] };
 
@@ -96,16 +100,15 @@
         document.getElementById('guide-display').innerHTML = found ? `<b>${found.key}</b><br>${found.pos}` : "가이드 내용 표시";
     }
 
-    // ✅ 음성 인식 및 POST 저장
     function startVoice() {
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         rec.lang = 'ko-KR'; rec.start();
         rec.onresult = async (e) => {
             const val = e.results[0][0].transcript.replace(/[^0-9]/g, '');
-            if(val && confirm(val + "건을 시트에 저장할까요?")) {
+            if(val && confirm(val + "건을 저장할까요?")) {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save', value: val }) });
                 alert("저장 완료!");
-                loadData(); // 목록 갱신
+                loadData();
             }
         };
     }
