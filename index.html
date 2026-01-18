@@ -2,21 +2,35 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>카드 상담 멘트 AI</title>
+  <title>카드 상담 멘트 생성기</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family: Arial, sans-serif; background:#f6f7fb; margin:0; padding:20px;}
+    body { font-family: Arial, sans-serif; background:#f5f6f8; }
+    .wrap { max-width:600px; margin:40px auto; background:#fff; padding:30px; border-radius:12px; }
     h1 { text-align:center; }
-    .box { max-width:700px; margin:auto; background:#fff; padding:20px; border-radius:10px;}
-    select, textarea, button { width:100%; margin-top:10px; padding:10px; }
-    .card { background:#eef1ff; padding:12px; margin-top:10px; border-radius:8px;}
+    select, textarea, button {
+      width:100%; padding:12px; margin-top:10px; font-size:14px;
+    }
+    .card { border:1px solid #ddd; border-radius:8px; padding:12px; margin-top:12px; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>카드 상담 멘트 생성기</h1>
+<div class="wrap">
+  <h1>카드 상담 멘트 생성기</h1>
 
-    <label>상황 유형</label>
-    <select id="type"></
+  <label>상황 유형</label>
+  <select id="type"></select>
+
+  <label>고객 상황</label>
+  <textarea id="detail" placeholder="고객 상황 입력"></textarea>
+
+  <button id="gen">멘트 만들기</button>
+
+  <div id="out"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
 
 
