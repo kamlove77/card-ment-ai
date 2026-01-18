@@ -4,64 +4,31 @@
     <meta charset="UTF-8">
     <title>카드 상담 스마트 가이드</title>
     <style>
-        /* 기본 스타일 */
-        body { font-family: 'Malgun Gothic', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; color: #333; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        
-        /* 공지사항 (스크롤 적용) */
         .top-info-bar { border: 1px solid #e0e6ed; padding: 15px; border-radius: 10px; margin-bottom: 20px; background: #fafbfc; }
-        .notice-title { font-weight: bold; color: #007bff; margin-bottom: 10px; display: flex; align-items: center; }
-        #notice-container { max-height: 120px; overflow-y: auto; font-size: 0.95rem; padding-right: 5px; }
-        #notice-container::-webkit-scrollbar { width: 5px; }
-        #notice-container::-webkit-scrollbar-thumb { background: #ccd5db; border-radius: 10px; }
-        .notice-item { padding: 5px 0; border-bottom: 1px solid #f0f2f5; }
-
-        /* 네비게이션 탭 */
+        #notice-container { max-height: 120px; overflow-y: auto; font-size: 0.95rem; }
         .nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        .nav button { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1rem; background: #e9ecef; transition: 0.2s; }
+        .nav button { flex: 1; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: #e9ecef; }
         .nav button.active { background: #007bff; color: white; }
-
-        /* 콘텐츠 카드 */
         .content { display: none; }
         .content.active { display: block; }
         .card { border: 1px solid #eee; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-        
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0; box-sizing: border-box; font-size: 1rem; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0; box-sizing: border-box; }
         .btn-search { background: #6c757d; color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
-        
-        /* 실적 통계 (스크롤 & 제목 고정) */
-        .summary-box { background: #e7f1ff; padding: 18px; border-radius: 10px; text-align: center; margin-bottom: 15px; border: 1px solid #d0e3ff; }
-        
-        /* [중요] 실적 테이블 스크롤 영역 */
-        #perf-list-wrapper { 
-            max-height: 350px; /* 실적 표의 최대 높이 */
-            overflow-y: auto; 
-            border: 1px solid #eee; 
-            border-radius: 8px;
-        }
-        #perf-list-wrapper::-webkit-scrollbar { width: 5px; }
-        #perf-list-wrapper::-webkit-scrollbar-thumb { background: #ccd5db; border-radius: 10px; }
-
+        .summary-box { background: #e7f1ff; padding: 18px; border-radius: 10px; text-align: center; margin-bottom: 15px; }
+        #perf-list-wrapper { max-height: 350px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; }
-        /* [중요] 테이블 헤더 고정 */
-        thead th { 
-            position: sticky; 
-            top: 0; 
-            background: #f8f9fa; 
-            z-index: 10; 
-            padding: 12px; 
-            border-bottom: 2px solid #dee2e6; 
-            font-size: 0.9rem;
-        }
-        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.95rem; }
+        thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 10; padding: 12px; border-bottom: 2px solid #dee2e6; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="top-info-bar">
-        <div class="notice-title">📢 실시간 공지</div>
-        <div id="notice-container">데이터를 불러오는 중입니다...</div>
+        <div style="font-weight:bold; color:#007bff; margin-bottom:5px;">📢 실시간 공지</div>
+        <div id="notice-container">번개보다 빠르게 로딩 중...</div>
     </div>
 
     <div class="nav">
@@ -74,7 +41,7 @@
             <h3>🔍 가이드 검색</h3>
             <input type="text" id="keyword" placeholder="화면번호 또는 키워드 입력">
             <button onclick="searchGuide()" class="btn-search">검색하기</button>
-            <div id="search-res" style="margin-top:15px; padding:15px; background:#f8f9fa; border-radius:8px; min-height:100px; white-space:pre-wrap; border:1px solid #eee;">결과가 여기 표시됩니다.</div>
+            <div id="search-res" style="margin-top:15px; padding:15px; background:#f8f9fa; border-radius:8px; min-height:100px; white-space:pre-wrap;">결과가 여기 표시됩니다.</div>
         </div>
     </div>
 
@@ -82,12 +49,9 @@
         <div class="card">
             <h3>📊 실적 현황</h3>
             <div class="summary-box">이번 달 총 완료: <span id="total-val" style="font-weight:bold; color:#007bff; font-size:1.5rem;">0</span>건</div>
-            
             <div id="perf-list-wrapper">
                 <table>
-                    <thead>
-                        <tr><th>날짜</th><th>콜수</th><th>달성률</th></tr>
-                    </thead>
+                    <thead><tr><th>날짜</th><th>콜수</th><th>달성률</th></tr></thead>
                     <tbody id="perf-list"></tbody>
                 </table>
             </div>
@@ -96,4 +60,52 @@
 </div>
 
 <script>
-    const API_URL = "
+    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    let guideData = [];
+
+    function showTab(m) {
+        document.getElementById('sec-h').classList.toggle('active', m === 'h');
+        document.getElementById('sec-p').classList.toggle('active', m === 'p');
+        document.getElementById('btn-h').classList.toggle('active', m === 'h');
+        document.getElementById('btn-p').classList.toggle('active', m === 'p');
+    }
+
+    async function loadAllData() {
+        const t = new Date().getTime();
+        try {
+            // 딱 한 번의 fetch로 모든 데이터를 가져옵니다!
+            const response = await fetch(`${API_URL}?t=${t}`);
+            const res = await response.json();
+
+            // 1. 공지사항 채우기
+            const nBox = document.getElementById("notice-container");
+            nBox.innerHTML = res.notice.map(i => `<div><b>${i.date}</b>: ${i.content}</div>`).join('');
+
+            // 2. 가이드 데이터 저장
+            guideData = res.ment;
+
+            // 3. 실적 데이터 채우기
+            const pList = document.getElementById("perf-list");
+            let sum = 0;
+            pList.innerHTML = res.perf.map(r => {
+                sum += parseInt(String(r.current).replace(/[^0-9]/g, "")) || 0;
+                return `<tr><td>${r.date}</td><td>${r.current}</td><td>${r.rate}</td></tr>`;
+            }).join('');
+            document.getElementById("total-val").innerText = sum.toLocaleString();
+
+        } catch(e) {
+            document.getElementById("notice-container").innerText = "로딩 실패. 인터넷 연결이나 시트 상태를 확인하세요.";
+        }
+    }
+
+    function searchGuide() {
+        const k = document.getElementById("keyword").value.trim().toLowerCase();
+        if(!k) return;
+        const f = guideData.find(i => String(i.screenNum).toLowerCase().includes(k) || (i.keywords && i.keywords.includes(k)));
+        document.getElementById("search-res").innerHTML = f ? `<strong>[${f.screenNum}]</strong>\n\n${f.text}` : "결과가 없습니다.";
+    }
+
+    window.onload = loadAllData;
+</script>
+</body>
+</html>
