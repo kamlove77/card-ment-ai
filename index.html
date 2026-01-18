@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카드 상담 통합 시스템</title>
+    <title>카드 상담 통합 가이드</title>
     <style>
         :root { --blue: #007bff; --red: #ff4d4f; --bg: #f0f2f5; --yellow: #fff9c4; }
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
         .wrapper { max-width: 1200px; margin: 0 auto; }
 
-        /* 공지사항: 제목 고정 + 내부 스크롤 */
+        /* 공지사항: 제목 고정 + 세로 리스트 스크롤 */
         .notice-container { 
             background: var(--yellow); border-left: 5px solid #fbc02d; 
             margin-bottom: 20px; border-radius: 8px; 
@@ -22,14 +22,16 @@
 
         .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .panel { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: 620px; display: flex; flex-direction: column; }
-        
-        /* 실적 현황: 스크롤 적용 */
+        h2 { font-size: 1.2rem; border-bottom: 2px solid var(--blue); padding-bottom: 10px; margin-top: 0; }
+
+        /* 실적 현황: 스크롤 및 테이블 스타일 */
         .perf-area { margin-top: 20px; flex-grow: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f8f9fa; padding: 12px; border-bottom: 2px solid #dee2e6; position: sticky; top: 0; }
-        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
+        th { background: #f8f9fa; padding: 10px; border-bottom: 2px solid #dee2e6; position: sticky; top: 0; font-size: 0.9rem; }
+        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.95rem; }
 
-        .ment-box, .guide-box { overflow-y: auto; }
+        .ment-box { background: #ffffff; border: 2px solid var(--blue); padding: 20px; border-radius: 12px; flex-grow: 1; font-size: 1.1rem; line-height: 1.7; white-space: pre-wrap; margin-top: 20px; display: none; overflow-y: auto; }
+        .guide-box { background: #fff1f0; border-left: 5px solid var(--red); padding: 15px; border-radius: 10px; height: 140px; overflow-y: auto; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -43,21 +45,27 @@
     <div class="main-layout">
         <div class="panel">
             <h2>📑 상담 멘트 생성기</h2>
-            <select id="ment-select" class="select-box" onchange="updateMentBox(this.value)">
-                <option value="">-- 선택 --</option>
+            <select id="ment-select" style="width:100%; padding:12px; margin-top:10px;" onchange="updateMentBox(this.value)">
+                <option value="">-- 상황 유형 선택 --</option>
             </select>
-            <div id="ment-display" class="ment-box" style="display:none; margin-top:20px; white-space:pre-wrap; border:2px solid var(--blue); padding:15px; border-radius:10px; flex-grow:1;"></div>
+            <div id="ment-display" class="ment-box"></div>
         </div>
 
         <div class="panel">
             <h2>🔍 화면 가이드</h2>
-            <input type="text" id="keyword" class="search-input" placeholder="검색..." onkeyup="searchGuide()" style="width:100%; padding:10px; margin:10px 0;">
-            <div id="guide-display" style="background:#fff1f0; padding:15px; border-radius:10px; height:150px; overflow-y:auto;"></div>
+            <input type="text" id="keyword" placeholder="화면번호 또는 문자 입력..." onkeyup="searchGuide()" style="width:100%; padding:12px; margin-top:10px; border:1px solid #ddd; border-radius:8px;">
+            <div id="guide-display" class="guide-box">번호나 문자를 입력하면 정보가 표시됩니다.</div>
 
-            <h2 style="margin-top:20px;">📊 실적 현황</h2>
+            <h2 style="margin-top:25px;">📊 실적 현황</h2>
             <div class="perf-area">
                 <table>
-                    <thead><tr><th>날짜</th><th>완료</th><th>비율</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>완료</th>
+                            <th>비율</th>
+                            <th style="color:var(--blue);">누적</th> </tr>
+                    </thead>
                     <tbody id="perf-list"></tbody>
                 </table>
             </div>
@@ -66,43 +74,61 @@
 </div>
 
 <script>
+    // ⚠️ 꽃게님의 구글 배포 URL을 여기에 꼭 넣어주세요!
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let db = { notice: [], ment: [], perf: [] };
 
-    async function init() {
+    async function loadData() {
         try {
-            const res = await fetch(API_URL).then(r => r.json());
+            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
             
-            // 공지 렌더링
+            // 공지사항 로드
             document.getElementById('notice-list').innerHTML = db.notice.map(n => 
                 `<div class="notice-item"><span class="notice-date">[${n.date}]</span><span>${n.content}</span></div>`).join('');
             
-            // 드롭다운
+            // 드롭다운 로드
             const select = document.getElementById('ment-select');
-            db.ment.forEach(m => { if(m.type) { const opt = document.createElement('option'); opt.value = m.type; opt.innerText = m.type; select.appendChild(opt); }});
+            db.ment.filter(m => m.type).forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
+            });
 
-            // 실적 렌더링
-            document.getElementById('perf-list').innerHTML = db.perf.map(p => 
-                `<tr><td>${p.date}</td><td>${p.val}건</td><td>${p.rate}</td></tr>`).join('');
-        } catch(e) { document.getElementById('notice-list').innerText = "❌ 데이터 로드 실패 (권한 설정 확인 필요)"; }
+            // ✅ 실적 누적 계산 및 렌더링
+            let cumulativeSum = 0;
+            const perfHtml = db.perf.map(p => {
+                const val = parseInt(p.val) || 0; // C열 숫자값
+                cumulativeSum += val; // 누적 합계 계산
+                return `
+                    <tr>
+                        <td>${p.date}</td>
+                        <td>${p.val}건</td>
+                        <td>${p.rate}</td>
+                        <td style="font-weight:bold; color:var(--blue);">${cumulativeSum.toLocaleString()}건</td>
+                    </tr>
+                `;
+            }).join('');
+            document.getElementById('perf-list').innerHTML = perfHtml;
+
+        } catch(e) { 
+            document.getElementById('notice-list').innerText = "❌ 데이터 로드 실패 (권한 설정 확인 필요)"; 
+        }
     }
-    
-    function updateMentBox(v) {
-        const item = db.ment.find(m => m.type === v);
-        const d = document.getElementById('ment-display');
-        if(item) { d.innerText = item.talk; d.style.display = 'block'; }
+
+    function updateMentBox(val) {
+        const box = document.getElementById('ment-display');
+        const item = db.ment.find(m => m.type === val);
+        if(item && item.talk) { box.innerText = item.talk; box.style.display = 'block'; } else { box.style.display = 'none'; }
     }
-    
+
     function searchGuide() {
-        const q = document.getElementById('keyword').value.toLowerCase();
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        if(!q) { display.innerText = "번호나 문자를 입력하면 정보가 표시됩니다."; return; }
         const found = db.ment.find(m => String(m.num).includes(q) || m.key.toLowerCase().includes(q));
-        document.getElementById('guide-display').innerHTML = found ? `<b>[${found.num}] ${found.key}</b><p>${found.pos}</p>` : "검색 결과 없음";
+        display.innerHTML = found ? `<b>[${found.num}] ${found.key}</b><p style="margin-top:8px;">${found.pos}</p>` : "검색 결과 없음";
     }
-
-    window.onload = init;
+    window.onload = loadData;
 </script>
 </body>
 </html>
-
-
