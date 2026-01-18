@@ -5,46 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>카드 상담 가이드</title>
     <style>
-        :root { --blue-line: #007bff; --blue-bg: #f0f7ff; --red-line: #ff4d4f; --red-bg: #fff5f5; --yellow-bg: #fff9c4; }
-        body { font-family: 'Malgun Gothic', sans-serif; background: #f2f4f7; margin: 0; padding: 10px; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
+        :root { 
+            --blue-line: #007bff; --blue-bg: #eef7ff; 
+            --red-line: #ff4d4f; --red-bg: #fff1f1; 
+            --yellow-bg: #fffbe6; --yellow-line: #ffe58f;
+        }
         
-        /* ✅ 전체 너비 제한: 화면이 옆으로 너무 퍼지지 않게 고정 */
-        .wrapper { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 10px; }
+        body { 
+            font-family: 'Malgun Gothic', sans-serif; background: #f2f4f7; 
+            margin: 0; padding: 10px; height: 100vh; 
+            display: flex; justify-content: center; /* 가운데 정렬 */
+            overflow: hidden; 
+        }
 
-        /* ✅ 공지사항: 노란색 배경 */
+        /* ✅ 너비 핵심: 화면이 옆으로 퍼지지 않게 700px로 제한 */
+        .wrapper { 
+            width: 100%; 
+            max-width: 700px; /* PC에서도 슬림하게 보이게 고정 */
+            display: flex; flex-direction: column; gap: 10px; 
+        }
+
+        /* 공지사항: 선명한 노란색 */
         .notice-container { 
-            background: var(--yellow-bg); border: 2px solid #fbc02d; 
-            border-radius: 10px; height: 90px; padding: 12px; flex-shrink: 0; 
+            background: var(--yellow-bg); border: 2px solid var(--yellow-line); 
+            border-radius: 12px; height: 90px; padding: 12px; flex-shrink: 0; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .notice-list { overflow-y: auto; height: 50px; font-size: 0.9rem; }
-        .notice-item { border-bottom: 1px dotted #d1cca4; padding: 3px 0; }
 
-        /* ✅ 레이아웃: 가로 2단 유지 */
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
+        
+        /* 패널 공통 */
         .panel { 
             background: white; border-radius: 15px; padding: 15px; 
             display: flex; flex-direction: column; flex: 1; min-width: 0; 
             border: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        h2 { font-size: 1rem; margin: 0 0 10px 0; padding-bottom: 5px; border-bottom: 2px solid #eee; }
+        /* 상단 포인트 컬러 바 */
+        .panel-blue { border-top: 5px solid var(--blue-line); }
+        .panel-red { border-top: 5px solid var(--red-line); }
 
-        /* ✅ 상담 멘트 박스: 연하늘색 */
+        h2 { font-size: 0.95rem; margin: 0 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+
+        /* ✅ 상담 멘트 박스: 확실한 연하늘색 */
         .ment-box { 
-            background: var(--blue-bg); border: 2px solid var(--blue-line); 
+            background: var(--blue-bg); border: 1.5px solid #cce5ff; 
             padding: 15px; border-radius: 10px; flex: 1; 
             font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px;
         }
 
-        /* ✅ 화면 가이드 박스: 연분홍색 */
+        /* ✅ 가이드 박스: 확실한 연분홍색 */
         .guide-box { 
-            background: var(--red-bg); border: 2px solid var(--red-line); 
+            background: var(--red-bg); border: 1.5px solid #ffccc7; 
             padding: 12px; height: 70px; overflow-y: auto; 
             margin: 8px 0; font-size: 0.9rem; border-radius: 10px;
         }
         
-        /* ✅ 실적 테이블 */
         .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { background: #f8f9fa; position: sticky; top: 0; padding: 8px; border-bottom: 2px solid #ddd; }
@@ -55,29 +71,28 @@
             background: var(--blue-line); color: white; border: none; padding: 12px; 
             border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; 
         }
-        .voice-btn:active { background: #0056b3; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
     <div class="notice-container">
-        <div style="font-weight:bold; margin-bottom:5px;">📢 공지사항</div>
-        <div id="notice-list" class="notice-list">데이터 로딩 중...</div>
+        <div style="font-weight:bold; color:#856404; margin-bottom:5px;">📢 공지사항</div>
+        <div id="notice-list" style="overflow-y:auto; height:50px; font-size:0.9rem;">로딩 중...</div>
     </div>
 
     <div class="main-layout">
-        <div class="panel">
+        <div class="panel panel-blue">
             <h2>📑 상담 멘트</h2>
-            <select id="ment-select" style="width:100%; padding:8px; border-radius: 5px; border: 1px solid #ccc;" onchange="updateMentBox(this.value)">
+            <select id="ment-select" style="width:100%; padding:8px;" onchange="updateMentBox(this.value)">
                 <option value="">-- 상황 선택 --</option>
             </select>
             <div id="ment-display" class="ment-box">상황을 선택하세요.</div>
         </div>
 
-        <div class="panel">
+        <div class="panel panel-red">
             <h2>📊 실적 및 가이드</h2>
-            <input type="text" id="keyword" placeholder="번호 입력..." style="width:100%; padding:8px; border-radius: 5px; border: 1px solid #ccc;" onkeyup="searchGuide()">
+            <input type="text" id="keyword" placeholder="번호 입력..." style="width:100%; padding:8px;" onkeyup="searchGuide()">
             <div id="guide-display" class="guide-box">가이드 내용 표시</div>
             <div class="perf-area">
                 <table>
@@ -98,7 +113,7 @@
         try {
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
-            document.getElementById('notice-list').innerHTML = res.notice.map(n => `<div class="notice-item"><span>[${n.date}] ${n.content}</span></div>`).join('');
+            document.getElementById('notice-list').innerHTML = res.notice.map(n => `<div>[${n.date}] ${n.content}</div>`).join('');
             const select = document.getElementById('ment-select');
             select.innerHTML = '<option value="">-- 상황 선택 --</option>';
             res.ment.filter(m => m.type).forEach(m => {
