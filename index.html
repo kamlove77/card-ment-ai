@@ -152,29 +152,34 @@
     const q = document.getElementById('keyword').value.toLowerCase().trim();
     const display = document.getElementById('guide-display');
     
+    // 1. 검색창이 비어있으면 즉시 초기화하고 종료
     if (!q) {
         display.innerHTML = "검색 결과가 표시됩니다.";
         return;
     }
 
-    // ✅ 모든 열(번호, 키워드, 멘트, 가이드)을 다 뒤져서 검색어가 포함된 걸 찾습니다.
-    const results = db.ment.filter(m => {
-        const num = String(m.num || "").toLowerCase();
-        const key = String(m.key || "").toLowerCase();
-        const talk = String(m.talk || "").toLowerCase(); // 상담 멘트 열 검색 추가
-        const pos = String(m.pos || "").toLowerCase();   // 가이드 내용 열 검색 추가
+    // 2. 검색 필터링 (빈 데이터는 철저히 제외)
+    let results = db.ment.filter(m => {
+        // 각 열의 값이 비어있지 않은지 확인 후 소문자 변환
+        const num = m.num ? String(m.num).toLowerCase() : "";
+        const key = m.key ? String(m.key).toLowerCase() : "";
+        const pos = m.pos ? String(m.pos).toLowerCase() : "";
+        const talk = m.talk ? String(m.talk).toLowerCase() : "";
         
-        // 검색어가 어느 한 곳이라-도 포함되어 있으면 통과!
-        const isMatch = num.includes(q) || key.includes(q) || talk.includes(q) || pos.includes(q);
+        // 검색어가 실제로 들어있는지 확인
+        const hasQ = (num.includes(q) || key.includes(q) || pos.includes(q) || talk.includes(q));
         
-        // '인증' 검색 시 '미인증' 가이드가 섞여서 방해하는 것만 방지
-        if (q === "인증" && key.includes("미인증")) return false;
+        // ⚠️ 핵심: 검색어가 포함되어 있지 않으면 무조건 탈락! (빈 칸 방지)
+        if (!hasQ) return false;
+
+        // '인증' 검색 시 '미인증' 차단 로직 유지
+        if (q === "인증" && key === "미인증") return false;
         
-        return isMatch;
+        return true;
     });
 
+    // 3. 화면 출력
     if (results.length > 0) {
-        // ✅ 검색 결과를 가이드 박스에 예쁘게 출력
         display.innerHTML = results.map(found => `
             <div style="margin-bottom: 15px; border-bottom: 1px dashed #ffccc7; padding-bottom: 10px;">
                 <b style="color:#333; font-size:1rem;">[${found.num || ''}] ${found.key || ''}</b><br>
@@ -183,7 +188,7 @@
         `).join('');
         display.scrollTop = 0;
     } else {
-        display.innerHTML = "<span style='color:#999;'>결과가 없습니다. '체크'나 '영어'처럼 짧게 입력해 보세요.</span>";
+        display.innerHTML = "<span style='color:#999;'>결과가 없습니다.</span>";
     }
 }
     function startVoice() {
@@ -202,6 +207,7 @@
 </script>
 </body>
 </html>
+
 
 
 
