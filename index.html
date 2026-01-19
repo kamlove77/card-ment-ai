@@ -153,23 +153,25 @@
     const display = document.getElementById('guide-display');
     
     if (!q) {
-        display.innerHTML = "검색어(키워드/멘트)를 입력하세요.";
+        display.innerHTML = "검색어를 입력하세요.";
         return;
     }
 
-    // ✅ 오직 B, C, D열에 해당하는 데이터만 검색합니다.
+    // ✅ 필터링 전용 데이터를 따로 만듭니다. (E열인 pos를 제외한 가짜 데이터 생성)
     const results = db.ment.filter(m => {
-        // 데이터가 없는 경우를 대비해 빈 문자열 처리
-        const key = m.key ? String(m.key).toLowerCase() : "";   // B열: 키워드
-        const talk = m.talk ? String(m.talk).toLowerCase() : ""; // C열: 상담멘트
-        const talk2 = m.talk2 ? String(m.talk2).toLowerCase() : ""; // D열: 추가멘트 (시트 확인 필요)
+        // 검색 대상에서 E열(pos)은 아예 빼고 B, C, D열만 합칩니다.
+        const searchTarget = [
+            String(m.key || "").toLowerCase(),   // B열
+            String(m.talk || "").toLowerCase(),  // C열
+            String(m.talk2 || "").toLowerCase()  // D열
+        ].join(" "); // 열들을 하나로 합쳐서 검색
 
-        // ❌ num(A열)과 pos(E열)는 조건에서 아예 뺐습니다.
-        const isMatch = key.includes(q) || talk.includes(q) || talk2.includes(q);
-        
-        // '인증' 검색 시 '미인증' 차단 로직 유지
-        if (q === "인증" && key === "미인증") return false;
-        
+        // ✅ 검색어가 B, C, D열 합친 곳에 들어있는지 확인 (E열은 아예 보지도 않음)
+        const isMatch = searchTarget.includes(q);
+
+        // '인증' 검색 시 '미인증' 방어
+        if (q === "인증" && String(m.key).toLowerCase() === "미인증") return false;
+
         return isMatch;
     });
 
@@ -182,7 +184,7 @@
         `).join('');
         display.scrollTop = 0;
     } else {
-        display.innerHTML = "<span style='color:#999;'>B, C, D열에 일치하는 내용이 없습니다.</span>";
+        display.innerHTML = "<span style='color:#999;'>B, C, D열에 일치하는 결과가 없습니다.</span>";
     }
 }
     function startVoice() {
@@ -201,6 +203,7 @@
 </script>
 </body>
 </html>
+
 
 
 
