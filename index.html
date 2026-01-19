@@ -3,63 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>카드 상담 가이드</title>
+    <title>카드 상담 가이드 (보안)</title>
     <style>
         :root { --bg: #f2f4f7; --yellow-bg: #fffbe6; --border-grey: #ddd; --blue: #007bff; }
+        
+        /* ✅ 보안을 위해 초기 화면 숨김 */
+        #main-content { display: none; }
+        
         body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
         
-        .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
+        /* 로그인 화면 스타일 */
+        #login-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: fit-content; margin-top: 100px;
+        }
+        #login-screen input { padding: 12px; font-size: 1rem; border-radius: 8px; border: 1px solid #ddd; width: 220px; margin-bottom: 10px; text-align: center; }
+        #login-screen button { padding: 10px 25px; background: var(--blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* ✅ 공지사항 박스: 5줄 이상 보이도록 높이 유지 */
+        .wrapper { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* ✅ 공지사항: 5줄 이상 보장 (230px) */
         .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 230px; padding: 12px; flex-shrink: 0; display: flex; flex-direction: column; box-sizing: border-box; }
         .notice-title { font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 0.9rem; }
         .notice-list { overflow-y: auto; flex: 1; }
-        
         .notice-item { display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1.5px dashed #ffd666 !important; width: 100%; box-sizing: border-box; }
-        .notice-item:last-child { border-bottom: none !important; }
-        
-        /* ✅ 날짜: 흰색 박스 제거 깔끔하게 */
-        .notice-date { color: #856404; font-weight: bold; margin-right: 12px; font-size: 0.85rem; flex-shrink: 0; background: none !important; border: none !important; padding: 2px 0 !important; }
-        .notice-content { font-size: 0.9rem; line-height: 1.5; color: #444; flex: 1; white-space: normal !important; word-break: break-all; }
+        .notice-date { color: #856404; font-weight: bold; margin-right: 12px; font-size: 0.85rem; flex-shrink: 0; }
+        .notice-content { font-size: 0.9rem; line-height: 1.5; color: #444; flex: 1; word-break: break-all; }
 
         .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
-        
         .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid var(--border-grey); }
-
         h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; color: #333; }
         
-        /* ✅ 검색창: 박스 밖으로 튀어나오지 않게 설정 */
+        /* ✅ 상담 멘트 박스: 가독성 및 긴 내용 처리 최적화 */
+        .ment-box { 
+            background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; 
+            font-size: 1.05rem; line-height: 1.7; overflow-y: auto; margin-top: 10px; 
+            white-space: pre-wrap; /* ✅ 시트의 줄바꿈을 그대로 표시 */
+            word-break: break-all; color: #222;
+        }
+        
         #keyword { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 8px; border: 1.2px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; }
-        
-        .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
-        
-        /* ✅ 가이드 박스: 빨간색 강조 유지 */
         .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 80px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; line-height: 1.4; }
         
         .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { background: #f1f3f5 !important; color: #495057 !important; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #dee2e6; font-weight: bold; }
-        td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; color: #333; background-color: #ffffff !important; }
+        td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; color: #333; }
         .cum-cell { font-weight: bold; color: #000 !important; background-color: #fafafa !important; }
 
         .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
         
-        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
 </head>
 <body>
-<div class="wrapper">
+
+<div id="login-screen">
+    <h3 style="margin-top:0;">🔐 보안 접속</h3>
+    <p style="font-size:0.85rem; color:#666;">비밀번호를 입력해주세요.</p>
+    <input type="password" id="pw-input" placeholder="비밀번호" onkeypress="if(event.keyCode==13) checkLogin()">
+    <button onclick="checkLogin()">입장하기</button>
+</div>
+
+<div id="main-content" class="wrapper">
     <div class="notice-container">
         <div class="notice-title">📢 공지사항</div>
-        <div id="notice-list" class="notice-list">데이터 불러오는 중...</div>
+        <div id="notice-list" class="notice-list">로딩 중...</div>
     </div>
     
     <div class="main-layout">
         <div class="panel">
             <h2>📑 상담 멘트</h2>
-            <select id="ment-select" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;" onchange="updateMentBox(this.value)">
-                <option value="">-- 상황 선택 --</option>
+            <select id="ment-select" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" onchange="updateMentBox(this.value)">
+                <option value="">-- 상황을 선택하세요 --</option>
             </select>
             <div id="ment-display" class="ment-box">상황을 선택하세요.</div>
         </div>
@@ -67,7 +85,7 @@
         <div class="panel">
             <h2>📊 실적 및 가이드</h2>
             <input type="text" id="keyword" placeholder="화면번호/키워드 검색..." onkeyup="searchGuide()">
-            <div id="guide-display" class="guide-box">가이드 내용 표시</div>
+            <div id="guide-display" class="guide-box">검색 결과가 표시됩니다.</div>
             <div class="perf-area">
                 <table>
                     <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
@@ -80,10 +98,23 @@
 </div>
 
 <script>
+    // ✅ 설정할 비밀번호 (꽃게님만 아는 것으로 수정하세요)
+    const MY_PASSWORD = "591977y"; 
+
+    function checkLogin() {
+        const input = document.getElementById('pw-input').value;
+        if(input === MY_PASSWORD) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'flex';
+            loadData();
+        } else {
+            alert("비밀번호가 올바르지 않습니다.");
+        }
+    }
+
     const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let db = { notice: [], ment: [], perf: [] };
 
-    // 날짜 형식을 "월/일"로 변환하는 함수
     function formatDate(dateStr) {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return dateStr;
@@ -95,7 +126,6 @@
             const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
             db = res;
             
-            // 공지사항 렌더링
             document.getElementById('notice-list').innerHTML = res.notice.map(n => `
                 <div class="notice-item">
                     <span class="notice-date">${formatDate(n.date)}</span>
@@ -120,29 +150,26 @@
 
     function updateMentBox(v) {
         const item = db.ment.find(m => m.type === v);
-        document.getElementById('ment-display').innerText = item ? item.talk : "상황을 선택하세요.";
+        const display = document.getElementById('ment-display');
+        if (item) {
+            display.innerText = item.talk; 
+            display.scrollTop = 0;
+        } else {
+            display.innerText = "상황을 선택하세요.";
+        }
     }
 
-    // ✅ 가이드 검색 기능: [화면번호]와 키워드가 모두 나오도록 수정
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
-        if (!q) {
-            document.getElementById('guide-display').innerHTML = "가이드 내용 표시";
-            return;
-        }
-
-        const found = db.ment.find(m => 
-            String(m.num).includes(q) || 
-            (m.key && m.key.toLowerCase().includes(q))
-        );
-
+        if (!q) { document.getElementById('guide-display').innerHTML = "검색 결과가 표시됩니다."; return; }
+        const found = db.ment.find(m => String(m.num).includes(q) || (m.key && m.key.toLowerCase().includes(q)));
         if (found) {
             document.getElementById('guide-display').innerHTML = `
                 <b style="color:#333;">[${found.num || ''}] ${found.key || ''}</b><br>
                 <div style="margin-top:5px;">${found.pos || ''}</div>
             `;
         } else {
-            document.getElementById('guide-display').innerHTML = "검색 결과가 없습니다.";
+            document.getElementById('guide-display').innerHTML = "결과 없음";
         }
     }
 
@@ -159,7 +186,6 @@
             }
         };
     }
-    window.onload = loadData;
 </script>
 </body>
 </html>
