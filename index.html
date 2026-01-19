@@ -148,38 +148,33 @@
     }
 
     // ✅ 다중 결과 지원 및 정확한 키워드 매칭 검색 함수
-    function searchGuide() {
+   function searchGuide() {
     const q = document.getElementById('keyword').value.toLowerCase().trim();
     const display = document.getElementById('guide-display');
     
-    // 1. 검색창이 비어있으면 즉시 초기화하고 종료
     if (!q) {
         display.innerHTML = "검색 결과가 표시됩니다.";
         return;
     }
 
-    // 2. 검색 필터링 (빈 데이터는 철저히 제외)
-    let results = db.ment.filter(m => {
-        // 각 열의 값이 비어있지 않은지 확인 후 소문자 변환
+    // ✅ 검색 범위를 '번호(num)'와 '키워드(key)' 열로만 한정합니다!
+    const results = db.ment.filter(m => {
         const num = m.num ? String(m.num).toLowerCase() : "";
         const key = m.key ? String(m.key).toLowerCase() : "";
-        const pos = m.pos ? String(m.pos).toLowerCase() : "";
-        const talk = m.talk ? String(m.talk).toLowerCase() : "";
         
-        // 검색어가 실제로 들어있는지 확인
-        const hasQ = (num.includes(q) || key.includes(q) || pos.includes(q) || talk.includes(q));
+        // 검색어가 번호나 키워드 칸에 들어있는지만 확인
+        const isMatch = num.includes(q) || key.includes(q);
         
-        // ⚠️ 핵심: 검색어가 포함되어 있지 않으면 무조건 탈락! (빈 칸 방지)
-        if (!hasQ) return false;
-
         // '인증' 검색 시 '미인증' 차단 로직 유지
         if (q === "인증" && key === "미인증") return false;
         
-        return true;
+        return isMatch;
     });
 
-    // 3. 화면 출력
     if (results.length > 0) {
+        // 정확도순 정렬 (키워드 일치 우선)
+        results.sort((a, b) => (String(a.key) === q ? -1 : 1));
+
         display.innerHTML = results.map(found => `
             <div style="margin-bottom: 15px; border-bottom: 1px dashed #ffccc7; padding-bottom: 10px;">
                 <b style="color:#333; font-size:1rem;">[${found.num || ''}] ${found.key || ''}</b><br>
@@ -188,7 +183,7 @@
         `).join('');
         display.scrollTop = 0;
     } else {
-        display.innerHTML = "<span style='color:#999;'>결과가 없습니다.</span>";
+        display.innerHTML = "<span style='color:#999;'>정확한 번호나 키워드를 입력하세요.</span>";
     }
 }
     function startVoice() {
@@ -207,6 +202,7 @@
 </script>
 </body>
 </html>
+
 
 
 
