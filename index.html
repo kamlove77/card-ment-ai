@@ -149,28 +149,50 @@
 
     // ✅ 다중 결과 지원 및 정확한 키워드 매칭 검색 함수
     function searchGuide() {
-        const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const display = document.getElementById('guide-display');
-        
-        if (!q) { display.innerHTML = "검색 결과가 표시됩니다."; return; }
-
-        const results = db.ment.filter(m => 
-            String(m.num) === q || 
-            (m.key && m.key.toLowerCase() === q)
-        );
-
-        if (results.length > 0) {
-            display.innerHTML = results.map(found => `
-                <div style="margin-bottom: 15px; border-bottom: 1px dashed #ffccc7; padding-bottom: 10px;">
-                    <b style="color:#333; font-size:1rem;">[${found.num || ''}] ${found.key || ''}</b><br>
-                    <div style="margin-top:8px; white-space: pre-wrap; color: #a8071a;">${found.pos || ''}</div>
-                </div>
-            `).join('');
-            display.scrollTop = 0;
-        } else {
-            display.innerHTML = "<span style='color:#999;'>정확한 번호나 키워드(인증/미인증)를 입력하세요.</span>";
-        }
+    const q = document.getElementById('keyword').value.toLowerCase().trim();
+    const display = document.getElementById('guide-display');
+    
+    if (!q) {
+        display.innerHTML = "검색 결과가 표시됩니다.";
+        return;
     }
+
+    // ✅ 모든 열(번호, 키워드, 내용)에서 검색어가 포함된 것을 다 찾습니다.
+    const results = db.ment.filter(m => {
+        const num = String(m.num || "").toLowerCase();
+        const key = String(m.key || "").toLowerCase();
+        const pos = String(m.pos || "").toLowerCase(); // 내용에서도 검색 가능하게 추가
+        
+        // 1. 단어가 포함되어 있는지 확인
+        const isMatch = num.includes(q) || key.includes(q) || pos.includes(q);
+        
+        // 2. '인증' 검색 시 '미인증'만 나오는 경우를 방지 (정확히 '인증'일 때만 필터)
+        if (q === "인증" && key === "미인증") return false;
+        
+        return isMatch;
+    });
+
+    if (results.length > 0) {
+        // ✅ 정확도가 높은 순서대로 정렬 (키워드에 포함된 게 먼저 보이게)
+        results.sort((a, b) => {
+            const aKey = String(a.key || "").toLowerCase();
+            const bKey = String(b.key || "").toLowerCase();
+            if (aKey === q) return -1;
+            if (bKey === q) return 1;
+            return aKey.indexOf(q) - bKey.indexOf(q);
+        });
+
+        display.innerHTML = results.map(found => `
+            <div style="margin-bottom: 15px; border-bottom: 1px dashed #ffccc7; padding-bottom: 10px;">
+                <b style="color:#333; font-size:1rem;">[${found.num || ''}] ${found.key || ''}</b><br>
+                <div style="margin-top:8px; white-space: pre-wrap; color: #a8071a;">${found.pos || ''}</div>
+            </div>
+        `).join('');
+        display.scrollTop = 0;
+    } else {
+        display.innerHTML = "<span style='color:#999;'>검색 결과가 없습니다. 다른 단어로 검색해 보세요.</span>";
+    }
+}
 
     function startVoice() {
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -188,3 +210,4 @@
 </script>
 </body>
 </html>
+
