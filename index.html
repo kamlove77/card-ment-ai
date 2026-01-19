@@ -157,35 +157,35 @@
         return;
     }
 
-    // ✅ 번호(num), 키워드(key), 가이드 내용(pos) 중 어디라도 포함되면 다 찾기!
+    // ✅ 모든 열(번호, 키워드, 멘트, 가이드)을 다 뒤져서 검색어가 포함된 걸 찾습니다.
     const results = db.ment.filter(m => {
         const num = String(m.num || "").toLowerCase();
         const key = String(m.key || "").toLowerCase();
-        const pos = String(m.talk || "").toLowerCase(); // 상담 멘트 내용에서도 검색
-        const guidePos = String(m.pos || "").toLowerCase(); // 가이드 내용에서도 검색
+        const talk = String(m.talk || "").toLowerCase(); // 상담 멘트 열 검색 추가
+        const pos = String(m.pos || "").toLowerCase();   // 가이드 내용 열 검색 추가
         
-        // 검색어가 어느 한 곳이라도 포함되어 있는지 확인
-        const isMatch = num.includes(q) || key.includes(q) || pos.includes(q) || guidePos.includes(q);
+        // 검색어가 어느 한 곳이라-도 포함되어 있으면 통과!
+        const isMatch = num.includes(q) || key.includes(q) || talk.includes(q) || pos.includes(q);
         
         // '인증' 검색 시 '미인증' 가이드가 섞여서 방해하는 것만 방지
-        if (q === "인증" && key === "미인증") return false;
+        if (q === "인증" && key.includes("미인증")) return false;
         
         return isMatch;
     });
 
     if (results.length > 0) {
+        // ✅ 검색 결과를 가이드 박스에 예쁘게 출력
         display.innerHTML = results.map(found => `
             <div style="margin-bottom: 15px; border-bottom: 1px dashed #ffccc7; padding-bottom: 10px;">
                 <b style="color:#333; font-size:1rem;">[${found.num || ''}] ${found.key || ''}</b><br>
-                <div style="margin-top:8px; white-space: pre-wrap; color: #a8071a;">${found.pos || ''}</div>
+                <div style="margin-top:8px; white-space: pre-wrap; color: #a8071a;">${found.pos || found.talk || ''}</div>
             </div>
         `).join('');
         display.scrollTop = 0;
     } else {
-        display.innerHTML = "<span style='color:#999;'>검색 결과가 없습니다. '체크' 등 짧은 단어로 검색해 보세요.</span>";
+        display.innerHTML = "<span style='color:#999;'>결과가 없습니다. '체크'나 '영어'처럼 짧게 입력해 보세요.</span>";
     }
 }
-
     function startVoice() {
         const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         rec.lang = 'ko-KR'; 
@@ -202,5 +202,6 @@
 </script>
 </body>
 </html>
+
 
 
