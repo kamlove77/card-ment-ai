@@ -1,113 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카드 상담 가이드</title>
-    <style>
-        /* 원래의 화면 분할 스타일 유지 */
-        body { font-family: sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; background: #fdf2f2; }
-        
-        /* 왼쪽 리스트 영역 */
-        .list-container { width: 35%; border-right: 2px solid #ffccc7; overflow-y: auto; background: white; padding: 10px; }
-        .list-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
-        .list-item:hover { background: #fff1f0; }
-
-        /* 오른쪽 검색 및 표시 영역 */
-        .search-container { width: 65%; display: flex; flex-direction: column; padding: 15px; }
-        #keyword { width: 100%; padding: 12px; border: 2px solid #ffccc7; border-radius: 8px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; }
-        #guide-display { flex-grow: 1; background: white; padding: 20px; border-radius: 8px; border: 1px solid #ffccc7; overflow-y: auto; line-height: 1.6; white-space: pre-wrap; }
-        
-        .result-item { margin-bottom: 25px; border-bottom: 1px dashed #ffa39e; padding-bottom: 15px; }
-        .result-item b { color: #cf1322; font-size: 1.1rem; }
-        .result-content { margin-top: 10px; color: #333; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 상담 가이드</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 10px; background: #fdf2f2; }
+        .search-container { position: sticky; top: 0; background: #fdf2f2; padding: 10px 0; z-index: 100; }
+        #keyword { width: 100%; padding: 12px; border: 2px solid #ffccc7; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        #guide-display { background: white; padding: 15px; border-radius: 8px; border: 1px solid #ffccc7; min-height: 200px; line-height: 1.6; }
+        .result-item { margin-bottom: 20px; border-bottom: 1px dashed #ffa39e; padding-bottom: 15px; }
+        .result-item b { color: #cf1322; font-size: 1.1rem; }
+        .result-content { margin-top: 10px; white-space: pre-wrap; color: #333; }
+    </style>
 </head>
 <body>
 
-<div class="list-container" id="side-list">
-    데이터를 불러오는 중...
+<div class="search-container">
+    <input type="text" id="keyword" onkeyup="searchGuide()" placeholder="키워드(B), 멘트(C, D)를 입력하세요..." autofocus>
 </div>
 
-<div class="search-container">
-    <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드(B), 멘트(C, D)만 검색됩니다..." autofocus>
-    <div id="guide-display">왼쪽 리스트를 선택하거나 검색어를 입력하세요.</div>
-</div>
+<div id="guide-display">검색 결과가 여기에 표시됩니다.</div>
 
 <script>
-    let db = { ment: [] };
+    // ✅ 데이터 구조 예시 (실제 데이터는 구글 시트에서 가져옴)
+    let db = { ment: [] };
 
-    // 1. 데이터 로드 및 왼쪽 리스트 초기화
-    function loadData() {
-        if (typeof google !== 'undefined') {
-            google.script.run.withSuccessHandler(function(data) {
-                db.ment = data;
-                renderSideList(data); // 왼쪽 리스트 그리기
-                document.getElementById('guide-display').innerHTML = "검색 결과가 여기에 표시됩니다.";
-            }).getSpreadsheetData();
-        }
-    }
+    // 1. 구글 시트 데이터 로드 (GAS 연결 부분)
+    function loadData() {
+        google.script.run.withSuccessHandler(function(data) {
+            db.ment = data;
+        }).getSpreadsheetData();
+    }
 
-    // 왼쪽 사이드바 리스트 생성 함수
-    function renderSideList(items) {
-        const sideList = document.getElementById('side-list');
-        sideList.innerHTML = items.map((m, index) => `
-            <div class="list-item" onclick="showDetail(${index})">
-                <b>[${m.num || ''}]</b> ${m.key || ''}
-            </div>
-        `).join('');
-    }
+    // 2. 핵심 검색 함수 (B, C, D열만 검색)
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        
+        if (!q) {
+            display.innerHTML = "번호나 키워드를 입력하세요.";
+            return;
+        }
 
-    // 리스트 클릭 시 상세 내용 표시
-    function showDetail(index) {
-        const item = db.ment[index];
-        const display = document.getElementById('guide-display');
-        display.innerHTML = `
-            <div class="result-item">
-                <b>[${item.num || ''}] ${item.key || ''}</b>
-                <div class="result-content">${item.pos || item.talk || ''}</div>
-            </div>
-        `;
-    }
+        // ✅ 검색 필터: E열(pos)은 아예 변수로 만들지도 않고 검사 대상에서 제외
+        const results = db.ment.filter(m => {
+            const colB = m.key ? String(m.key).toLowerCase() : "";   // 키워드
+            const colC = m.talk ? String(m.talk).toLowerCase() : ""; // 상담멘트 1
+            const colD = m.talk2 ? String(m.talk2).toLowerCase() : ""; // 상담멘트 2
 
-    // 2. 핵심 검색 함수 (B, C, D열만 검색하도록 철저히 제한)
-    function searchGuide() {
-        const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const display = document.getElementById('guide-display');
-        
-        if (!q) {
-            display.innerHTML = "검색어를 입력하세요.";
-            return;
-        }
+            // ✅ B, C, D열 중 하나라도 검색어가 포함되면 통과
+            const isMatch = colB.includes(q) || colC.includes(q) || colD.includes(q);
 
-        const results = db.ment.filter(m => {
-            const colB = m.key ? String(m.key).toLowerCase() : "";   // 키워드
-            const colC = m.talk ? String(m.talk).toLowerCase() : ""; // 상담멘트 1
-            const colD = m.talk2 ? String(m.talk2).toLowerCase() : ""; // 상담멘트 2
+            // '인증' 검색 시 '미인증' 제외 로직 유지
+            if (q === "인증" && colB === "미인증") return false;
 
-            // ✅ 검색어 포함 여부 확인 (E열 m.pos는 아예 검색 대상에서 제외됨)
-            const isMatch = colB.includes(q) || colC.includes(q) || colD.includes(q);
+            return isMatch;
+        });
 
-            if (q === "인증" && colB === "미인증") return false;
+        // 3. 화면 결과 출력
+        if (results.length > 0) {
+            display.innerHTML = results.map(found => `
+                <div class="result-item">
+                    <b>[${found.num || ''}] ${found.key || ''}</b>
+                    <div class="result-content">${found.pos || found.talk || ''}</div>
+                </div>
+            `).join('');
+            display.scrollTop = 0;
+        } else {
+            display.innerHTML = "<span style='color:#999;'>일치하는 키워드가 없습니다.</span>";
+        }
+    }
 
-            return isMatch;
-        });
-
-        if (results.length > 0) {
-            display.innerHTML = results.map(found => `
-                <div class="result-item">
-                    <b>[${found.num || ''}] ${found.key || ''}</b>
-                    <div class="result-content">${found.pos || found.talk || ''}</div>
-                </div>
-            `).join('');
-            display.scrollTop = 0;
-        } else {
-            display.innerHTML = "<span style='color:#999;'>일치하는 결과가 없습니다.</span>";
-        }
-    }
-
-    window.onload = loadData;
+    // 초기 데이터 로드 호출
+    window.onload = loadData;
 </script>
 
 </body>
-</html>
+</html> 원래 이거였어
