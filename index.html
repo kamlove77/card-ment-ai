@@ -2,68 +2,48 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카드 상담 가이드</title>
+    <title>카드 상담 가이드 - 통합판</title>
     <style>
-        /* ✅ 모든 디자인 요소 제거, 왼쪽 정렬에 올인 */
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 5px; color: #000; background: #fff; text-align: left; }
-        .container { width: 100%; display: flex; flex-direction: column; gap: 5px; }
-        
-        /* 공지사항: 상단에 딱 붙여서 한 줄로 */
-        #notice-content { font-size: 13px; border-bottom: 1px solid #000; padding: 3px 0; margin-bottom: 5px; }
-
-        /* 메인 레이아웃: 좌/우 반반 */
-        .main-layout { display: flex; gap: 10px; }
-        .left-panel { width: 48%; } 
-        .right-panel { width: 48%; }
-
-        /* 타이틀: 왼쪽 정렬 */
-        .title { font-weight: bold; font-size: 14px; margin: 2px 0; }
-
-        input, select { width: 100%; padding: 5px; border: 1px solid #999; font-size: 14px; margin-bottom: 5px; text-align: left; }
-        
-        /* ✅ 결과창: 캡처처럼 벙벙하지 않게 여백 0, 왼쪽 정렬 */
-        .display-area { 
-            height: 450px; 
-            border: 1px solid #999; 
-            padding: 8px; 
-            overflow-y: auto; 
-            text-align: left; 
-            font-size: 14px;
-            white-space: pre-wrap;
-            background: #fff;
-        }
-
-        /* 결과 유닛: 다닥다닥 붙여서 가독성 확보 */
-        .result-unit { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
-        .result-unit b { color: #d32f2f; }
-
-        /* ✅ 실적 테이블: 글씨만 나오게 최소화 */
-        .perf-area { width: 220px; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { border: 1px solid #999; padding: 3px 6px; text-align: left; }
-        th { background: #f0f0f0; }
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #444; }
+        .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .card { background: white; border-radius: 10px; padding: 20px; border: 1px solid #d9d9d9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .card-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 15px; border-left: 4px solid #8c8c8c; padding-left: 10px; }
+        .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
+        .left-panel { flex: 0.8; min-width: 320px; } 
+        .right-panel { flex: 1.2; min-width: 350px; display: flex; flex-direction: column; gap: 20px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; outline: none; }
+        .display-area { min-height: 250px; background: #fafafa; border-radius: 5px; padding: 15px; white-space: pre-wrap; margin-top: 10px; font-size: 15px; border: 1px solid #e8e8e8; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th { background: #f0f0f0; padding: 10px; border: 1px solid #d9d9d9; }
+        td { padding: 10px; border: 1px solid #e8e8e8; text-align: center; background: white; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <div id="notice-content">데이터 로딩 중...</div>
-
+    <div class="card">
+        <div class="card-title">📢 공지사항</div>
+        <div id="notice-content" style="font-size: 14px; line-height: 1.6;">데이터를 불러오는 중입니다...</div>
+    </div>
     <div class="main-layout">
         <div class="left-panel">
-            <div class="title">📝 상담 멘트 (A→E)</div>
-            <select id="ment-select" onchange="updateMent()"><option>로딩 중...</option></select>
-            <div id="ment-display" class="display-area" style="height: 300px;">유형을 선택해 주세요.</div>
+            <div class="card">
+                <div class="card-title">📝 멘트 생성기 (A→E)</div>
+                <select id="ment-select" onchange="updateMent()"><option>로딩 중...</option></select>
+                <div id="ment-display" class="display-area">유형을 선택하세요.</div>
+            </div>
         </div>
-
         <div class="right-panel">
-            <div class="title">🔍 가이드 검색 (B,C→D)</div>
-            <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호나 키워드 입력...">
-            <div id="guide-display" class="display-area">검색어를 입력해 주세요.</div>
-
-            <div class="perf-area">
-                <div class="title" style="font-size:12px;">📊 실적</div>
-                <table id="perf-table"></table>
+            <div class="card">
+                <div class="card-title">🔍 가이드 검색 (B,C→D)</div>
+                <input type="text" id="keyword" oninput="searchGuide()" placeholder="화면번호(B)나 키워드(C) 입력...">
+                <div id="guide-display" class="display-area">검색 결과가 표시됩니다.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 실적 현황</div>
+                <table>
+                    <thead><tr><th>날짜</th><th>실적</th><th>비율</th></tr></thead>
+                    <tbody id="perf-table"><tr><td colspan="3">로딩 중...</td></tr></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -75,41 +55,37 @@
 
     async function loadData() {
         try {
-            const res = await fetch(url + "?t=" + new Date().getTime());
+            const res = await fetch(url + "?t=" + new Date().getTime()); // 캐시 방지
             db = await res.json();
             initApp();
-        } catch (e) { document.getElementById('notice-content').innerText = "로드 실패"; }
+        } catch (e) { document.getElementById('notice-content').innerText = "데이터 연결 실패!"; }
     }
 
     function initApp() {
-        if(db.notice.length) document.getElementById('notice-content').innerText = db.notice.map(n => `[${n.date}] ${n.content}`).join(' / ');
+        if(db.notice.length) document.getElementById('notice-content').innerHTML = db.notice.map(n => `[${n.date}] ${n.content}`).join('<br>');
         
         const sel = document.getElementById('ment-select');
         const types = [...new Set(db.ment.map(m => m.type))].filter(Boolean);
         sel.innerHTML = '<option value="">-- 유형 선택 --</option>';
         types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
 
-        if(db.perf.length) {
-            let html = '<tr><th>날짜</th><th>실적</th><th>비율</th></tr>';
-            html += db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
-            document.getElementById('perf-table').innerHTML = html;
-        }
-        document.getElementById('guide-display').innerText = "데이터 연결 완료";
+        if(db.perf.length) document.getElementById('perf-table').innerHTML = db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
+        document.getElementById('guide-display').innerText = "로딩 완료! 검색을 시작하세요.";
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => m.type === val);
-        document.getElementById('ment-display').innerText = found ? found.talk : "";
+        document.getElementById('ment-display').textContent = found ? found.talk : "멘트가 없습니다.";
     }
 
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const display = document.getElementById('guide-display');
-        if (!q) { display.innerText = ""; return; }
+        if (!q) { document.getElementById('guide-display').innerText = "결과가 표시됩니다."; return; }
         const results = db.ment.filter(m => String(m.num).toLowerCase().includes(q) || String(m.key).toLowerCase().includes(q));
-        display.innerHTML = results.length ? results.map(i => `<div class="result-unit"><b>[${i.num}] ${i.key}</b><div>${i.pos || ''}</div></div>`).join('') : "검색 결과 없음";
+        document.getElementById('guide-display').innerHTML = results.length ? results.map(i => `<b>[${i.num}] ${i.key}</b><br>${i.pos}<hr style="border:0.5px solid #eee;">`).join('') : "검색 결과가 없습니다.";
     }
+
     window.onload = loadData;
 </script>
 </body>
