@@ -153,26 +153,22 @@
     const display = document.getElementById('guide-display');
     
     if (!q) {
-        display.innerHTML = "검색어를 입력하세요.";
+        display.innerHTML = "번호나 키워드를 입력하세요.";
         return;
     }
 
-    // ✅ 필터링 전용 데이터를 따로 만듭니다. (E열인 pos를 제외한 가짜 데이터 생성)
+    // ✅ 필터링 단계에서 'pos'(E열)는 아예 언급조차 안 함
     const results = db.ment.filter(m => {
-        // 검색 대상에서 E열(pos)은 아예 빼고 B, C, D열만 합칩니다.
-        const searchTarget = [
-            String(m.key || "").toLowerCase(),   // B열
-            String(m.talk || "").toLowerCase(),  // C열
-            String(m.talk2 || "").toLowerCase()  // D열
-        ].join(" "); // 열들을 하나로 합쳐서 검색
+        // 검색할 대상을 B, C, D열로만 한정해서 새로 합칩니다.
+        const onlyBCD = [
+            String(m.num || ""),  // A열(번호) - 필요없으시면 빼셔도 됩니다.
+            String(m.key || ""),  // B열(키워드)
+            String(m.talk || ""), // C열(상담멘트)
+            String(m.talk2 || "") // D열(상담멘트2)
+        ].join(" ").toLowerCase();
 
-        // ✅ 검색어가 B, C, D열 합친 곳에 들어있는지 확인 (E열은 아예 보지도 않음)
-        const isMatch = searchTarget.includes(q);
-
-        // '인증' 검색 시 '미인증' 방어
-        if (q === "인증" && String(m.key).toLowerCase() === "미인증") return false;
-
-        return isMatch;
+        // ✅ 오직 위에서 합친 텍스트에 q가 포함될 때만 true! (pos는 무시됨)
+        return onlyBCD.indexOf(q) !== -1;
     });
 
     if (results.length > 0) {
@@ -184,7 +180,7 @@
         `).join('');
         display.scrollTop = 0;
     } else {
-        display.innerHTML = "<span style='color:#999;'>B, C, D열에 일치하는 결과가 없습니다.</span>";
+        display.innerHTML = "<span style='color:#999;'>일치하는 키워드가 없습니다.</span>";
     }
 }
     function startVoice() {
@@ -203,6 +199,7 @@
 </script>
 </body>
 </html>
+
 
 
 
