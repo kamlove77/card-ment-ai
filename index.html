@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 가이드</title>
     <style>
+        /* ✅ 세련된 회색 디자인 유지 */
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #444; }
         .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         
-        /* 📢 상단 공지사항 */
+        /* 📢 공지사항 */
         .notice-box { background: white; border: 1px solid #d9d9d9; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .notice-title { font-weight: bold; color: #555; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
-        /* 📱 메인 레이아웃: 좌측(멘트) / 우측(가이드 검색 & 실적) */
+        /* 📱 배치: 왼쪽(멘트) / 오른쪽(가이드 & 실적) */
         .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
-        .left-panel { flex: 0.8; min-width: 300px; } /* 왼쪽: 멘트 생성기 */
-        .right-panel { flex: 1.2; min-width: 350px; display: flex; flex-direction: column; gap: 20px; } /* 오른쪽: 검색 */
+        .left-panel { flex: 0.8; min-width: 320px; } 
+        .right-panel { flex: 1.2; min-width: 350px; display: flex; flex-direction: column; gap: 20px; }
 
         .card { background: white; border-radius: 10px; padding: 20px; border: 1px solid #d9d9d9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .card-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 15px; color: #333; border-left: 4px solid #8c8c8c; padding-left: 10px; }
@@ -46,15 +47,15 @@
                 <select id="ment-select" onchange="updateMent()">
                     <option value="">-- 상황을 선택하세요 --</option>
                 </select>
-                <div id="ment-display" class="display-area" style="min-height: 150px;">항목을 선택하면 상담 멘트(E열)가 나옵니다.</div>
+                <div id="ment-display" class="display-area" style="min-height: 200px;">항목을 선택하면 상담 멘트가 나옵니다.</div>
             </div>
         </div>
 
         <div class="right-panel">
             <div class="card">
                 <div class="card-title">🔍 화면 가이드 검색</div>
-                <input type="text" id="keyword" oninput="searchGuide()" placeholder="화면번호(B)나 키워드(C)를 입력하세요..." autofocus>
-                <div id="guide-display" class="display-area">번호나 문자를 입력하면 가이드(D열)가 나옵니다.</div>
+                <input type="text" id="keyword" oninput="searchGuide()" placeholder="화면번호나 키워드를 입력하세요...">
+                <div id="guide-display" class="display-area" style="min-height: 200px;">검색하면 가이드(D열)가 표시됩니다.</div>
             </div>
 
             <div class="card">
@@ -74,27 +75,24 @@
     let db = { notice: [], ment: [], perf: [] };
 
     async function loadData() {
-        // 꽃게님의 URL 그대로 사용
         const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-        
         try {
             const response = await fetch(url);
             const data = await response.json();
             db = data;
             initApp();
         } catch (error) {
-            console.error("실패:", error);
-            document.getElementById('notice-content').innerText = "데이터 연결 실패!";
+            document.getElementById('notice-content').innerText = "연결 실패";
         }
     }
 
     function initApp() {
-        // 1. 공지사항 표시
+        // 공지사항
         if(db.notice && db.notice.length > 0) {
             document.getElementById('notice-content').innerHTML = db.notice.map(n => `[${n.date}] ${n.content}`).join('<br>');
         }
 
-        // 2. 왼쪽 셀렉트박스 채우기 (C열 키워드 기준)
+        // 왼쪽 셀렉트박스 (C열 키워드)
         const sel = document.getElementById('ment-select');
         const keys = [...new Set(db.ment.map(m => m.key))].filter(Boolean);
         sel.innerHTML = '<option value="">-- 상황을 선택하세요 --</option>';
@@ -104,46 +102,41 @@
             sel.appendChild(opt);
         });
 
-        // 3. 실적 테이블 채우기
-        const pTable = document.getElementById('perf-table');
+        // 실적 테이블
         if(db.perf && db.perf.length > 0) {
-            pTable.innerHTML = db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
+            document.getElementById('perf-table').innerHTML = db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
         }
-
         document.getElementById('guide-display').innerText = "데이터 로딩 완료!";
     }
 
-    // 왼쪽 선택 시 E열(talk) 멘트 표시
+    // 왼쪽 선택 -> E열(talk) 표시
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => m.key === val);
         document.getElementById('ment-display').textContent = found ? found.talk : "선택된 멘트가 없습니다.";
     }
 
-    // 오른쪽 검색 시 B, C, E열 검색하여 D열(pos) 가이드 표시
+    // 오른쪽 검색 -> D열(pos) 표시
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
-        if (!q) { display.innerHTML = "결과가 여기에 표시됩니다."; return; }
+        if (!q) { display.innerHTML = "결과가 표시됩니다."; return; }
 
         const results = db.ment.filter(m => {
             const b = String(m.num || "").toLowerCase();
             const c = String(m.key || "").toLowerCase();
-            const e = String(m.talk || "").toLowerCase();
-            return b.includes(q) || c.includes(q) || e.includes(q);
+            return b.includes(q) || c.includes(q);
         });
 
         if (results.length > 0) {
             display.innerHTML = results.map(i => `
-                <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
                     <b style="color:#d32f2f;">[${i.num || ''}] ${i.key || ''}</b><br>
-                    <div style="margin-top:10px; line-height:1.6; color:#333; background:#fff; padding:10px; border-radius:5px; border:1px solid #efefef;">
-                        ${i.pos || '가이드 내용 없음'}
-                    </div>
+                    <div style="margin-top:8px; line-height:1.5;">${i.pos || '가이드 내용 없음'}</div>
                 </div>
             `).join('');
         } else {
-            display.innerHTML = "일치하는 데이터가 없습니다.";
+            display.innerHTML = "데이터 없음";
         }
     }
 
