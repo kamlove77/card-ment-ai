@@ -4,24 +4,28 @@
     <meta charset="UTF-8">
     <title>카드 상담 가이드</title>
     <style>
-        /* 기본 레이아웃 및 왼쪽 정렬 강제 */
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 10px; color: #000; background: #fff; text-align: left; }
+        /* ✅ 모든 디자인 요소 제거, 왼쪽 정렬에 올인 */
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 5px; color: #000; background: #fff; text-align: left; }
         .container { width: 100%; display: flex; flex-direction: column; gap: 5px; }
         
-        #notice-content { font-size: 13px; border-bottom: 1px solid #000; padding: 3px 0; margin-bottom: 5px; text-align: left; }
+        /* 공지사항: 상단에 딱 붙여서 한 줄로 */
+        #notice-content { font-size: 13px; border-bottom: 1px solid #000; padding: 3px 0; margin-bottom: 5px; }
 
-        .main-layout { display: flex; gap: 15px; align-items: flex-start; }
-        .left-panel { width: 45%; } 
-        .right-panel { width: 50%; display: flex; flex-direction: column; gap: 10px; }
+        /* 메인 레이아웃: 좌/우 반반 */
+        .main-layout { display: flex; gap: 10px; }
+        .left-panel { width: 48%; } 
+        .right-panel { width: 48%; }
 
-        .title { font-weight: bold; font-size: 14px; margin: 2px 0; text-align: left; }
-        input, select { width: 100%; padding: 6px; border: 1px solid #999; font-size: 14px; margin-bottom: 5px; box-sizing: border-box; }
+        /* 타이틀: 왼쪽 정렬 */
+        .title { font-weight: bold; font-size: 14px; margin: 2px 0; }
+
+        input, select { width: 100%; padding: 5px; border: 1px solid #999; font-size: 14px; margin-bottom: 5px; text-align: left; }
         
-        /* 결과 창 설정 */
+        /* ✅ 결과창: 캡처처럼 벙벙하지 않게 여백 0, 왼쪽 정렬 */
         .display-area { 
-            height: 400px; 
+            height: 450px; 
             border: 1px solid #999; 
-            padding: 10px; 
+            padding: 8px; 
             overflow-y: auto; 
             text-align: left; 
             font-size: 14px;
@@ -29,27 +33,14 @@
             background: #fff;
         }
 
-        .result-unit { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; text-align: left; }
+        /* 결과 유닛: 다닥다닥 붙여서 가독성 확보 */
+        .result-unit { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
         .result-unit b { color: #d32f2f; }
 
-        /* ✅ [핵심] 실적 테이블 크기 최소화 */
-        .perf-area { 
-            width: fit-content; /* 테이블 내용만큼만 너비 차지 */
-            min-width: 200px; 
-            margin-top: 5px;
-            text-align: left;
-        }
-        table { 
-            width: auto; /* 너비 자동 조절 */
-            border-collapse: collapse; 
-            font-size: 12px; /* 글씨 작게 */
-        }
-        th, td { 
-            border: 1px solid #999; 
-            padding: 2px 8px; /* 안쪽 여백 축소 */
-            text-align: left; 
-            white-space: nowrap; /* 줄바꿈 방지로 딱 붙게 함 */
-        }
+        /* ✅ 실적 테이블: 글씨만 나오게 최소화 */
+        .perf-area { width: 220px; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #999; padding: 3px 6px; text-align: left; }
         th { background: #f0f0f0; }
     </style>
 </head>
@@ -62,16 +53,16 @@
         <div class="left-panel">
             <div class="title">📝 상담 멘트 (A→E)</div>
             <select id="ment-select" onchange="updateMent()"><option>로딩 중...</option></select>
-            <div id="ment-display" class="display-area" style="height: 300px;">유형 선택</div>
+            <div id="ment-display" class="display-area" style="height: 300px;">유형을 선택해 주세요.</div>
         </div>
 
         <div class="right-panel">
             <div class="title">🔍 가이드 검색 (B,C→D)</div>
             <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호나 키워드 입력...">
-            <div id="guide-display" class="display-area">검색 내용 표시</div>
+            <div id="guide-display" class="display-area">검색어를 입력해 주세요.</div>
 
             <div class="perf-area">
-                <div class="title" style="font-size:12px;">📊 실적 현황</div>
+                <div class="title" style="font-size:12px;">📊 실적</div>
                 <table id="perf-table"></table>
             </div>
         </div>
@@ -92,6 +83,7 @@
 
     function initApp() {
         if(db.notice.length) document.getElementById('notice-content').innerText = db.notice.map(n => `[${n.date}] ${n.content}`).join(' / ');
+        
         const sel = document.getElementById('ment-select');
         const types = [...new Set(db.ment.map(m => m.type))].filter(Boolean);
         sel.innerHTML = '<option value="">-- 유형 선택 --</option>';
@@ -102,7 +94,7 @@
             html += db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
             document.getElementById('perf-table').innerHTML = html;
         }
-        document.getElementById('guide-display').innerText = "로딩 완료";
+        document.getElementById('guide-display').innerText = "데이터 연결 완료";
     }
 
     function updateMent() {
@@ -116,7 +108,7 @@
         const display = document.getElementById('guide-display');
         if (!q) { display.innerText = ""; return; }
         const results = db.ment.filter(m => String(m.num).toLowerCase().includes(q) || String(m.key).toLowerCase().includes(q));
-        display.innerHTML = results.length ? results.map(i => `<div class="result-unit"><b>[${i.num}] ${i.key}</b><div>${i.pos || ''}</div></div>`).join('') : "결과 없음";
+        display.innerHTML = results.length ? results.map(i => `<div class="result-unit"><b>[${i.num}] ${i.key}</b><div>${i.pos || ''}</div></div>`).join('') : "검색 결과 없음";
     }
     window.onload = loadData;
 </script>
