@@ -126,9 +126,9 @@
 
         if (results.length > 0) {
             display.innerHTML = results.map(i => `
-                <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                <div style="margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:5px;">
                     <b style="color:#d32f2f;">[${i.num || ''}] ${i.key || ''}</b><br>
-                    <div style="margin-top:8px;">${i.pos || '가이드 내용 없음(D열)'}</div>
+                    <div style="margin-top:5px;">${i.pos || '가이드 내용 없음(D열)'}</div>
                 </div>
             `).join('');
         } else {
@@ -140,3 +140,4 @@
 </script>
 </body>
 </html>
+
