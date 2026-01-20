@@ -2,16 +2,19 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>카드 상담 가이드</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 상담 가이드 - 최종본</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #444; }
         .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-        .card { background: white; border-radius: 10px; padding: 20px; border: 1px solid #d9d9d9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .card-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 15px; border-left: 4px solid #8c8c8c; padding-left: 10px; }
+        .notice-box { background: white; border: 1px solid #d9d9d9; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .notice-title { font-weight: bold; color: #555; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
         .left-panel { flex: 0.8; min-width: 320px; } 
         .right-panel { flex: 1.2; min-width: 350px; display: flex; flex-direction: column; gap: 20px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; outline: none; }
+        .card { background: white; border-radius: 10px; padding: 20px; border: 1px solid #d9d9d9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .card-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 15px; border-left: 4px solid #8c8c8c; padding-left: 10px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box; outline: none; }
         .display-area { min-height: 250px; background: #fafafa; border-radius: 5px; padding: 15px; white-space: pre-wrap; margin-top: 10px; font-size: 15px; border: 1px solid #e8e8e8; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         th { background: #f0f0f0; padding: 10px; border: 1px solid #d9d9d9; }
@@ -19,30 +22,36 @@
     </style>
 </head>
 <body>
+
 <div class="container">
-    <div class="card" id="notice-box">
-        <div class="card-title">📢 공지사항</div>
-        <div id="notice-content" style="font-size: 14px; line-height: 1.6;">데이터 로딩 중...</div>
+    <div class="notice-box">
+        <div class="notice-title">📢 공지사항</div>
+        <div id="notice-content" style="font-size: 14px; line-height: 1.6;">데이터를 불러오는 중입니다...</div>
     </div>
+
     <div class="main-layout">
         <div class="left-panel">
             <div class="card">
                 <div class="card-title">📝 멘트 생성기 (A→E)</div>
-                <select id="ment-select" onchange="updateMent()"><option>로딩 중...</option></select>
-                <div id="ment-display" class="display-area">유형(A)을 선택하세요.</div>
+                <select id="ment-select" onchange="updateMent()">
+                    <option value="">-- 로딩 중 --</option>
+                </select>
+                <div id="ment-display" class="display-area">왼쪽에서 유형(A열)을 선택하세요.</div>
             </div>
         </div>
+
         <div class="right-panel">
             <div class="card">
                 <div class="card-title">🔍 가이드 검색 (B,C→D)</div>
-                <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호(B)나 키워드(C) 입력...">
-                <div id="guide-display" class="display-area">결과가 여기에 표시됩니다.</div>
+                <input type="text" id="keyword" oninput="searchGuide()" placeholder="화면번호(B)나 키워드(C)를 입력하세요...">
+                <div id="guide-display" class="display-area">검색어를 입력하면 화면 가이드(D열)가 나옵니다.</div>
             </div>
+
             <div class="card">
                 <div class="card-title">📊 실적 현황</div>
                 <table>
                     <thead><tr><th>날짜</th><th>실적</th><th>비율</th></tr></thead>
-                    <tbody id="perf-table"><tr><td colspan="3">로딩 중...</td></tr></tbody>
+                    <tbody id="perf-table"><tr><td colspan="3">데이터 로딩 중...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -51,38 +60,80 @@
 
 <script>
     let db = { notice: [], ment: [], perf: [] };
-    const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
     async function loadData() {
+        // 캐시 방지를 위해 URL 뒤에 랜덤 숫자를 붙입니다.
+        const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec?t=" + new Date().getTime();
+        
         try {
-            const res = await fetch(url);
-            db = await res.json();
-            initApp();
-        } catch (e) { document.getElementById('notice-content').innerText = "연결 실패. 배포 설정을 확인하세요."; }
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            // 데이터가 제대로 왔는지 확인
+            if (data && data.ment) {
+                db = data;
+                initApp();
+            } else {
+                throw new Error("데이터 형식이 맞지 않습니다.");
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('notice-content').innerHTML = "<b style='color:red;'>데이터 로드 실패!</b> 배포를 다시 해주세요.";
+        }
     }
 
     function initApp() {
-        if(db.notice.length) document.getElementById('notice-content').innerHTML = db.notice.map(n => `[${n.date}] ${n.content}`).join('<br>');
-        
+        // 1. 공지사항 (res.notice)
+        if(db.notice.length) {
+            document.getElementById('notice-content').innerHTML = db.notice.map(n => `[${n.date}] ${n.content}`).join('<br>');
+        }
+
+        // 2. 왼쪽 셀렉트 (A열: type)
         const sel = document.getElementById('ment-select');
         const types = [...new Set(db.ment.map(m => m.type))].filter(Boolean);
-        sel.innerHTML = '<option value="">-- 유형 선택 (A열) --</option>';
-        types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
+        sel.innerHTML = '<option value="">-- 유형을 선택하세요 --</option>';
+        types.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t; opt.textContent = t;
+            sel.appendChild(opt);
+        });
 
-        if(db.perf.length) document.getElementById('perf-table').innerHTML = db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
-        document.getElementById('guide-display').innerText = "준비 완료!";
+        // 3. 실적 테이블 (res.perf)
+        if(db.perf.length) {
+            document.getElementById('perf-table').innerHTML = db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
+        }
+        document.getElementById('guide-display').innerText = "데이터 로딩 완료!";
     }
 
+    // A열 선택 시 E열(talk) 표시
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => m.type === val);
-        document.getElementById('ment-display').textContent = found ? found.talk : "멘트 없음";
+        document.getElementById('ment-display').textContent = found ? found.talk : "선택된 유형에 멘트가 없습니다.";
     }
 
+    // B, C열 검색 시 D열(pos) 표시
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const results = db.ment.filter(m => String(m.num).toLowerCase().includes(q) || String(m.key).toLowerCase().includes(q));
-        document.getElementById('guide-display').innerHTML = q ? results.map(i => `<b>[${i.num}] ${i.key}</b><br>${i.pos}<hr style="border:0.5px solid #eee;">`).join('') : "결과가 여기에 표시됩니다.";
+        const display = document.getElementById('guide-display');
+        if (!q) { display.innerHTML = "결과가 표시됩니다."; return; }
+
+        const results = db.ment.filter(m => {
+            const b = String(m.num || "").toLowerCase(); // 번호
+            const c = String(m.key || "").toLowerCase(); // 키워드
+            return b.includes(q) || c.includes(q);
+        });
+
+        if (results.length > 0) {
+            display.innerHTML = results.map(i => `
+                <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <b style="color:#d32f2f;">[${i.num || ''}] ${i.key || ''}</b><br>
+                    <div style="margin-top:8px;">${i.pos || '가이드 내용 없음(D열)'}</div>
+                </div>
+            `).join('');
+        } else {
+            display.innerHTML = "검색 결과가 없습니다.";
+        }
     }
 
     window.onload = loadData;
