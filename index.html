@@ -1,80 +1,165 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>카드 상담 가이드</title>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 10px; background: #fdf2f2; }
-        .search-container { position: sticky; top: 0; background: #fdf2f2; padding: 10px 0; z-index: 100; }
-        #keyword { width: 100%; padding: 12px; border: 2px solid #ffccc7; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        #guide-display { background: white; padding: 15px; border-radius: 8px; border: 1px solid #ffccc7; min-height: 200px; line-height: 1.6; }
-        .result-item { margin-bottom: 20px; border-bottom: 1px dashed #ffa39e; padding-bottom: 15px; }
-        .result-item b { color: #cf1322; font-size: 1.1rem; }
-        .result-content { margin-top: 10px; white-space: pre-wrap; color: #333; }
+        :root { --bg: #f2f4f7; --yellow-bg: #fffbe6; --border-grey: #ddd; --blue: #007bff; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
+        
+        .wrapper { width: 100%; max-width: 750px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* ✅ 공지사항 박스: 5줄 이상 보이도록 높이 유지 */
+        .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 230px; padding: 12px; flex-shrink: 0; display: flex; flex-direction: column; box-sizing: border-box; }
+        .notice-title { font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 0.9rem; }
+        .notice-list { overflow-y: auto; flex: 1; }
+        
+        .notice-item { display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1.5px dashed #ffd666 !important; width: 100%; box-sizing: border-box; }
+        .notice-item:last-child { border-bottom: none !important; }
+        
+        /* ✅ 날짜: 흰색 박스 제거 깔끔하게 */
+        .notice-date { color: #856404; font-weight: bold; margin-right: 12px; font-size: 0.85rem; flex-shrink: 0; background: none !important; border: none !important; padding: 2px 0 !important; }
+        .notice-content { font-size: 0.9rem; line-height: 1.5; color: #444; flex: 1; white-space: normal !important; word-break: break-all; }
+
+        .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
+        
+        .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid var(--border-grey); }
+
+        h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; color: #333; }
+        
+        /* ✅ 검색창: 박스 밖으로 튀어나오지 않게 설정 */
+        #keyword { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 8px; border: 1.2px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; }
+        
+        .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1rem; line-height: 1.6; overflow-y: auto; margin-top: 10px; }
+        
+        /* ✅ 가이드 박스: 빨간색 강조 유지 */
+        .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 80px; overflow-y: auto; margin: 8px 0; font-size: 0.9rem; border-radius: 10px; color: #a8071a; line-height: 1.4; }
+        
+        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #f1f3f5 !important; color: #495057 !important; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #dee2e6; font-weight: bold; }
+        td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; color: #333; background-color: #ffffff !important; }
+        .cum-cell { font-weight: bold; color: #000 !important; background-color: #fafafa !important; }
+
+        .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
 </head>
 <body>
-
-<div class="search-container">
-    <input type="text" id="keyword" onkeyup="searchGuide()" placeholder="키워드(B), 멘트(C, D)를 입력하세요..." autofocus>
+<div class="wrapper">
+    <div class="notice-container">
+        <div class="notice-title">📢 공지사항</div>
+        <div id="notice-list" class="notice-list">데이터 불러오는 중...</div>
+    </div>
+    
+    <div class="main-layout">
+        <div class="panel">
+            <h2>📑 상담 멘트</h2>
+            <select id="ment-select" style="width:100%; padding:8px; border-radius:5px; border:1px solid #ccc;" onchange="updateMentBox(this.value)">
+                <option value="">-- 상황 선택 --</option>
+            </select>
+            <div id="ment-display" class="ment-box">상황을 선택하세요.</div>
+        </div>
+        
+        <div class="panel">
+            <h2>📊 실적 및 가이드</h2>
+            <input type="text" id="keyword" placeholder="화면번호/키워드 검색..." onkeyup="searchGuide()">
+            <div id="guide-display" class="guide-box">가이드 내용 표시</div>
+            <div class="perf-area">
+                <table>
+                    <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
+                    <tbody id="perf-list"></tbody>
+                </table>
+            </div>
+            <button class="voice-btn" onclick="startVoice()">🎙️ 실적 음성 기록</button>
+        </div>
+    </div>
 </div>
 
-<div id="guide-display">검색 결과가 여기에 표시됩니다.</div>
-
 <script>
-    // ✅ 데이터 구조 예시 (실제 데이터는 구글 시트에서 가져옴)
-    let db = { ment: [] };
+    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    let db = { notice: [], ment: [], perf: [] };
 
-    // 1. 구글 시트 데이터 로드 (GAS 연결 부분)
-    function loadData() {
-        google.script.run.withSuccessHandler(function(data) {
-            db.ment = data;
-        }).getSpreadsheetData();
+    // 날짜 형식을 "월/일"로 변환하는 함수
+    function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return `${d.getMonth() + 1}/${d.getDate()}`;
     }
 
-    // 2. 핵심 검색 함수 (B, C, D열만 검색)
+    async function loadData() {
+        try {
+            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
+            db = res;
+            
+            // 공지사항 렌더링
+            document.getElementById('notice-list').innerHTML = res.notice.map(n => `
+                <div class="notice-item">
+                    <span class="notice-date">${formatDate(n.date)}</span>
+                    <span class="notice-content">${n.content}</span>
+                </div>
+            `).join('');
+            
+            const select = document.getElementById('ment-select');
+            select.innerHTML = '<option value="">-- 상황 선택 --</option>';
+            res.ment.filter(m => m.type).forEach(m => {
+                const opt = document.createElement('option'); opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
+            });
+            
+            let cum = 0;
+            document.getElementById('perf-list').innerHTML = res.perf.map(p => {
+                const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
+                cum += val;
+                return `<tr><td>${formatDate(p.date)}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
+            }).join('');
+        } catch(e) { console.error(e); }
+    }
+
+    function updateMentBox(v) {
+        const item = db.ment.find(m => m.type === v);
+        document.getElementById('ment-display').innerText = item ? item.talk : "상황을 선택하세요.";
+    }
+
+    // ✅ 가이드 검색 기능: [화면번호]와 키워드가 모두 나오도록 수정
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const display = document.getElementById('guide-display');
-        
         if (!q) {
-            display.innerHTML = "번호나 키워드를 입력하세요.";
+            document.getElementById('guide-display').innerHTML = "가이드 내용 표시";
             return;
         }
 
-        // ✅ 검색 필터: E열(pos)은 아예 변수로 만들지도 않고 검사 대상에서 제외
-        const results = db.ment.filter(m => {
-            const colB = m.key ? String(m.key).toLowerCase() : "";   // 키워드
-            const colC = m.talk ? String(m.talk).toLowerCase() : ""; // 상담멘트 1
-            const colD = m.talk2 ? String(m.talk2).toLowerCase() : ""; // 상담멘트 2
+        const found = db.ment.find(m => 
+            String(m.num).includes(q) || 
+            (m.key && m.key.toLowerCase().includes(q))
+        );
 
-            // ✅ B, C, D열 중 하나라도 검색어가 포함되면 통과
-            const isMatch = colB.includes(q) || colC.includes(q) || colD.includes(q);
-
-            // '인증' 검색 시 '미인증' 제외 로직 유지
-            if (q === "인증" && colB === "미인증") return false;
-
-            return isMatch;
-        });
-
-        // 3. 화면 결과 출력
-        if (results.length > 0) {
-            display.innerHTML = results.map(found => `
-                <div class="result-item">
-                    <b>[${found.num || ''}] ${found.key || ''}</b>
-                    <div class="result-content">${found.pos || found.talk || ''}</div>
-                </div>
-            `).join('');
-            display.scrollTop = 0;
+        if (found) {
+            document.getElementById('guide-display').innerHTML = `
+                <b style="color:#333;">[${found.num || ''}] ${found.key || ''}</b><br>
+                <div style="margin-top:5px;">${found.pos || ''}</div>
+            `;
         } else {
-            display.innerHTML = "<span style='color:#999;'>일치하는 키워드가 없습니다.</span>";
+            document.getElementById('guide-display').innerHTML = "검색 결과가 없습니다.";
         }
     }
 
-    // 초기 데이터 로드 호출
+    function startVoice() {
+        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        rec.lang = 'ko-KR'; 
+        rec.start();
+        rec.onresult = async (e) => {
+            const val = e.results[0][0].transcript.replace(/[^0-9]/g, '');
+            if(val && confirm(val + "건을 저장할까요?")) {
+                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save', value: val }) });
+                alert("저장 완료!");
+                loadData();
+            }
+        };
+    }
     window.onload = loadData;
 </script>
-
 </body>
 </html>
