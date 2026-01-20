@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>카드 상담 가이드 - 회색 에디션</title>
+    <title>카드 상담 가이드</title>
     <style>
-        /* 기본 배경 및 폰트 설정 */
+        /* ✅ 마음에 들어하신 회색 톤 디자인 */
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #444; }
         .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 
-        /* 📢 공지사항 (연한 회색 테두리) */
+        /* 📢 공지사항 (회색 테두리형) */
         .notice-box { background: white; border: 1px solid #d9d9d9; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .notice-title { font-weight: bold; color: #555; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
@@ -17,26 +17,20 @@
         .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
         .left-panel, .right-panel { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 20px; }
 
-        /* 카드 스타일 (회색 테두리 강조) */
+        /* 카드 스타일 (회색 강조) */
         .card { background: white; border-radius: 10px; padding: 20px; border: 1px solid #d9d9d9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .card-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 8px; border-left: 4px solid #8c8c8c; padding-left: 10px; }
 
-        /* 입력창 및 선택창 */
-        select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: #8c8c8c; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #8c8c8c; }
 
-        /* 결과 표시창 (회색 배경) */
-        .display-area { min-height: 180px; background: #fafafa; border-radius: 5px; padding: 15px; white-space: pre-wrap; margin-top: 10px; font-size: 14px; border: 1px solid #e8e8e8; color: #555; overflow-y: auto; }
+        /* 결과 창 (연한 회색 배경) */
+        .display-area { min-height: 200px; background: #fafafa; border-radius: 5px; padding: 15px; white-space: pre-wrap; margin-top: 10px; font-size: 14px; border: 1px solid #e8e8e8; color: #555; overflow-y: auto; }
         
-        /* 📊 실적 테이블 (회색 톤) */
+        /* 📊 실적 테이블 */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; background: white; }
         th { background: #f0f0f0; padding: 10px; border: 1px solid #d9d9d9; color: #333; }
         td { padding: 10px; border: 1px solid #e8e8e8; text-align: center; }
-        tr:nth-child(even) { background-color: #fafafa; }
-
-        /* 검색 결과 내 강조 */
-        .result-item { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .result-item b { color: #222; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -44,10 +38,7 @@
 <div class="container">
     <div class="notice-box">
         <div class="notice-title">📢 공지사항</div>
-        <div id="notice-content" style="font-size: 13px; line-height: 1.6;">
-            1/19 법인카드 공제조합은 9031 <br>
-            1/20 시유 가맹점 강제 매입은 시유 리테일로 전화
-        </div>
+        <div id="notice-content" style="font-size: 13px; line-height: 1.6;">데이터를 불러오는 중...</div>
     </div>
 
     <div class="main-layout">
@@ -55,7 +46,7 @@
             <div class="card">
                 <div class="card-title">🔍 화면 가이드 검색</div>
                 <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드나 번호를 입력하세요..." autofocus>
-                <div id="guide-display" class="display-area">검색어를 입력하면 결과가 표시됩니다.</div>
+                <div id="guide-display" class="display-area">번호나 문자를 입력하면 정보가 표시됩니다.</div>
             </div>
         </div>
 
@@ -65,14 +56,14 @@
                 <select id="ment-select" onchange="updateMent()">
                     <option value="">-- 상황을 선택하세요 --</option>
                 </select>
-                <div id="ment-display" class="display-area" style="min-height: 80px;">상황을 선택하세요.</div>
+                <div id="ment-display" class="display-area" style="min-height: 100px;">상황을 선택하세요.</div>
             </div>
 
             <div class="card">
                 <div class="card-title">📊 실적 현황</div>
                 <table>
                     <thead><tr><th>날짜</th><th>완료</th><th>합계</th></tr></thead>
-                    <tbody>
+                    <tbody id="stat-table">
                         <tr><td>01/19</td><td>145</td><td>145</td></tr>
                         <tr><td>01/20</td><td>95</td><td>240</td></tr>
                     </tbody>
@@ -85,18 +76,22 @@
 <script>
     let db = { ment: [] };
 
-    // 1. 구글 시트 데이터 로드
-    function loadData() {
+    // 1. 데이터 로드 및 앱 초기화
+    window.onload = function() {
         if (typeof google !== 'undefined') {
             google.script.run.withSuccessHandler(function(data) {
                 db.ment = data;
-                initSelect();
+                initApp();
             }).getSpreadsheetData();
         }
-    }
+    };
 
-    // 셀렉트박스 초기화
-    function initSelect() {
+    function initApp() {
+        // 공지사항 표시
+        document.getElementById('notice-content').innerHTML = 
+            "1/19 법인카드 공제조합은 9031 <br> 1/20 시유 가맹점 강제 매입은 시유 리테일로 전화";
+
+        // 멘트 생성기 목록 채우기
         const sel = document.getElementById('ment-select');
         const keys = [...new Set(db.ment.map(m => m.key))].filter(Boolean);
         keys.forEach(k => {
@@ -112,7 +107,7 @@
         document.getElementById('ment-display').textContent = item ? item.talk : "선택된 멘트가 없습니다.";
     }
 
-    // ✅ 핵심 검색 함수: B, C, D열만 철저하게 검색
+    // ✅ B, C, D열만 철저하게 검색하는 핵심 함수
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
@@ -123,21 +118,23 @@
         }
 
         const results = db.ment.filter(m => {
-            const colB = String(m.key || "").toLowerCase();
-            const colC = String(m.talk || "").toLowerCase();
-            const colD = String(m.talk2 || "").toLowerCase();
+            const b = String(m.key || "").toLowerCase();
+            const c = String(m.talk || "").toLowerCase();
+            const d = String(m.talk2 || "").toLowerCase();
 
-            // E열(pos)은 검색에서 완전 배제
-            const match = colB.includes(q) || colC.includes(q) || colD.includes(q);
+            // E열(pos)은 검색 조건에서 완전히 제외
+            const isMatch = b.includes(q) || c.includes(q) || d.includes(q);
             
-            if (q === "인증" && colB.includes("미인증")) return false;
-            return match;
+            // '인증' 검색 시 '미인증' 제외 로직
+            if (q === "인증" && b.includes("미인증")) return false;
+            
+            return isMatch;
         });
 
         if (results.length > 0) {
             display.innerHTML = results.map(i => `
-                <div class="result-item">
-                    <b>[${i.num || ''}] ${i.key || ''}</b>
+                <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <b style="color:#222;">[${i.num || ''}] ${i.key || ''}</b><br>
                     <div style="margin-top:5px; color:#666;">${i.pos || i.talk || ''}</div>
                 </div>
             `).join('');
@@ -146,8 +143,6 @@
             display.innerHTML = "<div style='color:#999; text-align:center;'>일치하는 데이터 없음</div>";
         }
     }
-
-    window.onload = loadData;
 </script>
 
 </body>
