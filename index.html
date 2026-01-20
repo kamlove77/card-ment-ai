@@ -11,8 +11,7 @@
         #guide-display { background: white; padding: 15px; border-radius: 8px; border: 1px solid #ffccc7; min-height: 200px; line-height: 1.6; }
         .result-item { margin-bottom: 20px; border-bottom: 1px dashed #ffa39e; padding-bottom: 15px; }
         .result-item b { color: #cf1322; font-size: 1.1rem; }
-        .result-content { margin-top: 10px; white-space: pre-wrap; color: #333; font-size: 0.95rem; }
-        .no-result { color: #999; text-align: center; padding: 20px; }
+        .result-content { margin-top: 10px; white-space: pre-wrap; color: #333; }
     </style>
 </head>
 <body>
@@ -21,12 +20,11 @@
     <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드(B), 멘트(C, D)만 검색됩니다..." autofocus>
 </div>
 
-<div id="guide-display">데이터를 불러오는 중입니다...</div>
+<div id="guide-display">데이터를 로드 중입니다...</div>
 
 <script>
     let db = { ment: [] };
 
-    // 1. 데이터 로드
     function loadData() {
         if (typeof google !== 'undefined') {
             google.script.run.withSuccessHandler(function(data) {
@@ -36,7 +34,6 @@
         }
     }
 
-    // 2. 검색 함수 (B, C, D열 집중 검색)
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
@@ -47,32 +44,30 @@
         }
 
         const results = db.ment.filter(m => {
-            // ✅ 시트 열 매칭 (B=key, C=talk, D=talk2)
-            // 혹시 시트 열 이름이 다르면 여기서 수정 가능
+            // ✅ 검색 대상: B(key), C(talk), D(talk2) 열로만 한정
             const colB = String(m.key || "").toLowerCase();
             const colC = String(m.talk || "").toLowerCase();
-            const colD = String(m.talk2 || m.desc || "").toLowerCase(); // talk2나 desc로 명명된 경우 대비
+            const colD = String(m.talk2 || "").toLowerCase();
 
-            // ✅ 검색어 q가 B, C, D열에 포함되어 있는가? (E열인 m.pos는 아예 제외)
+            // ✅ 검색어 q가 B, C, D열 중 하나에라도 포함되는가? (E열인 pos는 아예 제외)
             const isMatch = colB.includes(q) || colC.includes(q) || colD.includes(q);
 
-            // '인증' 검색 시 '미인증' 제외 로직
+            // '인증' 검색 시 '미인증' 제외 로직 유지
             if (q === "인증" && colB.includes("미인증")) return false;
 
             return isMatch;
         });
 
-        // 3. 결과 출력
         if (results.length > 0) {
             display.innerHTML = results.map(found => `
                 <div class="result-item">
                     <b>[${found.num || ''}] ${found.key || ''}</b>
-                    <div class="result-content">${found.pos || '내용 없음'}</div>
+                    <div class="result-content">${found.pos || found.talk || '내용 없음'}</div>
                 </div>
             `).join('');
             display.scrollTop = 0;
         } else {
-            display.innerHTML = `<div class="no-result">B, C, D열에 '${q}'와(과) 일치하는 내용이 없습니다.</div>`;
+            display.innerHTML = "<div style='color:#999; text-align:center;'>일치하는 결과가 없습니다.</div>";
         }
     }
 
