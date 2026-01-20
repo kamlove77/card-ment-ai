@@ -64,17 +64,23 @@
     let db = { notice: [], ment: [], perf: [] };
 
     // 🚀 데이터 로드 함수 (꽃게님 GAS의 doGet 구조에 맞춤)
-    function loadData() {
-        // GAS 웹앱 URL (배포 후 받은 URL을 여기에 넣으시면 더 정확합니다)
-        // 현재는 google.script.run 방식을 유지하되 함수 호출을 doGet 대신 시트 스크립트에 'getSpreadsheetData'라는 이름의 함수를 하나 더 만들면 가장 좋습니다.
-        
-        if (typeof google !== 'undefined') {
-            google.script.run.withSuccessHandler(function(res) {
-                db = res;
-                initApp();
-            }).getSpreadsheetData(); // 💡 아래 설명 참고!
-        }
-    }
+    // 🚀 데이터 로드 함수 수정
+function loadData() {
+    // 1. 배포 후 받은 URL을 여기에 붙여넣으세요!
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec"; 
+
+    // 2. 외부 브라우저(Github)에서 데이터를 가져오기 위한 통신
+    fetch(webAppUrl)
+        .then(response => response.json())
+        .then(res => {
+            db = res;      // 가져온 데이터를 db 변수에 저장
+            initApp();     // 화면에 그리기 시작
+        })
+        .catch(err => {
+            console.error("데이터 로드 실패:", err);
+            document.getElementById('notice-content').innerHTML = "데이터 로딩 실패!";
+        });
+}
 
     function initApp() {
         // 1. 공지사항 업데이트
@@ -141,3 +147,4 @@
 </script>
 </body>
 </html>
+
