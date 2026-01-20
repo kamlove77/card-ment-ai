@@ -22,21 +22,21 @@
 <div class="container">
     <div class="card">
         <div class="card-title">📢 공지사항</div>
-        <div id="notice-content">데이터 로딩 중...</div>
+        <div id="notice-content" style="font-size: 14px; line-height: 1.6;">데이터를 불러오는 중입니다...</div>
     </div>
     <div class="main-layout">
         <div class="left-panel">
             <div class="card">
-                <div class="card-title">📝 상담 멘트 생성기 (A→E)</div>
+                <div class="card-title">📝 멘트 생성기 (A→E)</div>
                 <select id="ment-select" onchange="updateMent()"><option>로딩 중...</option></select>
-                <div id="ment-display" class="display-area">유형(A열)을 선택하세요.</div>
+                <div id="ment-display" class="display-area">유형을 선택하세요.</div>
             </div>
         </div>
         <div class="right-panel">
             <div class="card">
-                <div class="card-title">🔍 화면 가이드 검색 (B,C→D)</div>
-                <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호(B)나 키워드(C) 입력...">
-                <div id="guide-display" class="display-area">결과가 표시됩니다.</div>
+                <div class="card-title">🔍 가이드 검색 (B,C→D)</div>
+                <input type="text" id="keyword" oninput="searchGuide()" placeholder="화면번호(B)나 키워드(C) 입력...">
+                <div id="guide-display" class="display-area">검색 결과가 표시됩니다.</div>
             </div>
             <div class="card">
                 <div class="card-title">📊 실적 현황</div>
@@ -55,7 +55,7 @@
 
     async function loadData() {
         try {
-            const res = await fetch(url + "?t=" + new Date().getTime());
+            const res = await fetch(url + "?t=" + new Date().getTime()); // 캐시 방지
             db = await res.json();
             initApp();
         } catch (e) { document.getElementById('notice-content').innerText = "데이터 연결 실패!"; }
@@ -70,20 +70,20 @@
         types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
 
         if(db.perf.length) document.getElementById('perf-table').innerHTML = db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
-        document.getElementById('guide-display').innerText = "로딩 완료!";
+        document.getElementById('guide-display').innerText = "로딩 완료! 검색을 시작하세요.";
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => m.type === val);
-        document.getElementById('ment-display').textContent = found ? found.talk : "멘트 없음";
+        document.getElementById('ment-display').textContent = found ? found.talk : "멘트가 없습니다.";
     }
 
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         if (!q) { document.getElementById('guide-display').innerText = "결과가 표시됩니다."; return; }
         const results = db.ment.filter(m => String(m.num).toLowerCase().includes(q) || String(m.key).toLowerCase().includes(q));
-        document.getElementById('guide-display').innerHTML = results.length ? results.map(i => `<b>[${i.num}] ${i.key}</b><br>${i.pos}<hr style="border:0.5px solid #eee;">`).join('') : "검색 결과 없음";
+        document.getElementById('guide-display').innerHTML = results.length ? results.map(i => `<b>[${i.num}] ${i.key}</b><br>${i.pos}<hr style="border:0.5px solid #eee;">`).join('') : "검색 결과가 없습니다.";
     }
 
     window.onload = loadData;
