@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 가이드</title>
     <style>
-        /* ✅ 회색 톤 디자인 */
+        /* ✅ 꽃게님이 좋아하신 회색 톤 디자인 */
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #444; }
         .container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         .notice-box { background: white; border: 1px solid #d9d9d9; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -15,7 +15,7 @@
         .card { background: white; border-radius: 10px; padding: 20px; border: 1px solid #d9d9d9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .card-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 15px; border-left: 4px solid #8c8c8c; padding-left: 10px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box; outline: none; }
-        .display-area { min-height: 200px; background: #fafafa; border-radius: 5px; padding: 15px; white-space: pre-wrap; margin-top: 10px; font-size: 14px; border: 1px solid #e8e8e8; overflow-y: auto; }
+        .display-area { min-height: 250px; background: #fafafa; border-radius: 5px; padding: 15px; white-space: pre-wrap; margin-top: 10px; font-size: 14px; border: 1px solid #e8e8e8; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         th { background: #f0f0f0; padding: 10px; border: 1px solid #d9d9d9; }
         td { padding: 10px; border: 1px solid #e8e8e8; text-align: center; background: white; }
@@ -44,7 +44,7 @@
                 <select id="ment-select" onchange="updateMent()">
                     <option value="">-- 상황을 선택하세요 --</option>
                 </select>
-                <div id="ment-display" class="display-area" style="min-height: 80px;">멘트가 여기에 표시됩니다.</div>
+                <div id="ment-display" class="display-area" style="min-height: 100px;">상황을 선택하면 멘트가 표시됩니다.</div>
             </div>
 
             <div class="card">
@@ -63,59 +63,51 @@
 <script>
     let db = { notice: [], ment: [], perf: [] };
 
-    // 🚀 데이터 로드 함수 (꽃게님 GAS의 doGet 구조에 맞춤)
-    // 🚀 데이터 로드 함수 수정
-function loadData() {
-    // 1. 배포 후 받은 URL을 여기에 붙여넣으세요!
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec"; 
-
-    // 2. 외부 브라우저(Github)에서 데이터를 가져오기 위한 통신
-    fetch(webAppUrl)
-        .then(response => response.json())
-        .then(res => {
-            db = res;      // 가져온 데이터를 db 변수에 저장
-            initApp();     // 화면에 그리기 시작
-        })
-        .catch(err => {
-            console.error("데이터 로드 실패:", err);
-            document.getElementById('notice-content').innerHTML = "데이터 로딩 실패!";
-        });
-}
+    // 🚀 꽃게님의 URL을 사용하여 데이터 로드
+    async function loadData() {
+        const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+        
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            db = data;
+            initApp();
+        } catch (error) {
+            console.error("실패:", error);
+            document.getElementById('notice-content').innerText = "데이터 연결 실패! (GAS 배포 설정을 확인해주세요)";
+        }
+    }
 
     function initApp() {
-        // 1. 공지사항 업데이트
-        const noticeDiv = document.getElementById('notice-content');
-        if(db.notice.length > 0) {
-            noticeDiv.innerHTML = db.notice.map(n => `[${n.date}] ${n.content}`).join('<br>');
-        } else {
-            noticeDiv.innerHTML = "등록된 공지사항이 없습니다.";
-        }
+        // 공지사항 채우기
+        const nDiv = document.getElementById('notice-content');
+        if(db.notice && db.notice.length > 0) {
+            nDiv.innerHTML = db.notice.map(n => `[${n.date}] ${n.content}`).join('<br>');
+        } else { nDiv.innerText = "공지사항이 없습니다."; }
 
-        // 2. 멘트 셀렉트박스 채우기
+        // 셀렉트박스 채우기
         const sel = document.getElementById('ment-select');
-        const uniqueKeys = [...new Set(db.ment.map(m => m.key))].filter(Boolean);
+        const keys = [...new Set(db.ment.map(m => m.key))].filter(Boolean);
         sel.innerHTML = '<option value="">-- 상황을 선택하세요 --</option>';
-        uniqueKeys.forEach(k => {
+        keys.forEach(k => {
             const opt = document.createElement('option');
             opt.value = k; opt.textContent = k;
             sel.appendChild(opt);
         });
 
-        // 3. 실적 테이블 업데이트
-        const perfTable = document.getElementById('perf-table');
-        if(db.perf.length > 0) {
-            perfTable.innerHTML = db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
-        } else {
-            perfTable.innerHTML = '<tr><td colspan="3">데이터 없음</td></tr>';
-        }
+        // 실적 테이블 채우기
+        const pTable = document.getElementById('perf-table');
+        if(db.perf && db.perf.length > 0) {
+            pTable.innerHTML = db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
+        } else { pTable.innerHTML = '<tr><td colspan="3">실적 데이터가 없습니다.</td></tr>'; }
 
-        document.getElementById('guide-display').innerHTML = "데이터 로드 완료!";
+        document.getElementById('guide-display').innerText = "데이터 로딩 완료!";
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
-        const item = db.ment.find(m => m.key === val);
-        document.getElementById('ment-display').textContent = item ? item.talk : "선택된 멘트가 없습니다.";
+        const found = db.ment.find(m => m.key === val);
+        document.getElementById('ment-display').textContent = found ? found.talk : "선택된 멘트가 없습니다.";
     }
 
     function searchGuide() {
@@ -123,12 +115,12 @@ function loadData() {
         const display = document.getElementById('guide-display');
         if (!q) { display.innerHTML = "결과가 여기에 표시됩니다."; return; }
 
-        // ✅ 꽃게님 시트 컬럼 기준: num(B열), key(C열), pos(D열), talk(E열)
         const results = db.ment.filter(m => {
-            const b = String(m.num || "").toLowerCase();
-            const c = String(m.key || "").toLowerCase();
-            const e = String(m.talk || "").toLowerCase(); // 상담멘트만 검색 대상에 포함
-            return b.includes(q) || c.includes(q) || e.includes(q);
+            const num = String(m.num || "").toLowerCase();
+            const key = String(m.key || "").toLowerCase();
+            const talk = String(m.talk || "").toLowerCase();
+            // B(num), C(key), E(talk)열만 검색
+            return num.includes(q) || key.includes(q) || talk.includes(q);
         });
 
         if (results.length > 0) {
@@ -139,7 +131,7 @@ function loadData() {
                 </div>
             `).join('');
         } else {
-            display.innerHTML = "일치하는 데이터 없음";
+            display.innerHTML = "일치하는 데이터가 없습니다.";
         }
     }
 
@@ -147,4 +139,3 @@ function loadData() {
 </script>
 </body>
 </html>
-
