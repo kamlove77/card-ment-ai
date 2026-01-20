@@ -5,34 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>카드 상담 가이드</title>
     <style>
-        /* ✅ 꽃게님이 선택하신 세련된 회색 톤 디자인 */
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #444; }
         .container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-
-        /* 📢 공지사항 (회색 테두리) */
         .notice-box { background: white; border: 1px solid #d9d9d9; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .notice-title { font-weight: bold; color: #555; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 5px; display: flex; align-items: center; gap: 8px; }
-        
-        /* 📱 레이아웃 구성 */
+        .notice-title { font-weight: bold; color: #555; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
         .left-panel { flex: 1.2; min-width: 320px; display: flex; flex-direction: column; gap: 20px; }
         .right-panel { flex: 0.8; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
-
-        /* 카드 스타일 */
-        .card { background: white; border-radius: 10px; padding: 20px; border: 1px solid #d9d9d9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); height: fit-content; }
-        .card-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 15px; color: #333; border-left: 4px solid #8c8c8c; padding-left: 10px; display: flex; align-items: center; gap: 8px; }
-
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box; outline: none; transition: 0.2s; }
-        input:focus { border-color: #8c8c8c; background: #fff; }
-
-        /* 결과 표시창 */
+        .card { background: white; border-radius: 10px; padding: 20px; border: 1px solid #d9d9d9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .card-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 15px; color: #333; border-left: 4px solid #8c8c8c; padding-left: 10px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; box-sizing: border-box; outline: none; }
         .display-area { min-height: 250px; background: #fafafa; border-radius: 5px; padding: 15px; white-space: pre-wrap; margin-top: 10px; font-size: 14px; border: 1px solid #e8e8e8; color: #555; overflow-y: auto; }
-        
-        /* 📊 실적 테이블 */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; background: white; }
         th { background: #f0f0f0; padding: 10px; border: 1px solid #d9d9d9; color: #333; }
         td { padding: 10px; border: 1px solid #e8e8e8; text-align: center; }
-        
         .result-item { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 12px; }
         .result-item b { color: #d32f2f; font-size: 1.05rem; }
     </style>
@@ -44,8 +30,7 @@
         <div class="notice-title">📢 공지사항</div>
         <div id="notice-content" style="font-size: 14px; line-height: 1.8;">
             1/19 법인카드 공제조합은 9031 <br>
-            1/20 시유 가맹점 강제 매입은 시유 리테일로 전화 <br>
-            1/21 카드사용 확인 로직 변경됨
+            1/20 시유 가맹점 강제 매입은 시유 리테일로 전화
         </div>
     </div>
 
@@ -53,8 +38,8 @@
         <div class="left-panel">
             <div class="card">
                 <div class="card-title">🔍 화면 가이드 검색</div>
-                <input type="text" id="keyword" oninput="searchGuide()" placeholder="화면번호 또는 키워드를 입력하세요..." autofocus>
-                <div id="guide-display" class="display-area">키워드를 입력하면 검색 결과가 표시됩니다.</div>
+                <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드나 번호를 입력하세요..." autofocus>
+                <div id="guide-display" class="display-area">데이터 로딩 중... 잠시만 기다려주세요.</div>
             </div>
         </div>
 
@@ -84,68 +69,68 @@
 <script>
     let db = { ment: [] };
 
-    // 🚀 페이지 로드 시 실행
+    // 🚀 구글 시트 데이터 로드
     window.onload = function() {
-        // 시트 데이터 로드 시도
-        if (typeof google !== 'undefined' && google.script) {
-            google.script.run.withSuccessHandler(function(data) {
-                db.ment = data;
-                initApp();
-            }).getSpreadsheetData();
+        if (typeof google !== 'undefined') {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    console.log("받은 데이터:", data); // 브라우저 콘솔에서 확인 가능
+                    db.ment = data;
+                    initApp();
+                })
+                .withFailureHandler(function(err) {
+                    document.getElementById('guide-display').innerHTML = "데이터 로드 실패: " + err;
+                })
+                .getSpreadsheetData(); // GAS 함수 이름이 이와 같은지 꼭 확인!
         } else {
-            // 테스트용 또는 시트 연결 실패 시 기본 안내
-            console.log("시트 데이터를 불러올 수 없어 로컬 모드로 작동합니다.");
-            document.getElementById('guide-display').innerHTML = "데이터를 불러오는 중입니다... (시트 연결 확인 필요)";
+            document.getElementById('guide-display').innerHTML = "구글 스크립트 환경이 아닙니다. (GAS 내에서 실행하거나 배포 필요)";
         }
     };
 
     function initApp() {
-        // 멘트 셀렉트박스 채우기
         const sel = document.getElementById('ment-select');
-        const keys = [...new Set(db.ment.map(m => m.key))].filter(Boolean);
+        // 데이터 속성명이 다를 수 있어 유연하게 처리
+        const keys = [...new Set(db.ment.map(m => m.key || m.키워드 || m.제목))].filter(Boolean);
+        
         sel.innerHTML = '<option value="">-- 상황을 선택하세요 --</option>';
         keys.forEach(k => {
             const opt = document.createElement('option');
             opt.value = k; opt.textContent = k;
             sel.appendChild(opt);
         });
-        document.getElementById('guide-display').innerHTML = "데이터 로드 완료. 검색을 시작하세요!";
+        document.getElementById('guide-display').innerHTML = "데이터 로드 완료! 검색을 시작하세요.";
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
-        const item = db.ment.find(m => m.key === val);
-        document.getElementById('ment-display').textContent = item ? item.talk : "상황을 선택하세요.";
+        const item = db.ment.find(m => (m.key || m.키워드 || m.제목) === val);
+        document.getElementById('ment-display').textContent = item ? (item.talk || item.멘트 || "내용 없음") : "상황을 선택하세요.";
     }
 
-    // ✅ 핵심 검색: B, C, D열만 철저하게 필터링
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
         
-        if (!q) {
-            display.innerHTML = "결과가 여기에 표시됩니다.";
-            return;
-        }
+        if (!q) { display.innerHTML = "결과가 여기에 표시됩니다."; return; }
 
         const results = db.ment.filter(m => {
-            const b = String(m.key || "").toLowerCase();
-            const c = String(m.talk || "").toLowerCase();
-            const d = String(m.talk2 || "").toLowerCase();
-            // E열(pos)은 검색 대상에서 제외!
+            // B, C, D열 데이터를 모두 찾아봄 (속성명이 key, talk, talk2 또는 다른 명칭이어도 검색)
+            const b = String(m.key || m.키워드 || m.제목 || "").toLowerCase();
+            const c = String(m.talk || m.멘트 || m.상담멘트 || "").toLowerCase();
+            const d = String(m.talk2 || m.멘트2 || m.상담멘트2 || "").toLowerCase();
+            
             return b.includes(q) || c.includes(q) || d.includes(q);
         });
 
         if (results.length > 0) {
             display.innerHTML = results.map(i => `
                 <div class="result-item">
-                    <b>[${i.num || ''}] ${i.key || ''}</b>
-                    <div style="margin-top:8px; line-height:1.6;">${i.pos || i.talk || ''}</div>
+                    <b>[${i.num || i.번호 || ''}] ${i.key || i.키워드 || i.제목 || ''}</b>
+                    <div style="margin-top:8px;">${i.pos || i.talk || i.내용 || ''}</div>
                 </div>
             `).join('');
-            display.scrollTop = 0;
         } else {
-            display.innerHTML = "<div style='text-align:center; padding-top:50px; color:#999;'>일치하는 데이터가 없습니다.</div>";
+            display.innerHTML = "일치하는 데이터가 없습니다.";
         }
     }
 </script>
