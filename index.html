@@ -12,6 +12,7 @@
         .result-item { margin-bottom: 20px; border-bottom: 1px dashed #ffa39e; padding-bottom: 15px; }
         .result-item b { color: #cf1322; font-size: 1.1rem; }
         .result-content { margin-top: 10px; white-space: pre-wrap; color: #333; }
+        .no-result { color: #999; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
@@ -20,7 +21,7 @@
     <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드(B), 멘트(C, D)만 검색됩니다..." autofocus>
 </div>
 
-<div id="guide-display">데이터를 로드 중입니다...</div>
+<div id="guide-display">데이터를 불러오는 중입니다...</div>
 
 <script>
     let db = { ment: [] };
@@ -29,7 +30,7 @@
         if (typeof google !== 'undefined') {
             google.script.run.withSuccessHandler(function(data) {
                 db.ment = data;
-                document.getElementById('guide-display').innerHTML = "검색어를 입력하세요.";
+                document.getElementById('guide-display').innerHTML = "번호나 키워드를 입력하세요.";
             }).getSpreadsheetData();
         }
     }
@@ -43,16 +44,16 @@
             return;
         }
 
+        // ✅ 검색 필터링: E열(pos)은 아예 변수로 정의조차 하지 않음
         const results = db.ment.filter(m => {
-            // ✅ 검색 대상: B(key), C(talk), D(talk2) 열로만 한정
-            const colB = String(m.key || "").toLowerCase();
-            const colC = String(m.talk || "").toLowerCase();
-            const colD = String(m.talk2 || "").toLowerCase();
+            const colB = String(m.key || "").toLowerCase();   // B열: 키워드
+            const colC = String(m.talk || "").toLowerCase();  // C열: 상담멘트
+            const colD = String(m.talk2 || "").toLowerCase(); // D열: 상담멘트2 (추가멘트)
 
-            // ✅ 검색어 q가 B, C, D열 중 하나에라도 포함되는가? (E열인 pos는 아예 제외)
+            // ✅ 검색어 q가 B, C, D열 중 하나라도 포함되는지 확인 (pos는 완전히 배제)
             const isMatch = colB.includes(q) || colC.includes(q) || colD.includes(q);
 
-            // '인증' 검색 시 '미인증' 제외 로직 유지
+            // '인증' 검색 시 '미인증' 차단 로직
             if (q === "인증" && colB.includes("미인증")) return false;
 
             return isMatch;
@@ -67,7 +68,7 @@
             `).join('');
             display.scrollTop = 0;
         } else {
-            display.innerHTML = "<div style='color:#999; text-align:center;'>일치하는 결과가 없습니다.</div>";
+            display.innerHTML = `<div class="no-result">일치하는 키워드가 없습니다.</div>`;
         }
     }
 
