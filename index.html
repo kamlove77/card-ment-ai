@@ -1,210 +1,83 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>카드 상담 가이드 (보안 & 다중검색)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 상담 가이드</title>
     <style>
-        :root { --bg: #f2f4f7; --yellow-bg: #fffbe6; --border-grey: #ddd; --blue: #007bff; }
-        #main-content { display: none; } /* 로그인 전 숨김 */
-        body { font-family: 'Malgun Gothic', sans-serif; background: var(--bg); margin: 0; padding: 10px; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
-        
-        /* 로그인 화면 */
-        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); height: fit-content; margin-top: 100px; }
-        #login-screen input { padding: 12px; font-size: 1rem; border-radius: 8px; border: 1px solid #ddd; width: 220px; margin-bottom: 10px; text-align: center; }
-        #login-screen button { padding: 10px 25px; background: var(--blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-
-        .wrapper { width: 100%; max-width: 950px; display: flex; flex-direction: column; gap: 10px; }
-        .notice-container { background: var(--yellow-bg); border: 1.5px solid #ffe58f; border-radius: 12px; height: 210px; padding: 12px; flex-shrink: 0; display: flex; flex-direction: column; box-sizing: border-box; }
-        .notice-title { font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 0.9rem; }
-        .notice-list { overflow-y: auto; flex: 1; }
-        .notice-item { display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1.5px dashed #ffd666 !important; }
-        .notice-date { color: #856404; font-weight: bold; margin-right: 12px; font-size: 0.85rem; flex-shrink: 0; }
-        .notice-content { font-size: 0.9rem; line-height: 1.4; color: #444; flex: 1; word-break: break-all; }
-
-        .main-layout { display: flex; gap: 10px; flex: 1; overflow: hidden; }
-        .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; flex: 1; min-width: 0; border: 1.2px solid var(--border-grey); }
-        h2 { font-size: 0.95rem; margin: 0 0 10px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; color: #333; }
-        
-        /* 상담 멘트 박스 (스크롤 유지) */
-        .ment-box { background: #f8fbff; border: 1px solid #cce5ff; padding: 15px; border-radius: 10px; flex: 1; font-size: 1.05rem; line-height: 1.7; overflow-y: auto; margin-top: 10px; white-space: pre-wrap; word-break: break-all; color: #222; }
-        
-        #keyword { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 8px; border: 1.2px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; }
-        
-        /* 가이드 박스 (다중 결과 표시용 높이 증가) */
-        .guide-box { background: #fff1f1; border: 1px solid #ffccc7; padding: 12px; height: 180px; overflow-y: auto; margin: 8px 0; font-size: 0.95rem; border-radius: 10px; color: #a8071a; line-height: 1.5; }
-        
-        .perf-area { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fff; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: #f1f3f5 !important; color: #495057 !important; position: sticky; top: 0; padding: 10px 8px; border-bottom: 2px solid #dee2e6; }
-        td { padding: 9px 8px; border-bottom: 1px solid #f1f3f5; text-align: center; }
-        .cum-cell { font-weight: bold; color: #000 !important; background-color: #fafafa !important; }
-        .voice-btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        body { font-family: sans-serif; margin: 0; padding: 10px; background: #fdf2f2; }
+        .search-container { position: sticky; top: 0; background: #fdf2f2; padding: 10px 0; z-index: 100; }
+        #keyword { width: 100%; padding: 12px; border: 2px solid #ffccc7; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        #guide-display { background: white; padding: 15px; border-radius: 8px; border: 1px solid #ffccc7; min-height: 200px; line-height: 1.6; }
+        .result-item { margin-bottom: 20px; border-bottom: 1px dashed #ffa39e; padding-bottom: 15px; }
+        .result-item b { color: #cf1322; font-size: 1.1rem; }
+        .result-content { margin-top: 10px; white-space: pre-wrap; color: #333; font-size: 0.95rem; }
+        .no-result { color: #999; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <h3 style="margin-top:0;">🔐 보안 접속</h3>
-    <input type="password" id="pw-input" placeholder="비밀번호" onkeypress="if(event.keyCode==13) checkLogin()">
-    <button onclick="checkLogin()">입장하기</button>
+<div class="search-container">
+    <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드(B), 멘트(C, D)만 검색됩니다..." autofocus>
 </div>
 
-<div id="main-content" class="wrapper">
-    <div class="notice-container">
-        <div class="notice-title">📢 공지사항</div>
-        <div id="notice-list" class="notice-list">데이터 로딩 중...</div>
-    </div>
-    
-    <div class="main-layout">
-        <div class="panel">
-            <h2>📑 상담 멘트</h2>
-            <select id="ment-select" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" onchange="updateMentBox(this.value)">
-                <option value="">-- 상황을 선택하세요 --</option>
-            </select>
-            <div id="ment-display" class="ment-box">상황을 선택하세요.</div>
-        </div>
-        
-        <div class="panel">
-            <h2>📊 실적 및 가이드</h2>
-            <input type="text" id="keyword" placeholder="화면번호 또는 키워드 입력..." onkeyup="searchGuide()">
-            <div id="guide-display" class="guide-box">검색 결과가 표시됩니다.</div>
-            <div class="perf-area">
-                <table>
-                    <thead><tr><th>날짜</th><th>완료</th><th>누적</th></tr></thead>
-                    <tbody id="perf-list"></tbody>
-                </table>
-            </div>
-            <button class="voice-btn" onclick="startVoice()">🎙️ 실적 음성 기록</button>
-        </div>
-    </div>
-</div>
+<div id="guide-display">데이터를 불러오는 중입니다...</div>
 
 <script>
-    // ✅ SHA-256 암호문 입력 (비밀번호: 꽃게1234 예시)
-    const ENCRYPTED_PW = "c6ccc351ce1528625d704b3e538f06cb28bfcbf2e4b63c4fb222e41f630381b8";
+    let db = { ment: [] };
 
-    async function checkLogin() {
-        const input = document.getElementById('pw-input').value;
-        const msgUint8 = new TextEncoder().encode(input);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-        if(hashHex === ENCRYPTED_PW) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-content').style.display = 'flex';
-            loadData();
-        } else {
-            alert("비밀번호가 올바르지 않습니다.");
+    // 1. 데이터 로드
+    function loadData() {
+        if (typeof google !== 'undefined') {
+            google.script.run.withSuccessHandler(function(data) {
+                db.ment = data;
+                document.getElementById('guide-display').innerHTML = "검색어를 입력하세요.";
+            }).getSpreadsheetData();
         }
     }
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-    let db = { notice: [], ment: [], perf: [] };
+    // 2. 검색 함수 (B, C, D열 집중 검색)
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        
+        if (!q) {
+            display.innerHTML = "번호나 키워드를 입력하세요.";
+            return;
+        }
 
-    function formatDate(dateStr) {
-        const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return dateStr;
-        return `${d.getMonth() + 1}/${d.getDate()}`;
-    }
+        const results = db.ment.filter(m => {
+            // ✅ 시트 열 매칭 (B=key, C=talk, D=talk2)
+            // 혹시 시트 열 이름이 다르면 여기서 수정 가능
+            const colB = String(m.key || "").toLowerCase();
+            const colC = String(m.talk || "").toLowerCase();
+            const colD = String(m.talk2 || m.desc || "").toLowerCase(); // talk2나 desc로 명명된 경우 대비
 
-    async function loadData() {
-        try {
-            const res = await fetch(`${API_URL}?t=${Date.now()}`).then(r => r.json());
-            db = res;
-            document.getElementById('notice-list').innerHTML = res.notice.map(n => `
-                <div class="notice-item">
-                    <span class="notice-date">${formatDate(n.date)}</span>
-                    <span class="notice-content">${n.content}</span>
+            // ✅ 검색어 q가 B, C, D열에 포함되어 있는가? (E열인 m.pos는 아예 제외)
+            const isMatch = colB.includes(q) || colC.includes(q) || colD.includes(q);
+
+            // '인증' 검색 시 '미인증' 제외 로직
+            if (q === "인증" && colB.includes("미인증")) return false;
+
+            return isMatch;
+        });
+
+        // 3. 결과 출력
+        if (results.length > 0) {
+            display.innerHTML = results.map(found => `
+                <div class="result-item">
+                    <b>[${found.num || ''}] ${found.key || ''}</b>
+                    <div class="result-content">${found.pos || '내용 없음'}</div>
                 </div>
             `).join('');
-            const select = document.getElementById('ment-select');
-            select.innerHTML = '<option value="">-- 상황 선택 --</option>';
-            res.ment.filter(m => m.type).forEach(m => {
-                const opt = document.createElement('option'); opt.value = m.type; opt.innerText = m.type; select.appendChild(opt);
-            });
-            let cum = 0;
-            document.getElementById('perf-list').innerHTML = res.perf.map(p => {
-                const val = parseInt(String(p.val).replace(/[^0-9]/g, '')) || 0;
-                cum += val;
-                return `<tr><td>${formatDate(p.date)}</td><td>${p.val}</td><td class="cum-cell">${cum.toLocaleString()}</td></tr>`;
-            }).join('');
-        } catch(e) { console.error(e); }
-    }
-
-    function updateMentBox(v) {
-        const item = db.ment.find(m => m.type === v);
-        const display = document.getElementById('ment-display');
-        if (item) {
-            display.innerText = item.talk; 
             display.scrollTop = 0;
         } else {
-            display.innerText = "상황을 선택하세요.";
+            display.innerHTML = `<div class="no-result">B, C, D열에 '${q}'와(과) 일치하는 내용이 없습니다.</div>`;
         }
     }
 
-    // ✅ 다중 결과 지원 및 정확한 키워드 매칭 검색 함수
-   function searchGuide() {
-    const q = document.getElementById('keyword').value.toLowerCase().trim();
-    const display = document.getElementById('guide-display');
-    
-    if (!q) {
-        display.innerHTML = "번호나 키워드를 입력하세요.";
-        return;
-    }
-
-    // ✅ 필터링 단계에서 'pos'(E열)는 아예 언급조차 안 함
-    const results = db.ment.filter(m => {
-        // 검색할 대상을 B, C, D열로만 한정해서 새로 합칩니다.
-        const onlyBCD = [
-            String(m.num || ""),  // A열(번호) - 필요없으시면 빼셔도 됩니다.
-            String(m.key || ""),  // B열(키워드)
-            String(m.talk || ""), // C열(상담멘트)
-            String(m.talk2 || "") // D열(상담멘트2)
-        ].join(" ").toLowerCase();
-
-        // ✅ 오직 위에서 합친 텍스트에 q가 포함될 때만 true! (pos는 무시됨)
-        return onlyBCD.indexOf(q) !== -1;
-    });
-
-    if (results.length > 0) {
-        display.innerHTML = results.map(found => `
-            <div style="margin-bottom: 15px; border-bottom: 1px dashed #ffccc7; padding-bottom: 10px;">
-                <b style="color:#333; font-size:1rem;">[${found.num || ''}] ${found.key || ''}</b><br>
-                <div style="margin-top:8px; white-space: pre-wrap; color: #a8071a;">${found.pos || found.talk || ''}</div>
-            </div>
-        `).join('');
-        display.scrollTop = 0;
-    } else {
-        display.innerHTML = "<span style='color:#999;'>일치하는 키워드가 없습니다.</span>";
-    }
-}
-    function startVoice() {
-        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        rec.lang = 'ko-KR'; 
-        rec.start();
-        rec.onresult = async (e) => {
-            const val = e.results[0][0].transcript.replace(/[^0-9]/g, '');
-            if(val && confirm(val + "건을 저장할까요?")) {
-                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'save', value: val }) });
-                alert("저장 완료!");
-                loadData();
-            }
-        };
-    }
+    window.onload = loadData;
 </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
