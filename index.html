@@ -6,26 +6,30 @@
     <title>카드 상담 가이드</title>
     <style>
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 10px; background: var(--bg); text-align: left; }
         
-        .notice-wrapper { background: var(--primary); color: white; padding: 10px; border-radius: 12px; margin-bottom: 12px; }
+        /* ✅ PC에서 너무 커지지 않도록 최대 너비(1000px) 설정 */
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1000px; text-align: left; }
+        
+        .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
         .notice-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
         .refresh-btn { background: rgba(255,255,255,0.3); border: 1px solid white; color: white; padding: 3px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
         #notice-container { font-size: 13px; max-height: 100px; overflow-y: auto; }
 
-        .main-container { display: flex; gap: 10px; align-items: flex-start; flex-wrap: nowrap; }
-        .card { background: white; flex: 1; padding: 12px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
-        .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 8px; }
+        /* 가로 레이아웃 고정 */
+        .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: nowrap; }
+        .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
+        .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 10px; }
         
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
-        .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
+        .display-area { min-height: 150px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
         
         .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
 
+        /* ✅ 실적 테이블 크기 최적화 (너무 작지 않게 수정) */
         .perf-section { width: 100%; margin-top: 15px; }
-        table { width: auto; border-collapse: collapse; font-size: 11px; }
-        th, td { border: 1px solid #eee; padding: 6px; text-align: center; white-space: nowrap; }
-        th { background: #f8f9fa; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
+        th { background: #f8f9fa; color: #666; }
         .today { background: #fff9c4; font-weight: bold; }
         .total-row { background: var(--primary) !important; color: white !important; font-weight: bold; }
     </style>
@@ -50,10 +54,10 @@
     <div class="card">
         <div class="title">🔍 빠른 검색</div>
         <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드 입력">
-        <div id="guide-display" class="display-area" style="max-height:200px; overflow-y:auto;"></div>
+        <div id="guide-display" class="display-area" style="max-height:200px; overflow-y:auto; min-height:50px;"></div>
         
         <div class="perf-section">
-            <div class="title" style="margin-top:10px; border-left:4px solid var(--primary); font-size:12px;">📊 실적</div>
+            <div class="title" style="margin-top:10px;">📊 실적 현황</div>
             <table id="perf-table"></table>
         </div>
     </div>
@@ -63,7 +67,7 @@
     let db = { notice: [], ment: [], perf: [] };
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
-    // ✅ 데이터가 어떤 형식이든 [A, B, C, D, E] 순서로 변환
+    // 데이터 형식 정규화
     function formatRow(m) {
         if (Array.isArray(m)) return m;
         return [m.type, m.num, m.key, m.pos, m.talk];
@@ -89,7 +93,7 @@
                 sel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
 
-            // 실적 테이블
+            // 실적 테이블 출력
             if(db.perf?.length) {
                 let total = 0;
                 let rows = db.perf.map((p, idx) => {
@@ -102,17 +106,15 @@
                 }).join('');
                 document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { }
     }
 
-    // ✅ 유형(A열) 선택 시 멘트(E열) 출력
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => formatRow(m)[0] === val);
-        document.getElementById('ment-display').innerText = found ? (formatRow(found)[4] || "멘트가 비어있습니다.") : "";
+        document.getElementById('ment-display').innerText = found ? (formatRow(found)[4] || "") : "";
     }
 
-    // ✅ 번호(B열) 또는 키워드(C열) 검색
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
@@ -125,7 +127,6 @@
         
         display.innerHTML = results.map(m => {
             const r = formatRow(m);
-            // 번호와 키워드만 출력
             return `<div class="search-res">[${r[1] || ''}] ${r[2] || ''}</div>`;
         }).join('');
     }
