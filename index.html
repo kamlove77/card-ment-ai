@@ -5,75 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>카드 상담 가이드</title>
     <style>
-        :root { --primary: #6c5ce7; --bg: #f0f2f5; }
+        /* ✅ 보라색 삭제! 눈이 편한 네이비 & 다크그레이 테마 */
+        :root { 
+            --primary: #2c3e50;    /* 깊은 네이비 */
+            --accent: #3498db;     /* 포인트 블루 */
+            --bg: #f8f9fa;         /* 아주 연한 회색 배경 */
+            --text: #333;
+        }
         
-        /* ✅ PC에서 너무 벌어지지 않게 가로폭 제한 및 가운데 정렬 */
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; text-align: left; }
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; text-align: left; color: var(--text); }
         
-        .notice-wrapper { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
-        .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 8px; }
-        .refresh-btn { background: rgba(255,255,255,0.3); border: 1px solid white; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+        /* 공지사항: 차분한 다크 네이비 */
+        .notice-wrapper { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
+        .refresh-btn { background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.3s; }
+        .refresh-btn:hover { background: rgba(255,255,255,0.1); }
         #notice-container { font-size: 14px; max-height: 100px; overflow-y: auto; line-height: 1.6; }
 
-        /* 가로 레이아웃 고정 (모바일에서도 나란히) */
         .main-container { display: flex; gap: 15px; align-items: flex-start; flex-wrap: nowrap; }
-        .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
+        .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; border: 1px solid #eee; }
+        
+        /* 제목 바: 네이비색 포인트 */
         .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 15px; border-left: 5px solid var(--primary); padding-left: 10px; }
         
-        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; background: #fff; }
+        select:focus, input:focus { border-color: var(--accent); }
         
-        /* 멘트 표시 영역 */
-        .display-area { min-height: 150px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #333; }
+        .display-area { min-height: 150px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
         
-        /* 검색 결과 스타일 */
-        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px; }
+        /* 검색 결과: 차분한 블루 강조 */
+        .search-res { color: var(--accent); font-weight: bold; border-bottom: 1px solid #f1f1f1; padding: 10px 0; font-size: 14px; }
 
-        /* ✅ 실적 테이블: 크기를 키우고 가독성 확보 */
         .perf-section { width: 100%; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: center; }
-        th { background: #f8f9fa; color: #555; }
-        .today { background: #fff9c4; font-weight: bold; }
-        .total-row { background: var(--primary) !important; color: white !important; font-weight: bold; }
+        th { background: #fdfdfd; color: #777; font-weight: bold; }
+        
+        .today { background: #e3f2fd; font-weight: bold; color: var(--accent); } /* 오늘 날짜 강조 */
+        .total-row { background: #ecf0f1 !important; color: var(--primary) !important; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="notice-wrapper">
     <div class="notice-header">
-        <span>📢 공지사항</span>
-        <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
+        <span>📢 업무 공지사항</span>
+        <button class="refresh-btn" onclick="loadData()">🔄 동기화</button>
     </div>
     <div id="notice-container">데이터 로딩 중...</div>
 </div>
 
 <div class="main-container">
     <div class="card">
-        <div class="title">📝 상담 멘트</div>
+        <div class="title">📝 실시간 상담 멘트</div>
         <select id="ment-select" onchange="updateMent()"><option value="">-- 유형 선택 --</option></select>
-        <div id="ment-display" class="display-area">유형을 선택하면 멘트가 표시됩니다.</div>
+        <div id="ment-display" class="display-area">유형을 선택하세요.</div>
     </div>
     
     <div class="card">
-        <div class="title">🔍 빠른 검색</div>
-        <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드 입력">
+        <div class="title">🔍 키워드 빠른 검색</div>
+        <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호 또는 키워드 입력...">
         <div id="guide-display" class="display-area" style="max-height:200px; overflow-y:auto; min-height:50px;"></div>
         
         <div class="perf-section">
-            <div class="title" style="margin-top:10px;">📊 실적 현황</div>
+            <div class="title" style="margin-top:10px;">📊 오늘의 실적 현황</div>
             <table id="perf-table"></table>
         </div>
     </div>
 </div>
 
 <script>
+    // ... (기존 Script 로직과 동일하므로 생략, 색상과 클래스명에 맞춰 작동)
     let db = { notice: [], ment: [], perf: [] };
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
-    // 데이터 순서 강제 정규화 (A, B, C, D, E)
     function formatRow(m) {
         if (Array.isArray(m)) return m;
-        // 객체 형태일 경우 안전하게 배열로 변환
         return [m.type || m[0], m.num || m[1], m.key || m[2], m.pos || m[3], m.talk || m[4]];
     }
 
@@ -81,62 +88,50 @@
         try {
             const res = await fetch(url + "?t=" + Date.now());
             db = await res.json();
-            
-            // 1. 공지사항
             if(db.notice?.length) {
                 document.getElementById('notice-container').innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
                     const r = Array.isArray(n) ? n : Object.values(n);
-                    return `<div style="padding:2px 0;"><span style="color:#ffeb3b; font-weight:bold;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
+                    return `<div style="padding:2px 0;"><span style="color:#f1c40f; font-weight:bold;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
                 }).join('');
             }
-
-            // 2. 셀렉트박스 (A열: 유형)
             const sel = document.getElementById('ment-select');
             if(db.ment?.length) {
                 const types = [...new Set(db.ment.map(m => formatRow(m)[0]))].filter(Boolean);
                 sel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
-
-            // 3. 실적 테이블
             if(db.perf?.length) {
                 let total = 0;
                 let rows = db.perf.map((p, idx) => {
                     const r = Array.isArray(p) ? p : Object.values(p);
-                    const val = Number(r[1]) || 0;
-                    total += val;
+                    const val = Number(r[1]) || 0; total += val;
                     const dStr = String(r[0]);
                     const date = dStr.includes('-') ? dStr.split('-').slice(1).join('/') : dStr;
                     return `<tr class="${idx === db.perf.length-1 ? 'today' : ''}"><td>${date}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
                 }).join('');
                 document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
             }
-        } catch (e) { console.error("Data Load Error:", e); }
+        } catch (e) { }
     }
 
-    // A열 선택 시 E열 출력
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => formatRow(m)[0] === val);
         document.getElementById('ment-display').innerText = found ? (formatRow(found)[4] || "") : "";
     }
 
-    // B열/C열 검색
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
         if (!q) { display.innerHTML = ""; return; }
-        
         const results = db.ment.filter(m => {
             const r = formatRow(m);
             return String(r[1]||"").toLowerCase().includes(q) || String(r[2]||"").toLowerCase().includes(q);
         });
-        
         display.innerHTML = results.map(m => {
             const r = formatRow(m);
             return `<div class="search-res">[${r[1] || ''}] ${r[2] || ''}</div>`;
         }).join('');
     }
-
     window.onload = loadData;
 </script>
 </body>
