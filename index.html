@@ -8,22 +8,15 @@
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
         body { font-family: sans-serif; margin: 0; padding: 10px; background: var(--bg); overscroll-behavior-y: contain; }
         
-        /* ✅ 공지사항: 높이 고정 및 스크롤 추가 */
+        /* ✅ 공지사항: 날짜 포함 + 최신 5개 + 스크롤 */
         #notice-container { 
-            background: #6c5ce7; 
-            color: white; 
-            padding: 10px; 
-            border-radius: 12px; 
-            margin-bottom: 12px; 
-            font-size: 13px; 
-            max-height: 80px; /* 공지 5개 정도 보일 높이 */
-            overflow-y: auto; /* 세로 스크롤 발생 */
-            line-height: 1.6;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: #6c5ce7; color: white; padding: 10px; border-radius: 12px; 
+            margin-bottom: 12px; font-size: 13px; max-height: 100px; overflow-y: auto; 
+            line-height: 1.6; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        /* 스크롤바 디자인 (얇게) */
-        #notice-container::-webkit-scrollbar { width: 4px; }
-        #notice-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.5); border-radius: 10px; }
+        .notice-item { border-bottom: 1px solid rgba(255,255,255,0.2); padding: 4px 0; }
+        .notice-item:last-child { border-bottom: none; }
+        .notice-date { font-weight: bold; color: #ffeb3b; margin-right: 6px; }
 
         .main-container { display: flex; gap: 10px; }
         .card { background: white; flex: 1; padding: 12px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
@@ -31,96 +24,5 @@
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; }
         .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
         .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; background: white; }
-        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
-        th { background: #f8f9fa; color: #777; }
-        .today { background: #fff9c4; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-<div id="notice-container">데이터 연결 중...</div>
-
-<div class="main-container">
-    <div class="card">
-        <div class="title">📝 상담 멘트</div>
-        <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
-        <div id="ment-display" class="display-area"></div>
-    </div>
-
-    <div class="card">
-        <div class="title">🔍 빠른 검색</div>
-        <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호나 키워드 입력">
-        <div id="guide-display" class="display-area" style="min-height:60px;"></div>
         
-        <div class="title" style="margin-top:20px;">📊 실적</div>
-        <table id="perf-table"></table>
-    </div>
-</div>
-
-<script>
-    let db = { notice: [], ment: [], perf: [] };
-    const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-
-    async function loadData() {
-        const container = document.getElementById('notice-container');
-        try {
-            const response = await fetch(url + "?t=" + Date.now());
-            db = await response.json();
-            
-            if (db) {
-                // ✅ 1. 공지사항: 최신순 정렬 후 상위 5개 추출
-                if(db.notice && db.notice.length) {
-                    // 시트의 아래쪽이 최신 데이터라면 reverse() 사용
-                    const recentNotices = [...db.notice].reverse().slice(0, 5); 
-                    container.innerHTML = recentNotices.map(n => `<div>• ${n.content || n[1]}</div>`).join('');
-                }
-
-                // 2. 멘트 유형 설정
-                const sel = document.getElementById('ment-select');
-                const types = [...new Set(db.ment.map(m => m.type || m[0]))].filter(Boolean);
-                sel.innerHTML = '<option value="">-- 유형 선택 --</option>';
-                types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
-
-                // 3. 실적 테이블 설정
-                const perfTable = document.getElementById('perf-table');
-                if (db.perf) {
-                    let html = '<tr><th>날짜</th><th>실적</th><th>%</th></tr>';
-                    html += db.perf.map((p, idx) => `
-                        <tr class="${idx === db.perf.length - 1 ? 'today' : ''}">
-                            <td>${p.date || p[0]}</td><td>${p.val || p[1]}</td><td>${p.rate || p[2] || '-'}</td>
-                        </tr>`).join('');
-                    perfTable.innerHTML = html;
-                }
-            }
-        } catch (e) {
-            container.innerText = "❌ 연결 실패";
-        }
-    }
-
-    function updateMent() {
-        const val = document.getElementById('ment-select').value;
-        const found = db.ment.find(m => (m.type || m[0]) === val);
-        document.getElementById('ment-display').innerText = found ? (found.talk || found[3] || "내용이 없습니다.") : "";
-    }
-
-    function searchGuide() {
-        const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const display = document.getElementById('guide-display');
-        if (!q) { display.innerHTML = ""; return; }
-        
-        const results = db.ment.filter(m => {
-            const target = Object.values(m).join(" ").toLowerCase();
-            return target.includes(q);
-        });
-        
-        display.innerHTML = results.map(i => {
-            const row = Object.values(i);
-            return `<div class="search-res">[${row[2] || ''}] ${row[1] || ''}</div>`;
-        }).join('');
-    }
-
-    window.onload = loadData;
-</script>
-</body>
-</html>
+        /* ✅ 실적 테이블 및 누적 행 스타일 */
