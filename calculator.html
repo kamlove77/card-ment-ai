@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>업무용 계산기</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; }
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 600px; color: #333; }
+        
+        /* 헤더 섹션 */
+        .header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 18px; }
+        .back-btn { background: transparent; border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 13px; }
+
+        /* 계산기 카드 */
+        .calc-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #eee; }
+        .input-group { margin-bottom: 15px; }
+        .label { display: block; font-weight: bold; font-size: 14px; margin-bottom: 8px; color: var(--primary); }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; text-align: right; }
+        input:focus { border-color: var(--accent); }
+
+        /* 계산 버튼 */
+        .calc-btn { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .calc-btn:hover { background: #2980b9; }
+
+        /* 결과 창 */
+        .result-box { margin-top: 20px; padding: 15px; background: #f0f7ff; border-radius: 8px; border-left: 5px solid var(--accent); }
+        .result-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
+        .result-val { font-weight: bold; color: #d32f2f; }
+        
+        .reset-btn { width: 100%; background: #eee; color: #666; border: none; padding: 10px; border-radius: 8px; font-size: 13px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🧮 업무용 계산기</h1>
+    <a href="index.html" class="back-btn">⬅ 메인으로</a>
+</div>
+
+<div class="calc-card">
+    <div class="input-group">
+        <label class="label">결제 금액 (원)</label>
+        <input type="number" id="amount" placeholder="0" oninput="formatNumber(this)">
+    </div>
+
+    <div class="input-group">
+        <label class="label">할부 개월 수</label>
+        <input type="number" id="months" placeholder="1" value="1">
+    </div>
+
+    <div class="input-group">
+        <label class="label">수수료율 (%)</label>
+        <input type="number" id="rate" step="0.1" placeholder="0.0">
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">계산하기</button>
+    <button class="reset-btn" onclick="reset()">초기화</button>
+
+    <div id="result-area" class="result-box" style="display: none;">
+        <div class="result-row">
+            <span>총 결제 금액:</span>
+            <span id="res-total" class="result-val">0원</span>
+        </div>
+        <div class="result-row">
+            <span>월 납부액:</span>
+            <span id="res-monthly" class="result-val">0원</span>
+        </div>
+        <div class="result-row">
+            <span>총 수수료:</span>
+            <span id="res-fee" class="result-val">0원</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        const months = parseInt(document.getElementById('months').value) || 1;
+        const rate = parseFloat(document.getElementById('rate').value) || 0;
+
+        if (amount <= 0) {
+            alert("금액을 입력해주세요.");
+            return;
+        }
+
+        // 간단한 수수료 계산 로직 (원금 * 이율)
+        const totalFee = Math.round(amount * (rate / 100));
+        const totalAmount = amount + totalFee;
+        const monthlyAmount = Math.floor(totalAmount / months);
+
+        document.getElementById('res-total').innerText = totalAmount.toLocaleString() + "원";
+        document.getElementById('res-monthly').innerText = monthlyAmount.toLocaleString() + "원";
+        document.getElementById('res-fee').innerText = totalFee.toLocaleString() + "원";
+
+        document.getElementById('result-area').style.display = "block";
+    }
+
+    function reset() {
+        document.getElementById('amount').value = '';
+        document.getElementById('months').value = '1';
+        document.getElementById('rate').value = '';
+        document.getElementById('result-area').style.display = "none";
+    }
+
+    // 숫자를 입력할 때 시각적으로 편하게 (선택 사항)
+    function formatNumber(el) {
+        // 실제 계산은 value로 하되, UI적인 처리가 필요하면 여기에 추가
+    }
+</script>
+
+</body>
+</html>
