@@ -7,14 +7,113 @@
     <style>
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 10px; background: var(--bg); overscroll-behavior-y: contain; }
-        
         .notice-wrapper { background: #6c5ce7; color: white; padding: 10px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .notice-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
         .refresh-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
         #notice-container { font-size: 13px; max-height: 100px; overflow-y: auto; line-height: 1.6; }
         .notice-item { border-bottom: 1px dashed rgba(255,255,255,0.2); padding: 4px 0; }
         .notice-date { font-weight: bold; color: #ffeb3b; margin-right: 6px; }
-
         .main-container { display: flex; gap: 10px; }
         .card { background: white; flex: 1; padding: 12px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
-        .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--
+        .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 8px; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
+        .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
+        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
+        th, td { border: 1px solid #eee; padding: 6px; text-align: center; }
+        th { background: #f8f9fa; color: #777; }
+        .today { background: #fff9c4; font-weight: bold; }
+        .total-row { background: #6c5ce7 !important; color: white !important; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="notice-wrapper">
+    <div class="notice-header">
+        <span>📢 공지사항</span>
+        <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
+    </div>
+    <div id="notice-container">데이터를 불러오는 중...</div>
+</div>
+
+<div class="main-container">
+    <div class="card">
+        <div class="title">📝 상담 멘트</div>
+        <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
+        <div id="ment-display" class="display-area"></div>
+    </div>
+    <div class="card">
+        <div class="title">🔍 빠른 검색</div>
+        <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호/단어 입력">
+        <div id="guide-display" class="display-area" style="min-height:60px; max-height:150px; overflow-y:auto;"></div>
+        <div class="title" style="margin-top:20px;">📊 실적 (누적 포함)</div>
+        <table id="perf-table"></table>
+    </div>
+</div>
+
+<script>
+    let db = { notice: [], ment: [], perf: [] };
+    const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    const toArr = (obj) => Array.isArray(obj) ? obj : Object.values(obj);
+
+    async function loadData() {
+        const container = document.getElementById('notice-container');
+        try {
+            const response = await fetch(url + "?t=" + Date.now());
+            db = await response.json();
+            if(db.notice && db.notice.length > 0) {
+                const recent = [...db.notice].reverse().slice(0, 5);
+                container.innerHTML = recent.map(n => {
+                    const r = toArr(n);
+                    return `<div class="notice-item"><span class="notice-date">[${r[0] || ''}]</span> ${r[1] || ''}</div>`;
+                }).join('');
+            } else { container.innerText = "공지사항이 없습니다."; }
+
+            const sel = document.getElementById('ment-select');
+            if(db.ment && db.ment.length > 0) {
+                const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
+                sel.innerHTML = '<option value="">-- 유형 선택 --</option>';
+                types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
+            }
+
+            const perfTable = document.getElementById('perf-table');
+            if(db.perf && db.perf.length > 0) {
+                let html = '<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>';
+                let totalVal = 0;
+                db.perf.forEach((p, idx) => {
+                    const r = toArr(p);
+                    // 어떤 형식이든 뒤에서 5글자만 잘라서 월/일(MM/DD) 형태로 만듦
+                    let dateRaw = String(r[0]);
+                    let simpleDate = dateRaw.length > 5 ? dateRaw.substring(dateRaw.length - 5).replace('-', '/') : dateRaw;
+                    
+                    const val = Number(r[1]) || 0;
+                    totalVal += val;
+                    const isLast = (idx === db.perf.length - 1) ? 'class="today"' : '';
+                    html += `<tr ${isLast}><td>${simpleDate}</td><td>${val}</td><td>${r[2] || '-'}</td></tr>`;
+                });
+                html += `<tr class="total-row"><td>누적합계</td><td>${totalVal.toLocaleString()}</td><td>-</td></tr>`;
+                perfTable.innerHTML = html + '</tbody>';
+            }
+        } catch (e) { container.innerText = "❌ 데이터 연결 오류"; }
+    }
+
+    function updateMent() {
+        const val = document.getElementById('ment-select').value;
+        const found = db.ment.find(m => toArr(m)[0] === val);
+        document.getElementById('ment-display').innerText = found ? (toArr(found)[3] || "내용 없음") : "";
+    }
+
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        if (!q) { display.innerHTML = ""; return; }
+        const results = db.ment.filter(m => toArr(m).join(" ").toLowerCase().includes(q));
+        display.innerHTML = results.map(i => {
+            const r = toArr(i);
+            return `<div class="search-res">[${r[2] || ''}] ${r[1] || ''}</div>`;
+        }).join('');
+    }
+    window.onload = loadData;
+</script>
+</body>
+</html>
