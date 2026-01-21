@@ -7,7 +7,24 @@
     <style>
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
         body { font-family: sans-serif; margin: 0; padding: 10px; background: var(--bg); overscroll-behavior-y: contain; }
-        #notice-banner { background: #6c5ce7; color: white; padding: 10px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; font-weight: bold; }
+        
+        /* ✅ 공지사항: 높이 고정 및 스크롤 추가 */
+        #notice-container { 
+            background: #6c5ce7; 
+            color: white; 
+            padding: 10px; 
+            border-radius: 12px; 
+            margin-bottom: 12px; 
+            font-size: 13px; 
+            max-height: 80px; /* 공지 5개 정도 보일 높이 */
+            overflow-y: auto; /* 세로 스크롤 발생 */
+            line-height: 1.6;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        /* 스크롤바 디자인 (얇게) */
+        #notice-container::-webkit-scrollbar { width: 4px; }
+        #notice-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.5); border-radius: 10px; }
+
         .main-container { display: flex; gap: 10px; }
         .card { background: white; flex: 1; padding: 12px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
         .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 8px; }
@@ -22,7 +39,7 @@
 </head>
 <body>
 
-<div id="notice-banner">데이터 연결 중...</div>
+<div id="notice-container">데이터 연결 중...</div>
 
 <div class="main-container">
     <div class="card">
@@ -46,16 +63,17 @@
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
     async function loadData() {
-        const banner = document.getElementById('notice-banner');
+        const container = document.getElementById('notice-container');
         try {
             const response = await fetch(url + "?t=" + Date.now());
             db = await response.json();
             
             if (db) {
-                // 1. 공지사항 (데이터의 0번째가 날짜, 1번째가 내용인 경우 대응)
+                // ✅ 1. 공지사항: 최신순 정렬 후 상위 5개 추출
                 if(db.notice && db.notice.length) {
-                    const n = db.notice[0];
-                    banner.innerText = "📢 " + (n.content || n[1] || "환영합니다!");
+                    // 시트의 아래쪽이 최신 데이터라면 reverse() 사용
+                    const recentNotices = [...db.notice].reverse().slice(0, 5); 
+                    container.innerHTML = recentNotices.map(n => `<div>• ${n.content || n[1]}</div>`).join('');
                 }
 
                 // 2. 멘트 유형 설정
@@ -76,14 +94,13 @@
                 }
             }
         } catch (e) {
-            banner.innerText = "❌ 연결 실패: 시트 배포 설정을 확인하세요.";
+            container.innerText = "❌ 연결 실패";
         }
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => (m.type || m[0]) === val);
-        // 데이터 구조상 4번째(인덱스 3)가 멘트 내용인 경우 대응
         document.getElementById('ment-display').innerText = found ? (found.talk || found[3] || "내용이 없습니다.") : "";
     }
 
@@ -92,7 +109,6 @@
         const display = document.getElementById('guide-display');
         if (!q) { display.innerHTML = ""; return; }
         
-        // 전체 텍스트에서 검색
         const results = db.ment.filter(m => {
             const target = Object.values(m).join(" ").toLowerCase();
             return target.includes(q);
@@ -100,7 +116,6 @@
         
         display.innerHTML = results.map(i => {
             const row = Object.values(i);
-            // row[2]는 번호, row[1]은 키워드라고 가정
             return `<div class="search-res">[${row[2] || ''}] ${row[1] || ''}</div>`;
         }).join('');
     }
