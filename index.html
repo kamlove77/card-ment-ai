@@ -8,13 +8,18 @@
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 10px; background: var(--bg); overscroll-behavior-y: contain; }
         
-        /* 공지사항: 스크롤 및 날짜 강조 */
-        #notice-container { 
+        /* 공지사항 영역 레이아웃 */
+        .notice-wrapper {
             background: #6c5ce7; color: white; padding: 10px; border-radius: 12px; 
-            margin-bottom: 12px; font-size: 13px; max-height: 100px; overflow-y: auto; 
-            line-height: 1.6; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .notice-item { border-bottom: 1px dashed rgba(255,255,255,0.3); padding: 4px 0; }
+        .notice-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
+        
+        #notice-container { 
+            font-size: 13px; max-height: 100px; overflow-y: auto; line-height: 1.6;
+        }
+        .notice-item { border-bottom: 1px dashed rgba(255,255,255,0.2); padding: 4px 0; }
+        .notice-item:last-child { border-bottom: none; }
         .notice-date { font-weight: bold; color: #ffeb3b; margin-right: 6px; }
 
         .main-container { display: flex; gap: 10px; }
@@ -24,9 +29,8 @@
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
         .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
         
-        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
+        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 14px; }
         
-        /* 실적 테이블 및 누적 행 */
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
         th, td { border: 1px solid #eee; padding: 6px; text-align: center; }
         th { background: #f8f9fa; color: #777; }
@@ -36,7 +40,10 @@
 </head>
 <body>
 
-<div id="notice-container">데이터를 불러오는 중...</div>
+<div class="notice-wrapper">
+    <div class="notice-header">📢 공지사항</div>
+    <div id="notice-container">데이터를 불러오는 중...</div>
+</div>
 
 <div class="main-container">
     <div class="card">
@@ -59,7 +66,6 @@
     let db = { notice: [], ment: [], perf: [] };
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
-    // 데이터를 배열로 변환하는 헬퍼 함수
     const toArr = (obj) => Array.isArray(obj) ? obj : Object.values(obj);
 
     async function loadData() {
@@ -68,64 +74,4 @@
             const response = await fetch(url + "?t=" + Date.now());
             db = await response.json();
             
-            // 1. 공지사항 (날짜 표시 + 최신 5개)
-            if(db.notice && db.notice.length > 0) {
-                const recent = [...db.notice].reverse().slice(0, 5);
-                container.innerHTML = recent.map(n => {
-                    const r = toArr(n);
-                    return `<div class="notice-item"><span class="notice-date">[${r[0] || ''}]</span> ${r[1] || ''}</div>`;
-                }).join('');
-            } else { container.innerText = "공지사항이 없습니다."; }
-
-            // 2. 멘트 셀렉트박스 (유형 데이터 추출)
-            const sel = document.getElementById('ment-select');
-            if(db.ment && db.ment.length > 0) {
-                const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
-                sel.innerHTML = '<option value="">-- 유형 선택 --</option>';
-                types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
-            }
-
-            // 3. 실적 테이블 + 누적합계 계산
-            const perfTable = document.getElementById('perf-table');
-            if(db.perf && db.perf.length > 0) {
-                let html = '<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>';
-                let totalVal = 0;
-                db.perf.forEach((p, idx) => {
-                    const r = toArr(p);
-                    const val = Number(r[1]) || 0;
-                    totalVal += val;
-                    const isLast = (idx === db.perf.length - 1) ? 'class="today"' : '';
-                    html += `<tr ${isLast}><td>${r[0]}</td><td>${val}</td><td>${r[2] || '-'}</td></tr>`;
-                });
-                html += `<tr class="total-row"><td>누적합계</td><td>${totalVal.toLocaleString()}</td><td>-</td></tr>`;
-                perfTable.innerHTML = html + '</tbody>';
-            }
-        } catch (e) {
-            container.innerHTML = "❌ 연결 오류가 발생했습니다.";
-        }
-    }
-
-    function updateMent() {
-        const val = document.getElementById('ment-select').value;
-        const found = db.ment.find(m => toArr(m)[0] === val);
-        // 멘트 내용은 4번째 칸(인덱스 3)에 있다고 가정
-        document.getElementById('ment-display').innerText = found ? (toArr(found)[3] || "내용 없음") : "";
-    }
-
-    function searchGuide() {
-        const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const display = document.getElementById('guide-display');
-        if (!q) { display.innerHTML = ""; return; }
-        
-        const results = db.ment.filter(m => toArr(m).join(" ").toLowerCase().includes(q));
-        display.innerHTML = results.map(i => {
-            const r = toArr(i);
-            // r[2]는 번호, r[1]은 키워드라고 가정
-            return `<div class="search-res">[${r[2] || ''}] ${r[1] || ''}</div>`;
-        }).join('');
-    }
-
-    window.onload = loadData;
-</script>
-</body>
-</html>
+            if(db.
