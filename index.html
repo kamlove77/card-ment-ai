@@ -6,22 +6,25 @@
     <title>카드 상담 가이드</title>
     <style>
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 8px; background: var(--bg); text-align: left; }
-        .notice-wrapper { background: var(--primary); color: white; padding: 8px 12px; border-radius: 10px; margin-bottom: 8px; }
-        .notice-header { font-weight: bold; font-size: 13px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 3px; }
-        .refresh-btn { background: rgba(255,255,255,0.3); border: 1px solid white; color: white; padding: 2px 8px; border-radius: 5px; font-size: 10px; cursor: pointer; }
-        #notice-container { font-size: 12px; max-height: 80px; overflow-y: auto; }
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 10px; background: var(--bg); text-align: left; }
+        
+        .notice-wrapper { background: var(--primary); color: white; padding: 10px; border-radius: 12px; margin-bottom: 12px; }
+        .notice-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
+        .refresh-btn { background: rgba(255,255,255,0.3); border: 1px solid white; color: white; padding: 3px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        #notice-container { font-size: 13px; max-height: 100px; overflow-y: auto; }
 
-        .main-container { display: flex; gap: 8px; width: 100%; align-items: flex-start; flex-wrap: nowrap; }
-        .card { background: white; flex: 1; padding: 10px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
-        .title { font-weight: bold; margin-bottom: 6px; color: var(--primary); font-size: 13px; border-left: 4px solid var(--primary); padding-left: 8px; }
-        select, input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 13px; margin-bottom: 8px; outline: none; }
-        .display-area { min-height: 100px; white-space: pre-wrap; word-break: break-all; line-height: 1.5; font-size: 13px; color: #333; }
-        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 13px; }
+        .main-container { display: flex; gap: 10px; align-items: flex-start; flex-wrap: nowrap; }
+        .card { background: white; flex: 1; padding: 12px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
+        .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 8px; }
+        
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
+        .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
+        
+        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
 
-        .perf-section { width: 100%; margin-top: 10px; }
-        table { width: auto; border-collapse: collapse; font-size: 10px; }
-        th, td { border: 1px solid #eee; padding: 3px 6px; text-align: center; white-space: nowrap; }
+        .perf-section { width: 100%; margin-top: 15px; }
+        table { width: auto; border-collapse: collapse; font-size: 11px; }
+        th, td { border: 1px solid #eee; padding: 6px; text-align: center; white-space: nowrap; }
         th { background: #f8f9fa; }
         .today { background: #fff9c4; font-weight: bold; }
         .total-row { background: var(--primary) !important; color: white !important; font-weight: bold; }
@@ -34,23 +37,23 @@
         <span>📢 공지사항</span>
         <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
     </div>
-    <div id="notice-container">로딩 중...</div>
+    <div id="notice-container">데이터 로딩 중...</div>
 </div>
 
 <div class="main-container">
     <div class="card">
         <div class="title">📝 상담 멘트</div>
-        <select id="ment-select" onchange="updateMent()"><option value="">-- 선택 --</option></select>
+        <select id="ment-select" onchange="updateMent()"><option value="">-- 유형 선택 --</option></select>
         <div id="ment-display" class="display-area"></div>
     </div>
     
     <div class="card">
         <div class="title">🔍 빠른 검색</div>
         <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드 입력">
-        <div id="guide-display" class="display-area" style="max-height:180px; overflow-y:auto;"></div>
+        <div id="guide-display" class="display-area" style="max-height:200px; overflow-y:auto;"></div>
         
         <div class="perf-section">
-            <div class="title" style="margin-top:5px; border-left:3px solid var(--primary); font-size:11px;">📊 실적</div>
+            <div class="title" style="margin-top:10px; border-left:4px solid var(--primary); font-size:12px;">📊 실적</div>
             <table id="perf-table"></table>
         </div>
     </div>
@@ -60,73 +63,69 @@
     let db = { notice: [], ment: [], perf: [] };
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
-    const toArr = (obj) => Array.isArray(obj) ? obj : Object.values(obj);
+    // ✅ 데이터가 어떤 형식이든 [A, B, C, D, E] 순서로 변환
+    function formatRow(m) {
+        if (Array.isArray(m)) return m;
+        return [m.type, m.num, m.key, m.pos, m.talk];
+    }
 
     async function loadData() {
         try {
-            const response = await fetch(url + "?t=" + Date.now());
-            db = await response.json();
+            const res = await fetch(url + "?t=" + Date.now());
+            db = await res.json();
             
             // 공지사항
-            if(db.notice?.length > 0) {
+            if(db.notice?.length) {
                 document.getElementById('notice-container').innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
-                    const r = toArr(n);
-                    return `<div style="padding:1px 0;"><span style="color:#ffeb3b;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
+                    const r = Array.isArray(n) ? n : Object.values(n);
+                    return `<div style="padding:2px 0;"><span style="color:#ffeb3b;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
                 }).join('');
             }
 
-            // 셀렉트박스 (A열 기준)
+            // 셀렉트박스 (A열: 유형)
             const sel = document.getElementById('ment-select');
-            if(db.ment?.length > 0) {
-                // toArr(m)[0] 이 A열(유형)입니다.
-                const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
-                sel.innerHTML = '<option value="">-- 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+            if(db.ment?.length) {
+                const types = [...new Set(db.ment.map(m => formatRow(m)[0]))].filter(Boolean);
+                sel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
 
             // 실적 테이블
-            const perfTable = document.getElementById('perf-table');
-            if(db.perf?.length > 0) {
+            if(db.perf?.length) {
                 let total = 0;
                 let rows = db.perf.map((p, idx) => {
-                    const r = toArr(p);
+                    const r = Array.isArray(p) ? p : Object.values(p);
                     const val = Number(r[1]) || 0;
                     total += val;
                     const dStr = String(r[0]);
                     const date = dStr.includes('-') ? dStr.split('-').slice(1).join('/') : dStr;
                     return `<tr class="${idx === db.perf.length-1 ? 'today' : ''}"><td>${date}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
                 }).join('');
-                perfTable.innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
+                document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
             }
-        } catch (e) { }
+        } catch (e) { console.error(e); }
     }
 
-    // ✅ 수정 포인트: A열 선택 시 E열(index 4) 데이터 출력
+    // ✅ 유형(A열) 선택 시 멘트(E열) 출력
     function updateMent() {
         const val = document.getElementById('ment-select').value;
-        const found = db.ment.find(m => toArr(m)[0] === val); // A열(0)과 비교
-        if (found) {
-            const r = toArr(found);
-            // E열은 배열의 5번째이므로 index는 4입니다.
-            document.getElementById('ment-display').innerText = r[4] || "멘트 내용이 없습니다.";
-        } else {
-            document.getElementById('ment-display').innerText = "";
-        }
+        const found = db.ment.find(m => formatRow(m)[0] === val);
+        document.getElementById('ment-display').innerText = found ? (formatRow(found)[4] || "멘트가 비어있습니다.") : "";
     }
 
+    // ✅ 번호(B열) 또는 키워드(C열) 검색
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
         if (!q) { display.innerHTML = ""; return; }
         
         const results = db.ment.filter(m => {
-            const r = toArr(m);
-            // B열(1) 혹은 C열(2)에서 검색
+            const r = formatRow(m);
             return String(r[1]||"").toLowerCase().includes(q) || String(r[2]||"").toLowerCase().includes(q);
         });
         
         display.innerHTML = results.map(m => {
-            const r = toArr(m);
-            // 검색 결과는 B열(유형)과 C열(키워드)만 출력
+            const r = formatRow(m);
+            // 번호와 키워드만 출력
             return `<div class="search-res">[${r[1] || ''}] ${r[2] || ''}</div>`;
         }).join('');
     }
