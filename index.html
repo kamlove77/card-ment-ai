@@ -7,29 +7,32 @@
     <style>
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
         
-        /* ✅ PC에서 너무 커지지 않도록 최대 너비(1000px) 설정 */
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1000px; text-align: left; }
+        /* ✅ PC에서 너무 벌어지지 않게 가로폭 제한 및 가운데 정렬 */
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; text-align: left; }
         
-        .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
-        .notice-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
-        .refresh-btn { background: rgba(255,255,255,0.3); border: 1px solid white; color: white; padding: 3px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
-        #notice-container { font-size: 13px; max-height: 100px; overflow-y: auto; }
+        .notice-wrapper { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
+        .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 8px; }
+        .refresh-btn { background: rgba(255,255,255,0.3); border: 1px solid white; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+        #notice-container { font-size: 14px; max-height: 100px; overflow-y: auto; line-height: 1.6; }
 
-        /* 가로 레이아웃 고정 */
-        .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: nowrap; }
+        /* 가로 레이아웃 고정 (모바일에서도 나란히) */
+        .main-container { display: flex; gap: 15px; align-items: flex-start; flex-wrap: nowrap; }
         .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
-        .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 10px; }
+        .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 15px; border-left: 5px solid var(--primary); padding-left: 10px; }
         
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
-        .display-area { min-height: 150px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
         
-        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
+        /* 멘트 표시 영역 */
+        .display-area { min-height: 150px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #333; }
+        
+        /* 검색 결과 스타일 */
+        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px; }
 
-        /* ✅ 실적 테이블 크기 최적화 (너무 작지 않게 수정) */
-        .perf-section { width: 100%; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
-        th { background: #f8f9fa; color: #666; }
+        /* ✅ 실적 테이블: 크기를 키우고 가독성 확보 */
+        .perf-section { width: 100%; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border: 1px solid #eee; padding: 10px; text-align: center; }
+        th { background: #f8f9fa; color: #555; }
         .today { background: #fff9c4; font-weight: bold; }
         .total-row { background: var(--primary) !important; color: white !important; font-weight: bold; }
     </style>
@@ -48,7 +51,7 @@
     <div class="card">
         <div class="title">📝 상담 멘트</div>
         <select id="ment-select" onchange="updateMent()"><option value="">-- 유형 선택 --</option></select>
-        <div id="ment-display" class="display-area"></div>
+        <div id="ment-display" class="display-area">유형을 선택하면 멘트가 표시됩니다.</div>
     </div>
     
     <div class="card">
@@ -67,10 +70,11 @@
     let db = { notice: [], ment: [], perf: [] };
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
-    // 데이터 형식 정규화
+    // 데이터 순서 강제 정규화 (A, B, C, D, E)
     function formatRow(m) {
         if (Array.isArray(m)) return m;
-        return [m.type, m.num, m.key, m.pos, m.talk];
+        // 객체 형태일 경우 안전하게 배열로 변환
+        return [m.type || m[0], m.num || m[1], m.key || m[2], m.pos || m[3], m.talk || m[4]];
     }
 
     async function loadData() {
@@ -78,22 +82,22 @@
             const res = await fetch(url + "?t=" + Date.now());
             db = await res.json();
             
-            // 공지사항
+            // 1. 공지사항
             if(db.notice?.length) {
                 document.getElementById('notice-container').innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
                     const r = Array.isArray(n) ? n : Object.values(n);
-                    return `<div style="padding:2px 0;"><span style="color:#ffeb3b;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
+                    return `<div style="padding:2px 0;"><span style="color:#ffeb3b; font-weight:bold;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
                 }).join('');
             }
 
-            // 셀렉트박스 (A열: 유형)
+            // 2. 셀렉트박스 (A열: 유형)
             const sel = document.getElementById('ment-select');
             if(db.ment?.length) {
                 const types = [...new Set(db.ment.map(m => formatRow(m)[0]))].filter(Boolean);
                 sel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
 
-            // 실적 테이블 출력
+            // 3. 실적 테이블
             if(db.perf?.length) {
                 let total = 0;
                 let rows = db.perf.map((p, idx) => {
@@ -106,15 +110,17 @@
                 }).join('');
                 document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
             }
-        } catch (e) { }
+        } catch (e) { console.error("Data Load Error:", e); }
     }
 
+    // A열 선택 시 E열 출력
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => formatRow(m)[0] === val);
         document.getElementById('ment-display').innerText = found ? (formatRow(found)[4] || "") : "";
     }
 
+    // B열/C열 검색
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
