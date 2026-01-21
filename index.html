@@ -14,11 +14,11 @@
         .main-container { display: flex; gap: 10px; }
         .card { background: white; flex: 1; padding: 12px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
         .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 8px; }
-        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 10px; outline: none; }
-        .display-area { min-height: 120px; white-space: pre-wrap; font-size: 14px; color: #333; }
-        /* 검색 결과 빨간색 강조 */
-        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
+        .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
+        /* 검색 결과: 빨간색, [유형] 키워드 포맷 */
+        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
         th, td { border: 1px solid #eee; padding: 6px; text-align: center; }
         .today { background: #fff9c4; font-weight: bold; }
         .total-row { background: #6c5ce7 !important; color: white !important; font-weight: bold; }
@@ -31,13 +31,13 @@
         <span>📢 공지사항</span>
         <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
     </div>
-    <div id="notice-container">데이터를 불러오는 중...</div>
+    <div id="notice-container">데이터 로딩 중...</div>
 </div>
 
 <div class="main-container">
     <div class="card">
         <div class="title">📝 상담 멘트</div>
-        <select id="ment-select" onchange="updateMent()"><option value="">-- 선택 --</option></select>
+        <select id="ment-select" onchange="updateMent()"><option value="">-- 유형 선택 --</option></select>
         <div id="ment-display" class="display-area"></div>
     </div>
     <div class="card">
@@ -57,26 +57,25 @@
 
     async function loadData() {
         try {
-            const resp = await fetch(url + "?t=" + Date.now());
-            db = await resp.json();
+            const response = await fetch(url + "?t=" + Date.now());
+            db = await response.json();
             
-            // 1. 공지사항
-            const nBox = document.getElementById('notice-container');
+            // 공지사항
             if(db.notice?.length > 0) {
-                nBox.innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
+                document.getElementById('notice-container').innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
                     const r = toArr(n);
-                    return `<div style="padding:4px 0;"><span style="color:#ffeb3b; font-weight:bold;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
+                    return `<div style="padding:2px 0;"><span style="color:#ffeb3b;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
                 }).join('');
             }
 
-            // 2. 셀렉트박스
+            // 셀렉트박스
             const sel = document.getElementById('ment-select');
             if(db.ment?.length > 0) {
                 const types = [...new Set(db.ment.map(m => toArr(m)[1]))].filter(Boolean);
                 sel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
 
-            // 3. 실적 테이블
+            // 실적 테이블
             const perfTable = document.getElementById('perf-table');
             if(db.perf?.length > 0) {
                 let total = 0;
@@ -90,16 +89,16 @@
                 }).join('');
                 perfTable.innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
             }
-        } catch (e) { document.getElementById('notice-container').innerText = "❌ 데이터 연결 실패"; }
+        } catch (e) { }
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => toArr(m)[1] === val);
-        document.getElementById('ment-display').innerText = found ? (toArr(found)[4] || "내용 없음") : "";
+        document.getElementById('ment-display').innerText = found ? (toArr(found)[4] || "") : "";
     }
 
-    // ⭐ [수정 핵심] B(유형)와 C(키워드)만 출력하도록 변경
+    // ⭐ 수정 포인트: B, C 데이터만 출력 (번호 완전 제거)
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
@@ -108,21 +107,17 @@
         const results = db.ment.filter(m => {
             const r = toArr(m);
             const a=String(r[0]||"").toLowerCase(), b=String(r[1]||"").toLowerCase(), c=String(r[2]||"").toLowerCase(), e=String(r[4]||"").toLowerCase();
-            
-            // A열(대분류) 검색 시에만 E열(내용) 뒤짐
             if (a.includes(q)) return a.includes(q) || e.includes(q);
-            // 일반 검색 시 B(유형), C(키워드)에서만 찾음
             return b.includes(q) || c.includes(q);
         });
         
         display.innerHTML = results.map(m => {
             const r = toArr(m);
-            // [유형] 키워드 형식으로만 출력 (빈 대괄호 방지)
-            const type = r[1] ? `[${r[1]}]` : '';
-            return `<div class="search-res">${type} ${r[2] || '내용없음'}</div>`;
+            // 번호 없이 [유형] 키워드 만 출력
+            return `<div class="search-res">[${r[1] || ''}] ${r[2] || ''}</div>`;
         }).join('');
     }
-    
+
     window.onload = loadData;
 </script>
 </body>
