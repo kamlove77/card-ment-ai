@@ -7,22 +7,72 @@
     <style>
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
         body { font-family: sans-serif; margin: 0; padding: 10px; background: var(--bg); overscroll-behavior-y: contain; }
-        
-        /* ✅ 공지사항: 날짜 포함 + 최신 5개 + 스크롤 */
         #notice-container { 
             background: #6c5ce7; color: white; padding: 10px; border-radius: 12px; 
             margin-bottom: 12px; font-size: 13px; max-height: 100px; overflow-y: auto; 
             line-height: 1.6; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .notice-item { border-bottom: 1px solid rgba(255,255,255,0.2); padding: 4px 0; }
-        .notice-item:last-child { border-bottom: none; }
         .notice-date { font-weight: bold; color: #ffeb3b; margin-right: 6px; }
-
         .main-container { display: flex; gap: 10px; }
         .card { background: white; flex: 1; padding: 12px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
         .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 8px; }
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; }
         .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
         .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 15px; }
-        
-        /* ✅ 실적 테이블 및 누적 행 스타일 */
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; background: white; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
+        th { background: #f8f9fa; color: #777; }
+        .today { background: #fff9c4; font-weight: bold; }
+        .total-row { background: #6c5ce7 !important; color: white !important; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="notice-container">데이터를 연결 중입니다...</div>
+
+<div class="main-container">
+    <div class="card">
+        <div class="title">📝 상담 멘트</div>
+        <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
+        <div id="ment-display" class="display-area"></div>
+    </div>
+    <div class="card">
+        <div class="title">🔍 빠른 검색</div>
+        <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호나 키워드 입력">
+        <div id="guide-display" class="display-area" style="min-height:60px;"></div>
+        <div class="title" style="margin-top:20px;">📊 실적 현황</div>
+        <table id="perf-table"></table>
+    </div>
+</div>
+
+<script>
+    let db = { notice: [], ment: [], perf: [] };
+    const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+
+    async function loadData() {
+        const container = document.getElementById('notice-container');
+        try {
+            const response = await fetch(url + "?t=" + Date.now());
+            const json = await response.json();
+            if (!json) return;
+            db = json;
+
+            // 1. 공지사항 (최신 5개)
+            if(db.notice && db.notice.length > 0) {
+                const recent = [...db.notice].reverse().slice(0, 5);
+                container.innerHTML = recent.map(n => {
+                    const r = Object.values(n); // 배열/객체 모두 대응
+                    return `<div class="notice-item"><span class="notice-date">[${r[0]}]</span> ${r[1]}</div>`;
+                }).join('');
+            } else { container.innerText = "등록된 공지가 없습니다."; }
+
+            // 2. 멘트 셀렉트박스
+            const sel = document.getElementById('ment-select');
+            if(db.ment && db.ment.length > 0) {
+                const types = [...new Set(db.ment.map(m => Object.values(m)[0]))].filter(Boolean);
+                sel.innerHTML = '<option value="">-- 유형 선택 --</option>';
+                types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
+            }
+
+            //
