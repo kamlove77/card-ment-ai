@@ -8,39 +8,27 @@
         :root { 
             --primary: #2c3e50;    /* 네이비 */
             --accent: #3498db;     /* 블루 */
-            --point: #f1c40f;      /* 옐로우(대시보드) */
-            --success: #27ae60;    /* 그린(계산기) */
+            --point: #f1c40f;      /* 옐로우 */
+            --success: #27ae60;    /* 그린 */
             --bg: #f8f9fa; 
         }
-        
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; text-align: left; color: #333; }
-        
-        /* 공지사항 섹션 */
-        .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
         .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
-        
-        /* 버튼 그룹 */
-        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .refresh-btn { background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .refresh-btn:hover { background: rgba(255,255,255,0.1); border-color: white; }
-        
-        /* 개별 버튼 색상 */
+        .btn-group { display: flex; gap: 8px; }
+        .refresh-btn { background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .dash-btn { background: var(--point); color: #2c3e50 !important; border: none; }
         .calc-btn { background: var(--success); color: white !important; border: none; }
-        
         #notice-container { font-size: 13px; max-height: 100px; overflow-y: auto; line-height: 1.6; }
-
-        .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: nowrap; }
+        .main-container { display: flex; gap: 12px; align-items: flex-start; }
         .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; border: 1px solid #eee; }
         .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 5px solid var(--primary); padding-left: 10px; }
-        
-        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; background: #fff; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
         .display-area { min-height: 150px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
         .search-res { color: var(--accent); font-weight: bold; border-bottom: 1px solid #f1f1f1; padding: 8px 0; font-size: 14px; }
-
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: center; }
-        th { background: #fdfdfd; color: #666; }
+        th { background: #fdfdfd; }
         .today { background: #e3f2fd; font-weight: bold; color: var(--accent); }
         .total-row { background: #ecf0f1 !important; color: var(--primary) !important; font-weight: bold; }
     </style>
@@ -62,15 +50,13 @@
 <div class="main-container">
     <div class="card">
         <div class="title">📝 상담 멘트 가이드</div>
-        <select id="ment-select" onchange="updateMent()"><option value="">-- 유형 선택 --</option></select>
+        <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
         <div id="ment-display" class="display-area"></div>
     </div>
-    
     <div class="card">
         <div class="title">🔍 빠른 검색</div>
-        <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드 입력">
+        <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호나 키워드 입력">
         <div id="guide-display" class="display-area" style="max-height:200px; overflow-y:auto; min-height:50px;"></div>
-        
         <div class="perf-section" style="margin-top:15px;">
             <div class="title">📊 실적 현황</div>
             <table id="perf-table"></table>
@@ -79,34 +65,86 @@
 </div>
 
 <script>
-    let db = { notice: [], ment: [], perf: [] };
+    // ⚠️ 여기에 꽃게님의 실제 구글 앱스 스크립트 URL을 넣어주세요!
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
+    let db = { notice: [], ment: [], perf: [] };
+
+    // 데이터 형식 정규화 함수
     function formatRow(m) {
+        if (!m) return ["", "", "", "", ""];
         if (Array.isArray(m)) return m;
-        return [m.type || m[0], m.num || m[1], m.key || m[2], m.pos || m[3], m.talk || m[4]];
+        // 객체 형태(GAS에서 JSON으로 올 때) 대응
+        return [m.type || m[0] || "", m.num || m[1] || "", m.key || m[2] || "", m.pos || m[3] || "", m.talk || m[4] || ""];
     }
 
     async function loadData() {
+        const noticeCont = document.getElementById('notice-container');
+        const mentSel = document.getElementById('ment-select');
+        
         try {
             const res = await fetch(url + "?t=" + Date.now());
+            if (!res.ok) throw new Error("네트워크 응답 오류");
             db = await res.json();
-            if(db.notice?.length) {
-                document.getElementById('notice-container').innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
+            
+            console.log("받은 데이터:", db); // 브라우저 개발자도구(F12)에서 확인용
+
+            // 1. 공지사항
+            if(db.notice && db.notice.length > 0) {
+                noticeCont.innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
                     const r = Array.isArray(n) ? n : Object.values(n);
                     return `<div style="padding:2px 0;"><span style="color:#f1c40f; font-weight:bold;">[${r[0]||''}]</span> ${r[1]||''}</div>`;
                 }).join('');
-            }
-            const sel = document.getElementById('ment-select');
-            if(db.ment?.length) {
+            } else { noticeCont.innerText = "공지사항이 없습니다."; }
+
+            // 2. 셀렉트박스 (A열)
+            if(db.ment && db.ment.length > 0) {
                 const types = [...new Set(db.ment.map(m => formatRow(m)[0]))].filter(Boolean);
-                sel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
-            }
-            if(db.perf?.length) {
+                mentSel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+            } else { mentSel.innerHTML = '<option value="">데이터 없음</option>'; }
+
+            // 3. 실적 테이블
+            if(db.perf && db.perf.length > 0) {
                 let total = 0;
                 let rows = db.perf.map((p, idx) => {
                     const r = Array.isArray(p) ? p : Object.values(p);
-                    const val = Number(r[1]) || 0; total += val;
+                    const val = Number(r[1]) || 0;
+                    total += val;
                     const dStr = String(r[0]);
                     const date = dStr.includes('-') ? dStr.split('-').slice(1).join('/') : dStr;
-                    return `<tr class="${idx === db.perf.length-1 ? 'today' : ''}"><td>${date}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>
+                    return `<tr class="${idx === db.perf.length-1 ? 'today' : ''}"><td>${date}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
+                }).join('');
+                document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
+            }
+        } catch (e) {
+            console.error("로딩 에러:", e);
+            noticeCont.innerText = "데이터 로딩에 실패했습니다. (URL 확인 필요)";
+        }
+    }
+
+    function updateMent() {
+        const val = document.getElementById('ment-select').value;
+        if (!val) { document.getElementById('ment-display').innerText = ""; return; }
+        const found = db.ment.find(m => formatRow(m)[0] === val);
+        document.getElementById('ment-display').innerText = found ? (formatRow(found)[4] || "내용 없음") : "";
+    }
+
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        if (!q) { display.innerHTML = ""; return; }
+        const results = db.ment.filter(m => {
+            const r = formatRow(m);
+            return String(r[1]||"").toLowerCase().includes(q) || String(r[2]||"").toLowerCase().includes(q);
+        });
+        display.innerHTML = results.map(m => {
+            const r = formatRow(m);
+            return `<div class="search-res">[${r[1] || ''}] ${r[2] || ''}</div>`;
+        }).join('');
+    }
+
+    // 페이지 로드 시 즉시 실행
+    window.onload = loadData;
+</script>
+</body>
+</html>
