@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>업무 데이터 대시보드</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; }
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; color: #333; }
+        
+        /* 헤더 영역 */
+        .header { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 20px; }
+        .back-btn { background: transparent; border: 1px solid white; color: white; padding: 6px 15px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 13px; }
+
+        /* 대시보드 카드 구성 */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .card-title { font-weight: bold; font-size: 16px; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; display: flex; justify-content: space-between; }
+
+        /* 데이터 테이블 스타일 */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid #f1f1f1; text-align: left; }
+        th { color: #777; font-weight: bold; background: #fafafa; }
+        tr:hover { background: #f9f9ff; }
+
+        .status-badge { padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .type-a { background: #e3f2fd; color: #1976d2; } /* 완료/정상 예시 */
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>📊 데이터 관리 대시보드</h1>
+    <a href="index.html" class="back-btn">⬅ 메인으로 돌아가기</a>
+</div>
+
+<div class="grid-container">
+    <div class="card" style="grid-column: span 2;">
+        <div class="card-title">📋 상세 정보 목록 <span style="font-size:12px; color:#999;">Sheet2 데이터</span></div>
+        <table id="data-list">
+            <thead>
+                <tr>
+                    <th>카테고리</th>
+                    <th>상세 내용</th>
+                    <th>비고</th>
+                    <th>상태</th>
+                </tr>
+            </thead>
+            <tbody id="data-body">
+                <tr><td colspan="4" style="text-align:center; padding:50px;">데이터를 불러오는 중입니다...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-title">💡 주요 참고사항</div>
+        <div id="summary-content" style="font-size:14px; line-height:1.8; color:#555;">
+            데이터 로딩 후 여기에 요약 정보가 표시됩니다.
+        </div>
+    </div>
+</div>
+
+<script>
+    const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+
+    async function fetchDashboardData() {
+        try {
+            // 현재 GAS 주소에서 Sheet2 데이터를 가져오도록 설계되었다고 가정
+            const res = await fetch(url + "?sheet=Sheet2&t=" + Date.now());
+            const data = await res.json();
+            renderData(data.sheet2Data); // GAS에서 보내주는 데이터 구조에 맞춰 수정 필요
+        } catch (e) {
+            document.getElementById('data-body').innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">데이터 로딩 실패</td></tr>';
+        }
+    }
+
+    function renderData(items) {
+        if(!items || items.length === 0) return;
+        const body = document.getElementById('data-body');
+        body.innerHTML = items.map(item => `
+            <tr>
+                <td><strong>${item[0] || ''}</strong></td>
+                <td>${item[1] || ''}</td>
+                <td>${item[2] || ''}</td>
+                <td><span class="status-badge type-a">${item[3] || '확인'}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    window.onload = fetchDashboardData;
+</script>
+</body>
+</html>
