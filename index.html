@@ -3,98 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>카드 상담 가이드</title>
+    <title>Smart Card Guide</title>
     <style>
         :root { --primary: #6c5ce7; --bg: #f4f7f6; }
         body { font-family: sans-serif; margin: 0; padding: 10px; background: var(--bg); font-size: 14px; }
-        #notice-banner { background: #6c5ce7; color: white; padding: 8px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; }
+        #status-bar { background: #6c5ce7; color: white; padding: 8px; border-radius: 8px; margin-bottom: 10px; font-size: 12px; }
         .main-container { display: flex; gap: 10px; }
         .card { background: white; flex: 1; padding: 12px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); min-width: 0; }
         .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 13px; }
         select, input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .display-area { margin-top: 10px; min-height: 100px; white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
-        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 4px 0; }
+        .display-area { margin-top: 10px; min-height: 100px; white-space: pre-wrap; word-break: break-all; line-height: 1.5; font-size: 14px; }
+        .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
         th, td { border: 1px solid #eee; padding: 6px; text-align: center; }
-        th { background: #f8f9fa; }
+        th { background: #f8f9fa; color: #666; }
         .today { background: #fff9c4; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="notice-banner">데이터 불러오는 중...</div>
+<div id="status-bar">데이터를 연결하는 중...</div>
 
 <div class="main-container">
     <div class="card">
-        <div class="title">📝 상담 멘트</div>
-        <select id="ment-select" onchange="updateMent()"><option value="">선택하세요</option></select>
+        <div class="title">📝 상담 멘트 가이드</div>
+        <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
         <div id="ment-display" class="display-area"></div>
     </div>
 
     <div class="card">
-        <div class="title">🔍 빠른 검색</div>
-        <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호/키워드">
+        <div class="title">🔍 빠른 키워드 검색</div>
+        <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호 또는 단어 입력">
         <div id="guide-display" class="display-area" style="min-height:60px;"></div>
         
-        <div class="title" style="margin-top:15px;">📊 실적</div>
+        <div class="title" style="margin-top:20px;">📊 실적 현황</div>
         <table id="perf-table"></table>
     </div>
 </div>
 
 <script>
     let db = { notice: [], ment: [], perf: [] };
-    // 기존에 잘 작동하던 URL을 여기에 그대로 넣어주세요.
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
     async function loadData() {
-        const banner = document.getElementById('notice-banner');
+        const bar = document.getElementById('status-bar');
         try {
-            // 캐시 방지를 위해 타임스탬프 추가
             const response = await fetch(url + "?t=" + Date.now());
             const data = await response.json();
             
-            // 데이터가 비어있지 않은지 확인
             if (data) {
                 db = data;
                 renderApp();
-                banner.innerText = "✅ 데이터 연결 완료";
-                setTimeout(() => {
-                    if(db.notice && db.notice.length) {
-                        banner.innerText = db.notice.map(n => n.content || n[1]).join(' | ');
-                    }
-                }, 1000);
+                // 공지사항 표시
+                if(db.notice && db.notice.length > 0) {
+                    bar.innerText = "📢 " + (db.notice[0].content || db.notice[0][1] || "환영합니다!");
+                } else {
+                    bar.innerText = "✅ 데이터 연결 성공";
+                }
             }
         } catch (e) {
-            banner.innerText = "❌ 연결 실패: " + e.message;
-            console.error(e);
+            bar.innerText = "❌ 연결 실패 (설정을 확인하세요)";
+            console.error("Error:", e);
         }
     }
 
     function renderApp() {
-        // 1. 멘트 셀렉트박스 설정
+        // 1. 멘트 유형 설정 (첫 번째 열 기준)
         const sel = document.getElementById('ment-select');
-        if (db.ment) {
-            const types = [...new Set(db.ment.map(m => m.type || m[0]))].filter(Boolean);
+        if (db.ment && db.ment.length > 0) {
+            const types = [...new Set(db.ment.map(m => m.type || m.유형 || Object.values(m)[0]))].filter(Boolean);
             sel.innerHTML = '<option value="">-- 유형 선택 --</option>';
             types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
         }
 
-        // 2. 실적 테이블 설정
+        // 2. 실적 테이블 설정 (순서대로 가져오기)
         const perfTable = document.getElementById('perf-table');
-        if (db.perf && db.perf.length) {
-            let html = '<tr><th>날짜</th><th>실적</th><th>%</th></tr>';
-            html += db.perf.map((p, idx) => `
-                <tr class="${idx === db.perf.length - 1 ? 'today' : ''}">
-                    <td>${p.date || p[0]}</td><td>${p.val || p[1]}</td><td>${p.rate || p[2] || '-'}</td>
-                </tr>`).join('');
-            perfTable.innerHTML = html;
+        if (db.perf && db.perf.length > 0) {
+            let html = '<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>';
+            html += db.perf.map((p, idx) => {
+                const row = Object.values(p); // 객체의 값만 순서대로 추출
+                return `<tr class="${idx === db.perf.length - 1 ? 'today' : ''}">
+                    <td>${row[0]}</td><td>${row[1]}</td><td>${row[2] || '-'}</td>
+                </tr>`;
+            }).join('');
+            perfTable.innerHTML = html + '</tbody>';
         }
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
-        const found = db.ment.find(m => (m.type || m[0]) === val);
-        document.getElementById('ment-display').innerText = found ? (found.talk || found[3]) : "";
+        // 선택한 유형과 일치하는 데이터 찾기
+        const found = db.ment.find(m => (m.type || m.유형 || Object.values(m)[0]) === val);
+        // 'talk' 또는 '상담멘트' 또는 4번째 열 데이터 표시
+        document.getElementById('ment-display').innerText = found ? (found.talk || found.상담멘트 || Object.values(found)[3] || "내용 없음") : "";
     }
 
     function searchGuide() {
@@ -102,12 +103,15 @@
         const display = document.getElementById('guide-display');
         if (!q) { display.innerHTML = ""; return; }
         
-        const results = db.ment.filter(m => 
-            String(m.num || m[2]).toLowerCase().includes(q) || 
-            String(m.key || m[1]).toLowerCase().includes(q)
-        );
+        const results = db.ment.filter(m => {
+            const values = Object.values(m).join(" ").toLowerCase();
+            return values.includes(q);
+        });
         
-        display.innerHTML = results.map(i => `<div class="search-res">[${i.num || i[2] || ''}] ${i.key || i[1] || ''}</div>`).join('');
+        display.innerHTML = results.map(i => {
+            const row = Object.values(i);
+            return `<div class="search-res">[${row[2] || ''}] ${row[1] || ''}</div>`;
+        }).join('');
     }
 
     window.onload = loadData;
