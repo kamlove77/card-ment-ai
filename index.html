@@ -7,18 +7,27 @@
     <style>
         :root { --primary: #6c5ce7; --bg: #f0f2f5; }
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 10px; background: var(--bg); overscroll-behavior-y: contain; }
+        
+        /* 📢 공지사항 디자인 */
         .notice-wrapper { background: #6c5ce7; color: white; padding: 10px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .notice-header { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
         .refresh-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
         #notice-container { font-size: 13px; max-height: 100px; overflow-y: auto; line-height: 1.6; }
         .notice-item { border-bottom: 1px dashed rgba(255,255,255,0.2); padding: 4px 0; }
         .notice-date { font-weight: bold; color: #ffeb3b; margin-right: 6px; }
+
+        /* 📋 메인 레이아웃 */
         .main-container { display: flex; gap: 10px; }
         .card { background: white; flex: 1; padding: 12px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 0; }
         .title { font-weight: bold; margin-bottom: 8px; color: var(--primary); font-size: 14px; border-left: 4px solid var(--primary); padding-left: 8px; }
+        
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
         .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #333; }
+        
+        /* 🔍 검색 결과 스타일 */
         .search-res { color: #d32f2f; font-weight: bold; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 14px; }
+        
+        /* 📊 실적 테이블 스타일 */
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
         th, td { border: 1px solid #eee; padding: 6px; text-align: center; }
         th { background: #f8f9fa; color: #777; }
@@ -33,19 +42,21 @@
         <span>📢 공지사항</span>
         <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
     </div>
-    <div id="notice-container">데이터 로딩 중...</div>
+    <div id="notice-container">데이터를 불러오는 중...</div>
 </div>
 
 <div class="main-container">
     <div class="card">
         <div class="title">📝 상담 멘트</div>
-        <select id="ment-select" onchange="updateMent()"><option value="">-- 유형 선택 --</option></select>
+        <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
         <div id="ment-display" class="display-area"></div>
     </div>
+
     <div class="card">
         <div class="title">🔍 빠른 검색</div>
         <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호/키워드 입력">
         <div id="guide-display" class="display-area" style="min-height:60px; max-height:150px; overflow-y:auto;"></div>
+        
         <div class="title" style="margin-top:20px;">📊 실적 (누적 포함)</div>
         <table id="perf-table"></table>
     </div>
@@ -57,6 +68,7 @@
 
     const toArr = (obj) => Array.isArray(obj) ? obj : Object.values(obj);
 
+    // 실적 테이블 날짜: 무조건 뒤에서 5글자 자르기 (월/일 표시)
     function getSimpleDate(dateStr) {
         if (!dateStr) return "";
         let s = String(dateStr);
@@ -68,11 +80,11 @@
             const response = await fetch(url + "?t=" + Date.now());
             db = await response.json();
             
-            // 1. 공지사항
-            const nContainer = document.getElementById('notice-container');
+            // 1. 공지사항 (최신 5개)
+            const nBox = document.getElementById('notice-container');
             if(db.notice?.length > 0) {
                 const recent = [...db.notice].reverse().slice(0, 5);
-                nContainer.innerHTML = recent.map(n => {
+                nBox.innerHTML = recent.map(n => {
                     const r = toArr(n);
                     return `<div class="notice-item"><span class="notice-date">[${r[0]||''}]</span> ${r[1]||''}</div>`;
                 }).join('');
@@ -86,7 +98,7 @@
                 types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
             }
 
-            // 3. 실적 테이블
+            // 3. 실적 테이블 + 누적합계
             const perfTable = document.getElementById('perf-table');
             if(db.perf?.length > 0) {
                 let html = '<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>';
@@ -110,7 +122,7 @@
         document.getElementById('ment-display').innerText = found ? (toArr(found)[4] || "내용 없음") : "";
     }
 
-    // ⭐ 검색 로직 재수정: A가 일치할 때만 E 검색 / 그 외엔 BCD만 검색
+    // ⭐ 요청하신 핵심 로직: A열 검색 시에만 E열 내용 포함 ⭐
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
@@ -118,6 +130,17 @@
         
         const results = db.ment.filter(m => {
             const r = toArr(m);
-            const a = String(r[0]||"").toLowerCase(); // 대분류
-            const b = String(r[1]||"").toLowerCase(); // 유형
-            const c
+            const a = String(r[0]||"").toLowerCase(); // A: 대분류
+            const b = String(r[1]||"").toLowerCase(); // B: 유형
+            const c = String(r[2]||"").toLowerCase(); // C: 키워드
+            const d = String(r[3]||"").toLowerCase(); // D: 번호
+            const e = String(r[4]||"").toLowerCase(); // E: 내용
+
+            // 1단계: 검색어가 A열에 포함되어 있는지 확인
+            const isMatchingA = a !== "" && a.includes(q);
+
+            if (isMatchingA) {
+                // A열이 매칭되면 A열 또는 E열(내용)에서 검색어 확인
+                return a.includes(q) || e.includes(q);
+            } else {
+                // A열이 매칭되지 않으면 오직 B, C, D열에서
