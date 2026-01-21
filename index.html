@@ -3,65 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>카드 상담 가이드</title>
+    <title>Smart Card Guide</title>
     <style>
-        /* 1. 칸과 여백을 최소화하여 텍스트만 왼쪽 정렬 */
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 5px; color: #000; background: #fff; text-align: left; }
-        .container { width: 100%; display: flex; flex-direction: column; gap: 5px; }
-        
-        #notice-content { font-size: 12px; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
-
-        /* 2. 가로 레이아웃 유지 */
-        .main-layout { display: flex; gap: 10px; align-items: flex-start; }
-        .left-panel { flex: 1; } 
-        .right-panel { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-
-        .title { font-weight: bold; font-size: 13px; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 6px; border: 1px solid #999; font-size: 13px; box-sizing: border-box; }
-        
-        /* ✅ 3. 칸(박스) 제거: 배경색과 테두리를 없애고 텍스트만 노출 */
-        .display-area { 
-            height: auto; 
-            max-height: 400px; 
-            overflow-y: auto; 
-            text-align: left; 
-            font-size: 14px;
-            margin-top: 5px;
-            line-height: 1.5;
+        /* 예쁜 디자인을 위한 커스텀 설정 */
+        :root {
+            --primary-color: #6c5ce7;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #2d3436;
         }
 
-        /* 검색 결과 텍스트 스타일 */
-        .result-unit { margin-bottom: 4px; color: #d32f2f; font-weight: bold; }
+        body { 
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif; 
+            margin: 0; padding: 12px; 
+            background: var(--bg-color); 
+            color: var(--text-color);
+        }
 
-        /* ✅ 4. 실적 테이블: 아주 작게 텍스트 위주로 */
-        .perf-area { width: fit-content; margin-top: 5px; }
-        table { width: auto; border-collapse: collapse; font-size: 11px; }
-        th, td { border: 1px solid #999; padding: 2px 6px; text-align: left; white-space: nowrap; }
-        th { background: #f0f0f0; }
+        /* 공지사항 애니메이션 스타일 */
+        #notice-banner {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* 카드 형태의 섹션 디자인 */
+        .glass-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: 0.3s;
+            outline: none;
+        }
+
+        select:focus, input:focus { border-color: var(--primary-color); }
+
+        /* 결과 창 디자인 */
+        .content-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9fb;
+            border-radius: 8px;
+            min-height: 120px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .search-item {
+            color: #e84393;
+            font-weight: bold;
+            padding: 5px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        /* 실적 테이블 디자인 */
+        .perf-table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 12px;
+        }
+
+        .perf-table th { background: #f1f2f6; padding: 8px; border-radius: 5px 5px 0 0; }
+        .perf-table td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; }
+        .today-row { background: #fff9db; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="notice-content">데이터 로딩 중...</div>
+<div id="notice-banner">📢 <span id="notice-text">데이터를 불러오는 중입니다...</span></div>
 
-    <div class="main-layout">
-        <div class="left-panel">
-            <div class="title">📝 멘트 (A→E)</div>
-            <select id="ment-select" onchange="updateMent()"><option value="">-- 선택 --</option></select>
-            <div id="ment-display" class="display-area"></div>
-        </div>
+<div class="main-container">
+    <div class="glass-card">
+        <div class="section-title">💬 멘트 가이드</div>
+        <select id="ment-select" onchange="showMent()">
+            <option value="">유형을 선택하세요</option>
+        </select>
+        <div id="ment-display" class="content-box"></div>
+    </div>
 
-        <div class="right-panel">
-            <div class="title">🔍 검색 (B,C)</div>
-            <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호/키워드 입력">
-            <div id="guide-display" class="display-area"></div>
+    <div class="glass-card">
+        <div class="section-title">🔍 빠른 검색</div>
+        <input type="text" id="keyword" oninput="doSearch()" placeholder="번호 또는 키워드 입력">
+        <div id="search-results" class="content-box" style="min-height: 80px;"></div>
 
-            <div class="perf-area">
-                <div class="title" style="font-size:11px;">📊 실적</div>
-                <table id="perf-table"></table>
-            </div>
-        </div>
+        <div class="section-title" style="margin-top: 20px;">📊 실적 현황</div>
+        <table class="perf-table" id="perf-table"></table>
     </div>
 </div>
 
@@ -69,45 +127,30 @@
     let db = { notice: [], ment: [], perf: [] };
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
-    async function loadData() {
+    async function fetchData() {
         try {
-            const res = await fetch(url + "?t=" + new Date().getTime());
+            const res = await fetch(url + "?t=" + Date.now());
             db = await res.json();
-            initApp();
-        } catch (e) { document.getElementById('notice-content').innerText = "로드 실패"; }
+            setupApp();
+        } catch (e) { document.getElementById('notice-text').innerText = "로드 실패"; }
     }
 
-    function initApp() {
-        if(db.notice.length) document.getElementById('notice-content').innerText = db.notice.map(n => `[${n.date}] ${n.content}`).join(' / ');
+    function setupApp() {
+        if(db.notice.length) document.getElementById('notice-text').innerText = db.notice[0].content;
+        
         const sel = document.getElementById('ment-select');
         const types = [...new Set(db.ment.map(m => m.type))].filter(Boolean);
-        sel.innerHTML = '<option value="">-- 유형 선택 --</option>';
         types.forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
 
         if(db.perf.length) {
             let html = '<tr><th>날짜</th><th>실적</th><th>%</th></tr>';
-            html += db.perf.map(p => `<tr><td>${p.date}</td><td>${p.val}</td><td>${p.rate}</td></tr>`).join('');
+            html += db.perf.map((p, idx) => `
+                <tr class="${idx === db.perf.length - 1 ? 'today-row' : ''}">
+                    <td>${p.date}</td><td>${p.val}</td><td>${p.rate || '-'}</td>
+                </tr>`).join('');
             document.getElementById('perf-table').innerHTML = html;
         }
     }
 
-    function updateMent() {
-        const val = document.getElementById('ment-select').value;
-        const found = db.ment.find(m => m.type === val);
-        // ✅ 박스 없이 텍스트만 표시
-        document.getElementById('ment-display').innerText = found ? found.talk : "";
-    }
-
-    function searchGuide() {
-        const q = document.getElementById('keyword').value.toLowerCase().trim();
-        const display = document.getElementById('guide-display');
-        if (!q) { display.innerHTML = ""; return; }
-        const results = db.ment.filter(m => String(m.num).toLowerCase().includes(q) || String(m.key).toLowerCase().includes(q));
-        
-        // ✅ '내용 없음' 문구 삭제 및 박스 없는 텍스트 노출
-        display.innerHTML = results.length ? results.map(i => `<div class="result-unit">[${i.num || ''}] ${i.key || ''}</div>`).join('') : "";
-    }
-    window.onload = loadData;
-</script>
-</body>
-</html>
+    function showMent() {
+        const val = document.getElementById('ment-
