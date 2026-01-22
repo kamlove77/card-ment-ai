@@ -7,8 +7,6 @@
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --point: #f1c40f; --success: #27ae60; --bg: #f8f9fa; }
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; color: #333; }
-        
-        /* 상단 공지 및 버튼 영역 */
         .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
         .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
         .btn-group { display: flex; gap: 8px; }
@@ -16,22 +14,15 @@
         .dash-btn { background: var(--point); color: #2c3e50 !important; border: none; }
         .calc-btn { background: var(--success); color: white !important; border: none; }
         #notice-container { font-size: 13px; min-height: 20px; line-height: 1.6; }
-
-        /* 메인 레이아웃 */
         .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
         .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 320px; border: 1px solid #eee; }
         .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 5px solid var(--primary); padding-left: 10px; }
-        
-        /* 입력 및 출력 영역 */
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
         .display-area { min-height: 150px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
-        
-        /* 실적 테이블 스타일 */
-        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-        th, td { border: 1px solid #eee; padding: 10px; text-align: center; }
-        th { background: #fdfdfd; color: #777; font-weight: normal; }
-        .today { background: #e3f2fd; font-weight: bold; color: var(--accent); }
-        .total-row { background: var(--point); color: #2c3e50; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        th, td { border: 1px solid #eee; padding: 8px 5px; text-align: center; }
+        .today { background: #fff9db; font-weight: bold; }
+        .total-row { background: var(--point); color: #2c3e50; font-weight: bold; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -45,7 +36,7 @@
             <button class="refresh-btn" onclick="loadData()">🔄 동기화</button>
         </div>
     </div>
-    <div id="notice-container">데이터 연결 시도 중...</div>
+    <div id="notice-container">데이터 로딩 중...</div>
 </div>
 
 <div class="main-container">
@@ -54,113 +45,97 @@
         <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
         <div id="ment-display" class="display-area"></div>
     </div>
-
     <div class="card">
         <div class="title">🔍 빠른 검색</div>
-        <input type="text" id="keyword" oninput="searchGuide()" placeholder="번호나 키워드 입력">
+        <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드 입력">
         <div id="guide-display" class="display-area" style="max-height:150px; overflow-y:auto; min-height:50px;"></div>
-        
         <div class="perf-section" style="margin-top:15px;">
-            <div class="title">📊 실적 현황 (영업일수 및 평균)</div>
+            <div class="title">📊 실적 (일수/평균)</div>
             <table id="perf-table"></table>
         </div>
     </div>
 </div>
 
 <script>
-    // 구글 스크립트 웹 앱 URL
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-
     let db = { notice: [], ment: [], perf: [] };
 
-    // 행 데이터 포맷 정리 함수
     function formatRow(m) {
         if (!m) return ["", "", "", "", ""];
         if (Array.isArray(m)) return m;
-        return [m.type || m[0] || "", m.num || m[1] || "", m.key || m[2] || "", m.pos || m[3] || "", m.talk || m[4] || ""];
+        return [m[0]||"", m[1]||"", m[2]||"", m[3]||"", m[4]||""];
     }
 
     async function loadData() {
         const noticeCont = document.getElementById('notice-container');
-        noticeCont.innerText = "최신 데이터 불러오는 중...";
-        
         try {
             const res = await fetch(url + "?t=" + Date.now());
-            if (!res.ok) throw new Error();
             db = await res.json();
             
-            // 1. 공지사항 표시
-            if(db.notice && db.notice.length > 0) {
-                noticeCont.innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
-                    const r = Array.isArray(n) ? n : Object.values(n);
-                    return `<div style="padding:2px 0;"><span style="color:var(--point);">[${r[0]||''}]</span> ${r[1]||''}</div>`;
-                }).join('');
+            // 1. 공지사항
+            if(db.notice) {
+                noticeCont.innerHTML = db.notice.reverse().slice(0, 5).map(r => 
+                    `<div style="padding:2px 0;"><span style="color:var(--point);">[${r[0]||''}]</span> ${r[1]||''}</div>`
+                ).join('');
             }
 
-            // 2. 상담 멘트 유형 설정
-            const mentSel = document.getElementById('ment-select');
-            if(db.ment && db.ment.length > 0) {
+            // 2. 셀렉트박스
+            if(db.ment) {
                 const types = [...new Set(db.ment.map(m => formatRow(m)[0]))].filter(Boolean);
-                mentSel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+                document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + 
+                    types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
 
-            // 3. 실적 테이블 계산 (날짜, 합계, 평균)
-            if(db.perf && db.perf.length > 0) {
-                let total = 0;
-                let activeDays = 0;
-
-                let rows = db.perf.map((p, idx) => {
-                    const r = Array.isArray(p) ? p : Object.values(p);
-                    const val = Number(r[1]) || 0;
-                    
-                    // 실적이 있는 날만 카운트
-                    if (val > 0) {
-                        total += val;
-                        activeDays++;
-                    }
-
-                    // 날짜 변환 (에러 방지용)
-                    let displayDate = "-";
+            // 3. 실적 (날짜/합계/평균) - 오류 방지 강화
+            if(db.perf) {
+                let total = 0, days = 0, tableRows = "";
+                db.perf.forEach((p, idx) => {
                     try {
-                        let rawDate = r[0];
-                        if (rawDate) {
-                            let d = new Date(rawDate);
-                            if (isNaN(d.getTime())) {
-                                let match = String(rawDate).match(/(\d{1,2})[-/](\d{1,2})/);
-                                displayDate = match ? `${match[1]}/${match[2]}` : String(rawDate).substring(5, 10);
-                            } else {
-                                displayDate = (d.getMonth() + 1) + "/" + d.getDate();
-                            }
+                        const r = Array.isArray(p) ? p : Object.values(p);
+                        const val = Number(r[1]) || 0;
+                        if(val > 0) { total += val; days++; }
+
+                        let dStr = "-";
+                        if(r[0]) {
+                            let d = new Date(r[0]);
+                            dStr = isNaN(d.getTime()) ? String(r[0]).substring(5,10) : (d.getMonth()+1)+"/"+d.getDate();
                         }
-                    } catch (e) { displayDate = String(r[0] || "-").substring(0, 5); }
 
-                    return `<tr class="${idx === db.perf.length-1 ? 'today' : ''}">
-                        <td>${displayDate}</td>
-                        <td>${val.toLocaleString()}</td>
-                        <td>${r[2]||'-'}</td>
-                    </tr>`;
-                }).join('');
+                        tableRows += `<tr class="${idx === db.perf.length-1 ? 'today' : ''}">
+                            <td>${dStr}</td><td>${val.toLocaleString()}</td><td>${r[2]||'-'}</td>
+                        </tr>`;
+                    } catch(e) { console.log("행 로딩 건너뜀"); }
+                });
                 
-                // 평균값 산출 (영업일수 기준)
-                const avg = activeDays > 0 ? (total / activeDays).toFixed(1) : 0;
-
+                const avg = days > 0 ? (total / days).toFixed(1) : 0;
                 document.getElementById('perf-table').innerHTML = `
-                    <thead>
-                        <tr><th>날짜</th><th>실적</th><th>%</th></tr>
-                    </thead>
-                    <tbody>
-                        ${rows}
-                        <tr class="total-row">
-                            <td>합계 (${activeDays}일)</td>
-                            <td>${total.toLocaleString()}</td>
-                            <td>평균: ${avg}</td>
-                        </tr>
-                    </tbody>`;
+                    <thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead>
+                    <tbody>${tableRows}<tr class="total-row"><td>합계(${days}일)</td><td>${total.toLocaleString()}</td><td>평균:${avg}</td></tr></tbody>`;
             }
         } catch (e) {
-            noticeCont.innerHTML = "<span style='color:#ff7675;'>❌ 서버 연결 실패 (새로고침 해주세요)</span>";
+            noticeCont.innerHTML = "⚠️ 연결 확인 중... (새로고침 하세요)";
+            console.error(e);
         }
     }
 
-    // 선택한 유형에 맞는 멘트 표시
     function updateMent() {
+        const val = document.getElementById('ment-select').value;
+        const found = db.ment.find(m => formatRow(m)[0] === val);
+        document.getElementById('ment-display').innerText = found ? formatRow(found)[4] : "";
+    }
+
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        if (!q) { display.innerHTML = ""; return; }
+        const results = db.ment.filter(m => {
+            const r = formatRow(m);
+            return String(r[1]).includes(q) || String(r[2]).includes(q);
+        });
+        display.innerHTML = results.map(m => `<div style="color:#3498db; font-weight:bold; border-bottom:1px solid #eee; padding:5px 0;">[${formatRow(m)[1]}] ${formatRow(m)[2]}</div>`).join('');
+    }
+
+    window.onload = loadData;
+</script>
+</body>
+</html>
