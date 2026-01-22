@@ -22,6 +22,7 @@
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: center; }
         .today { background: #e3f2fd; font-weight: bold; color: var(--accent); }
+        .total-row { background: #ecf0f1 !important; color: var(--primary) !important; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -56,7 +57,6 @@
 </div>
 
 <script>
-    // ⚠️ [필독] 이 주소가 꽃게님의 실제 스크립트 주소인지 꼭 확인하세요!
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
     let db = { notice: [], ment: [], perf: [] };
@@ -92,16 +92,45 @@
                 mentSel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
 
-            // 3. 실적 테이블
+            // 3. 실적 테이블 (날짜 표시 보강)
             if(db.perf && db.perf.length > 0) {
+                let total = 0;
                 let rows = db.perf.map((p, idx) => {
                     const r = Array.isArray(p) ? p : Object.values(p);
-                    return `<tr class="${idx === db.perf.length-1 ? 'today' : ''}"><td>${String(r[0]).split('-').slice(1).join('/')}</td><td>${r[1]}</td><td>${r[2]||'-'}</td></tr>`;
+                    const val = Number(r[1]) || 0;
+                    total += val;
+
+                    // 날짜 변환 로직
+                    let displayDate = "-";
+                    try {
+                        let rawDate = r[0];
+                        if (rawDate) {
+                            let d = new Date(rawDate);
+                            if (isNaN(d.getTime())) {
+                                // 문자로 올 경우 (예: 2024-11-08) 처리
+                                let match = String(rawDate).match(/(\d{1,2})[-/](\d{1,2})/);
+                                displayDate = match ? `${match[1]}/${match[2]}` : String(rawDate).substring(5, 10);
+                            } else {
+                                displayDate = (d.getMonth() + 1) + "/" + d.getDate();
+                            }
+                        }
+                    } catch (e) {
+                        displayDate = String(r[0] || "-").substring(0, 5);
+                    }
+
+                    return `<tr class="${idx === db.perf.length-1 ? 'today' : ''}">
+                        <td>${displayDate}</td>
+                        <td>${val.toLocaleString()}</td>
+                        <td>${r[2]||'-'}</td>
+                    </tr>`;
                 }).join('');
-                document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead><tbody>${rows}</tbody>`;
+                
+                document.getElementById('perf-table').innerHTML = `
+                    <thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead>
+                    <tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
             }
         } catch (e) {
-            noticeCont.innerHTML = "<span style='color:#ff7675;'>❌ 데이터를 가져올 수 없습니다. (URL 또는 배포 설정 확인)</span>";
+            noticeCont.innerHTML = "<span style='color:#ff7675;'>❌ 데이터를 가져올 수 없습니다.</span>";
         }
     }
 
@@ -117,15 +146,4 @@
         if (!q) { display.innerHTML = ""; return; }
         const results = db.ment.filter(m => {
             const r = formatRow(m);
-            return String(r[1]).toLowerCase().includes(q) || String(r[2]).toLowerCase().includes(q);
-        });
-        display.innerHTML = results.map(m => {
-            const r = formatRow(m);
-            return `<div style="color:#3498db; font-weight:bold; border-bottom:1px solid #eee; padding:5px 0;">[${r[1]}] ${r[2]}</div>`;
-        }).join('');
-    }
-
-    window.onload = loadData;
-</script>
-</body>
-</html>
+            return String(r[1]).
