@@ -10,7 +10,7 @@
         .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
         .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
         .btn-group { display: flex; gap: 8px; }
-        .refresh-btn { background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; }
+        .refresh-btn { background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
         .dash-btn { background: var(--point); color: #2c3e50 !important; border: none; }
         .calc-btn { background: var(--success); color: white !important; border: none; }
         #notice-container { font-size: 13px; min-height: 20px; line-height: 1.6; }
@@ -31,12 +31,12 @@
     <div class="notice-header">
         <span>📢 업무 가이드</span>
         <div class="btn-group">
-            <button class="refresh-btn dash-btn" onclick="location.href='dashboard.html'">📊 대시보드</button>
-            <button class="refresh-btn calc-btn" onclick="location.href='calculator.html'">🧮 계산기</button>
+            <a href="dashboard.html" class="refresh-btn dash-btn">📊 대시보드</a>
+            <a href="calculator.html" class="refresh-btn calc-btn">🧮 계산기</a>
             <button class="refresh-btn" onclick="loadData()">🔄 동기화</button>
         </div>
     </div>
-    <div id="notice-container">데이터 로딩 중...</div>
+    <div id="notice-container">데이터 연결 중...</div>
 </div>
 
 <div class="main-container">
@@ -60,51 +60,52 @@
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     let db = { notice: [], ment: [], perf: [] };
 
-    function formatRow(m) {
-        if (!m) return ["", "", "", "", ""];
-        if (Array.isArray(m)) return m;
-        return [m[0]||"", m[1]||"", m[2]||"", m[3]||"", m[4]||""];
+    // 어떤 형식이든 배열로 변환해주는 마법의 함수
+    function toArr(item) {
+        if (!item) return [];
+        return Array.isArray(item) ? item : Object.values(item);
     }
 
     async function loadData() {
         const noticeCont = document.getElementById('notice-container');
         try {
             const res = await fetch(url + "?t=" + Date.now());
-            db = await res.json();
+            const data = await res.json();
+            db = data;
             
             // 1. 공지사항
-            if(db.notice) {
-                noticeCont.innerHTML = db.notice.reverse().slice(0, 5).map(r => 
-                    `<div style="padding:2px 0;"><span style="color:var(--point);">[${r[0]||''}]</span> ${r[1]||''}</div>`
-                ).join('');
+            if(db.notice && db.notice.length > 0) {
+                noticeCont.innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
+                    const r = toArr(n);
+                    return `<div style="padding:2px 0;"><span style="color:var(--point);">[${r[0]||''}]</span> ${r[1]||''}</div>`;
+                }).join('');
             }
 
-            // 2. 셀렉트박스
-            if(db.ment) {
-                const types = [...new Set(db.ment.map(m => formatRow(m)[0]))].filter(Boolean);
+            // 2. 셀렉트박스 (멘트 유형)
+            if(db.ment && db.ment.length > 0) {
+                const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
                 document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + 
                     types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
 
-            // 3. 실적 (날짜/합계/평균) - 오류 방지 강화
-            if(db.perf) {
+            // 3. 실적 테이블 (날짜/합계/평균)
+            if(db.perf && db.perf.length > 0) {
                 let total = 0, days = 0, tableRows = "";
                 db.perf.forEach((p, idx) => {
-                    try {
-                        const r = Array.isArray(p) ? p : Object.values(p);
-                        const val = Number(r[1]) || 0;
-                        if(val > 0) { total += val; days++; }
+                    const r = toArr(p);
+                    const val = Number(r[1]) || 0;
+                    if(val > 0) { total += val; days++; }
 
-                        let dStr = "-";
-                        if(r[0]) {
-                            let d = new Date(r[0]);
-                            dStr = isNaN(d.getTime()) ? String(r[0]).substring(5,10) : (d.getMonth()+1)+"/"+d.getDate();
-                        }
+                    let dStr = "-";
+                    if(r[0]) {
+                        let d = new Date(r[0]);
+                        // 날짜가 숫자로 올 경우나 문자로 올 경우 모두 대응
+                        dStr = isNaN(d.getTime()) ? String(r[0]).substring(5,10) : (d.getMonth()+1)+"/"+d.getDate();
+                    }
 
-                        tableRows += `<tr class="${idx === db.perf.length-1 ? 'today' : ''}">
-                            <td>${dStr}</td><td>${val.toLocaleString()}</td><td>${r[2]||'-'}</td>
-                        </tr>`;
-                    } catch(e) { console.log("행 로딩 건너뜀"); }
+                    tableRows += `<tr class="${idx === db.perf.length-1 ? 'today' : ''}">
+                        <td>${dStr}</td><td>${val.toLocaleString()}</td><td>${r[2]||'-'}</td>
+                    </tr>`;
                 });
                 
                 const avg = days > 0 ? (total / days).toFixed(1) : 0;
@@ -113,15 +114,15 @@
                     <tbody>${tableRows}<tr class="total-row"><td>합계(${days}일)</td><td>${total.toLocaleString()}</td><td>평균:${avg}</td></tr></tbody>`;
             }
         } catch (e) {
-            noticeCont.innerHTML = "⚠️ 연결 확인 중... (새로고침 하세요)";
-            console.error(e);
+            noticeCont.innerHTML = "⚠️ 데이터 연결 실패 (시트 배포 확인 필요)";
+            console.error("Error details:", e);
         }
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
-        const found = db.ment.find(m => formatRow(m)[0] === val);
-        document.getElementById('ment-display').innerText = found ? formatRow(found)[4] : "";
+        const found = db.ment.find(m => toArr(m)[0] === val);
+        document.getElementById('ment-display').innerText = found ? toArr(found)[4] : "";
     }
 
     function searchGuide() {
@@ -129,10 +130,13 @@
         const display = document.getElementById('guide-display');
         if (!q) { display.innerHTML = ""; return; }
         const results = db.ment.filter(m => {
-            const r = formatRow(m);
+            const r = toArr(m);
             return String(r[1]).includes(q) || String(r[2]).includes(q);
         });
-        display.innerHTML = results.map(m => `<div style="color:#3498db; font-weight:bold; border-bottom:1px solid #eee; padding:5px 0;">[${formatRow(m)[1]}] ${formatRow(m)[2]}</div>`).join('');
+        display.innerHTML = results.map(m => {
+            const r = toArr(m);
+            return `<div style="color:#3498db; font-weight:bold; border-bottom:1px solid #eee; padding:5px 0;">[${r[1]}] ${r[2]}</div>`;
+        }).join('');
     }
 
     window.onload = loadData;
