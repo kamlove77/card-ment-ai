@@ -22,7 +22,7 @@
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: center; }
         .today { background: #e3f2fd; font-weight: bold; color: var(--accent); }
-        .total-row { background: #ecf0f1 !important; color: var(--primary) !important; font-weight: bold; }
+        .total-row { background: #ecf0f1; font-weight: bold; color: #e74c3c; } /* 합계행 강조 */
     </style>
 </head>
 <body>
@@ -57,6 +57,7 @@
 </div>
 
 <script>
+    // ⚠️ 꽃게님 주소 확인 완료
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
 
     let db = { notice: [], ment: [], perf: [] };
@@ -69,12 +70,11 @@
 
     async function loadData() {
         const noticeCont = document.getElementById('notice-container');
-        noticeCont.innerText = "데이터 연결 시도 중...";
+        noticeCont.innerText = "데이터 연결 중...";
         
         try {
             const res = await fetch(url + "?t=" + Date.now());
-            if (!res.ok) throw new Error("서버 응답 없음");
-            
+            if (!res.ok) throw new Error();
             db = await res.json();
             
             // 1. 공지사항
@@ -92,7 +92,7 @@
                 mentSel.innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
             }
 
-            // 3. 실적 테이블 (날짜 표시 보강)
+            // 3. 실적 테이블 (날짜 표시 보강 및 합계 추가)
             if(db.perf && db.perf.length > 0) {
                 let total = 0;
                 let rows = db.perf.map((p, idx) => {
@@ -100,23 +100,20 @@
                     const val = Number(r[1]) || 0;
                     total += val;
 
-                    // 날짜 변환 로직
+                    // --- [강력한 날짜 변환 로직] ---
                     let displayDate = "-";
                     try {
                         let rawDate = r[0];
                         if (rawDate) {
                             let d = new Date(rawDate);
-                            if (isNaN(d.getTime())) {
-                                // 문자로 올 경우 (예: 2024-11-08) 처리
+                            if (isNaN(d.getTime())) { // 날짜 객체가 아닐 경우 글자에서 추출
                                 let match = String(rawDate).match(/(\d{1,2})[-/](\d{1,2})/);
                                 displayDate = match ? `${match[1]}/${match[2]}` : String(rawDate).substring(5, 10);
                             } else {
                                 displayDate = (d.getMonth() + 1) + "/" + d.getDate();
                             }
                         }
-                    } catch (e) {
-                        displayDate = String(r[0] || "-").substring(0, 5);
-                    }
+                    } catch (e) { displayDate = String(r[0] || "-").substring(0, 5); }
 
                     return `<tr class="${idx === db.perf.length-1 ? 'today' : ''}">
                         <td>${displayDate}</td>
@@ -130,7 +127,7 @@
                     <tbody>${rows}<tr class="total-row"><td>합계</td><td>${total.toLocaleString()}</td><td>-</td></tr></tbody>`;
             }
         } catch (e) {
-            noticeCont.innerHTML = "<span style='color:#ff7675;'>❌ 데이터를 가져올 수 없습니다.</span>";
+            noticeCont.innerHTML = "<span style='color:#ff7675;'>❌ 서버 응답 에러 (재시도 필요)</span>";
         }
     }
 
@@ -146,4 +143,15 @@
         if (!q) { display.innerHTML = ""; return; }
         const results = db.ment.filter(m => {
             const r = formatRow(m);
-            return String(r[1]).
+            return String(r[1]).toLowerCase().includes(q) || String(r[2]).toLowerCase().includes(q);
+        });
+        display.innerHTML = results.map(m => {
+            const r = formatRow(m);
+            return `<div style="color:#3498db; font-weight:bold; border-bottom:1px solid #eee; padding:5px 0;">[${r[1]}] ${r[2]}</div>`;
+        }).join('');
+    }
+
+    window.onload = loadData;
+</script>
+</body>
+</html>
