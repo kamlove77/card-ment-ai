@@ -10,18 +10,20 @@
         
         .header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { margin: 0; font-size: 18px; }
-        .back-btn { background: transparent; border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 13px; }
+        .back-btn { background: var(--primary); border: 1px solid white; color: white; padding: 5px 12px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 13px; }
 
         .calc-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #eee; }
         .input-group { margin-bottom: 15px; }
         .label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 8px; color: var(--primary); }
         
-        /* 금액과 통화 선택 나란히 배치 */
         .flex-row { display: flex; gap: 8px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; outline: none; background: #fff; }
         
-        .calc-btn { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 0 #2980b9; }
-        
+        /* 버튼이 확실히 눌리도록 스타일 보강 */
+        .calc-btn { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; box-shadow: 0 4px 0 #2980b9; }
+        .calc-btn:hover { background: #2980b9; }
+        .calc-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2980b9; }
+
         .result-box { margin-top: 25px; padding: 18px; background: #fff; border-radius: 12px; border: 2px solid var(--accent); display: none; }
         .result-title { font-weight: bold; color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; text-align: center; }
         .result-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
@@ -63,7 +65,7 @@
         <select id="brandRate">
             <option value="1.1">Visa / Master (1.1%)</option>
             <option value="1.0">JCB / Amex (1.0%)</option>
-            <option value="0">면제 (0%)</option>
+            <option value="0" selected>면제 (0%)</option>
         </select>
     </div>
 
@@ -72,11 +74,101 @@
         <input type="number" id="serviceRate" value="0.2" step="0.01">
     </div>
 
-    <button class="calc-btn" onclick="calculateFinal()">청구 금액 산출하기</button>
+    <button id="submit-btn" class="calc-btn" onclick="calculateFinal()">청구 금액 산출하기</button>
 
     <div id="result-area" class="result-box">
         <div class="result-title">💰 상세 산출 내역</div>
         
         <div class="result-row">
             <span>현지 이용금액:</span>
-            <span id
+            <span id="res-input" style="font-weight:bold; color:var(--primary);">0</span>
+        </div>
+        <div class="result-row">
+            <span>원화 환산 금액 (미화환산):</span>
+            <span id="res-base">0원</span>
+        </div>
+
+        <div class="highlight-row">
+            <div class="result-row" style="margin-bottom:5px;">
+                <span>브랜드 수수료:</span>
+                <span id="res-brand">0원</span>
+            </div>
+            <div class="result-row" style="margin-bottom:0;">
+                <span>해외서비스 수수료 (0.2%):</span>
+                <span id="res-service">0원</span>
+            </div>
+        </div>
+
+        <div style="text-align: right; margin-top: 15px;">
+            <span style="font-size: 14px; color: #333;">최종 원화 청구 예정액</span>
+            <span id="res-final" class="total-price">0원</span>
+        </div>
+
+        <div class="info-box" id="jpy-notice" style="display:none; color: #e67e22;">
+            * 일본(JPY)은 100엔당 환율 기준으로 계산되었습니다.
+        </div>
+    </div>
+</div>
+
+<script>
+    // ✅ 통화 선택 시 라벨 변경 함수
+    function updateLabel() {
+        const curr = document.getElementById('currency').value;
+        const label = document.getElementById('rateLabel');
+        const jpyNotice = document.getElementById('jpy-notice');
+        
+        if(curr === 'JPY') {
+            label.innerText = "2. 전신환매도율 (100엔당 환율)";
+            jpyNotice.style.display = "block";
+        } else if(curr === 'KRW') {
+            label.innerText = "2. 적용 환율 (1원 기준)";
+            jpyNotice.style.display = "none";
+        } else {
+            label.innerText = `2. 전신환매도율 (1${curr}당 환율)`;
+            jpyNotice.style.display = "none";
+        }
+    }
+
+    // ✅ 실제 계산 함수
+    function calculateFinal() {
+        console.log("계산 시작..."); // 확인용 로그
+        
+        const amount = parseFloat(document.getElementById('foreignAmount').value) || 0;
+        const curr = document.getElementById('currency').value;
+        const rate = parseFloat(document.getElementById('exchangeRate').value) || 0;
+        const bRate = parseFloat(document.getElementById('brandRate').value) || 0;
+        const sRate = parseFloat(document.getElementById('serviceRate').value) || 0;
+
+        if (amount <= 0 || (curr !== 'KRW' && rate <= 0)) {
+            alert("금액과 환율을 정확히 입력해주세요.");
+            return;
+        }
+
+        // 1. 원화 환산 (JPY는 100엔 단위 처리)
+        let baseWon = (curr === 'JPY') ? (amount / 100) * rate : amount * rate;
+        if (curr === 'KRW') baseWon = amount; 
+        
+        // 2. 수수료 계산 (수첩 로직: 미화환산금액 기준)
+        const brandFee = baseWon * (bRate / 100);
+        const serviceFee = baseWon * (sRate / 100);
+        
+        // 3. 최종 합계 (소수점 절사)
+        const finalAmount = Math.floor(baseWon + brandFee + serviceFee);
+
+        // 4. 결과 출력
+        document.getElementById('res-input').innerText = amount.toLocaleString() + " " + curr;
+        document.getElementById('res-base').innerText = Math.round(baseWon).toLocaleString() + "원";
+        document.getElementById('res-brand').innerText = Math.round(brandFee).toLocaleString() + "원";
+        document.getElementById('res-service').innerText = Math.round(serviceFee).toLocaleString() + "원";
+        document.getElementById('res-final').innerText = finalAmount.toLocaleString() + "원";
+
+        // 결과 영역 표시
+        document.getElementById('result-area').style.display = "block";
+    }
+
+    // 초기 실행
+    window.onload = updateLabel;
+</script>
+
+</body>
+</html>
