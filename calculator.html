@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>해외 청구 금액 계산기</title>
+    <title>해외 결제 상세 계산기</title>
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; --danger: #e74c3c; }
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 500px; color: #333; }
@@ -27,8 +27,8 @@
         .result-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
         .result-val { font-weight: 500; color: #555; }
         
-        .highlight-row { background: #f9f9f9; padding: 10px; border-radius: 6px; margin: 10px 0; }
-        .total-price { font-size: 22px; font-weight: bold; color: var(--danger); text-align: right; display: block; margin-top: 5px; }
+        .highlight-row { background: #f9f9f9; padding: 10px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #ccc; }
+        .total-price { font-size: 24px; font-weight: bold; color: var(--danger); text-align: right; display: block; margin-top: 5px; }
         
         .info-box { font-size: 11px; color: #888; background: #fdfdfd; padding: 10px; border-radius: 5px; margin-top: 15px; line-height: 1.5; border: 1px solid #eee; }
     </style>
@@ -36,114 +36,99 @@
 <body>
 
 <div class="header">
-    <h1>🌍 해외 청구 금액 계산기</h1>
+    <h1>🌍 해외 결제 상세 계산기</h1>
     <a href="index.html" class="back-btn">⬅ 메인으로</a>
 </div>
 
 <div class="calc-card">
     <div class="input-group">
-        <label class="label">1. 현지 결제 금액 (외화)</label>
-        <div style="display:flex; gap:5px;">
-            <input type="number" id="foreignAmount" placeholder="0.00" style="flex:2;">
-            <select id="currency" style="flex:1;">
-                <option value="USD">USD ($)</option>
-                <option value="JPY">JPY (¥)</option>
-                <option value="EUR">EUR (€)</option>
-            </select>
-        </div>
+        <label class="label">1. 현지 이용 금액 (외화)</label>
+        <input type="number" id="foreignAmount" placeholder="예: 21.96" step="0.01">
     </div>
 
     <div class="input-group">
-        <label class="label">2. 접수 시점 환율 (송금 보낼 때)</label>
-        <input type="number" id="exchangeRate" placeholder="예: 1345.50">
+        <label class="label">2. 전신환매도율 (접수일 1회차)</label>
+        <input type="number" id="exchangeRate" placeholder="예: 1441.10">
     </div>
 
     <div class="input-group">
-        <label class="label">3. 국제 브랜드 수수료 (Visa/Master 등)</label>
-        <select id="brandFee">
+        <label class="label">3. 국제 브랜드 수수료율</label>
+        <select id="brandRate">
             <option value="1.1">Visa / Master (1.1%)</option>
             <option value="1.0">JCB / Amex (1.0%)</option>
-            <option value="0">수수료 없음 (0%)</option>
+            <option value="0">면제 (0%)</option>
         </select>
     </div>
 
     <div class="input-group">
-        <label class="label">4. 해외 서비스 수수료 (카드사)</label>
-        <input type="number" id="cardCompanyFee" value="0.25" step="0.01">
+        <label class="label">4. 해외 서비스 수수료율 (카드사)</label>
+        <input type="number" id="serviceRate" value="0.2" step="0.01">
+        <p style="font-size:11px; color:#999; margin-top:4px;">* 수첩 메모 기준 0.2% 세팅</p>
     </div>
 
-    <button class="calc-btn" onclick="calculateFinal()">상세 청구금액 계산하기</button>
+    <button class="calc-btn" onclick="calculateFinal()">청구 금액 산출하기</button>
 
     <div id="result-area" class="result-box">
-        <div class="result-title">💰 예상 청구 금액 상세</div>
+        <div class="result-title">💰 상세 산출 내역</div>
         
         <div class="result-row">
-            <span>현지 이용금액:</span>
-            <span id="res-foreign" class="result-val">0</span>
-        </div>
-        
-        <div class="result-row">
-            <span>원화 환산 금액:</span>
+            <span>미화 환산 금액:</span>
             <span id="res-base" class="result-val">0원</span>
         </div>
 
         <div class="highlight-row">
             <div class="result-row" style="margin-bottom:5px;">
-                <span>국제브랜드 수수료:</span>
+                <span>브랜드 수수료 (A):</span>
                 <span id="res-brand" class="result-val">0원</span>
             </div>
             <div class="result-row" style="margin-bottom:0;">
-                <span>해외서비스 수수료:</span>
-                <span id="res-company" class="result-val">0원</span>
+                <span>해외서비스 수수료 (B):</span>
+                <span id="res-service" class="result-val">0원</span>
             </div>
         </div>
 
         <div style="text-align: right; margin-top: 15px;">
-            <span style="font-size: 14px; color: #333;">최종 청구 예정 금액</span>
+            <span style="font-size: 14px; color: #333;">최종 원화 청구 금액</span>
             <span id="res-final" class="total-price">0원</span>
         </div>
 
         <div class="info-box">
-            • 환율은 전표가 카드사에 접수되는 시점의 <b>전신환매도율</b>이 적용됩니다.<br>
-            • 수수료 산출 방식: (현지금액 × 환율) + 브랜드수수료 + 카드사수수료<br>
-            • 소액의 원단위 절사 차이가 발생할 수 있습니다.
+            • <b>미화 환산:</b> 현지금액 × 접수일 전신환매도율<br>
+            • <b>수수료 합계:</b> 브랜드(1.1%) + 해외서비스(0.2%)<br>
+            • 실제 청구 시 원 단위 미만은 절사될 수 있습니다.
         </div>
     </div>
 </div>
 
 <script>
     function calculateFinal() {
+        // 입력값 가져오기
         const amount = parseFloat(document.getElementById('foreignAmount').value) || 0;
-        const currency = document.getElementById('currency').value;
         const rate = parseFloat(document.getElementById('exchangeRate').value) || 0;
-        const brandRate = parseFloat(document.getElementById('brandFee').value) || 0;
-        const companyRate = parseFloat(document.getElementById('cardCompanyFee').value) || 0;
+        const bRate = parseFloat(document.getElementById('brandRate').value) || 0;
+        const sRate = parseFloat(document.getElementById('serviceRate').value) || 0;
 
         if (amount <= 0 || rate <= 0) {
             alert("금액과 환율을 정확히 입력해주세요.");
             return;
         }
 
-        // 1. 원화 환산 (JPY의 경우 100엔당 기준인 경우가 많으므로 주의가 필요하나 일반적 환율 입력 가정)
-        let baseWon = amount * rate;
-        if(currency === 'JPY' && rate < 500) { // 혹시 100엔당 환율(900원꼴)로 입력했을 경우 대비
-             baseWon = (amount / 100) * rate;
-        }
+        // 1. 미화 환산 금액 (원화)
+        const baseWon = amount * rate;
         
-        // 2. 브랜드 수수료 (원화 환산 금액 기준)
-        const brandFeeWon = baseWon * (brandRate / 100);
+        // 2. 브랜드 수수료 계산
+        const brandFee = baseWon * (bRate / 100);
         
-        // 3. 국내 카드사 수수료 (원화 환산 금액 기준)
-        const companyFeeWon = baseWon * (companyRate / 100);
+        // 3. 해외 서비스 수수료 계산
+        const serviceFee = baseWon * (sRate / 100);
         
-        // 4. 최종 합계 (소수점 이하 절사)
-        const finalAmount = Math.floor(baseWon + brandFeeWon + companyFeeWon);
+        // 4. 최종 합계 (소수점 절사)
+        const finalAmount = Math.floor(baseWon + brandFee + serviceFee);
 
         // 화면 출력
-        document.getElementById('res-foreign').innerText = amount.toLocaleString() + " " + currency;
         document.getElementById('res-base').innerText = Math.round(baseWon).toLocaleString() + "원";
-        document.getElementById('res-brand').innerText = Math.round(brandFeeWon).toLocaleString() + "원";
-        document.getElementById('res-company').innerText = Math.round(companyFeeWon).toLocaleString() + "원";
+        document.getElementById('res-brand').innerText = Math.round(brandFee).toLocaleString() + "원";
+        document.getElementById('res-service').innerText = Math.round(serviceFee).toLocaleString() + "원";
         document.getElementById('res-final').innerText = finalAmount.toLocaleString() + "원";
 
         document.getElementById('result-area').style.display = "block";
