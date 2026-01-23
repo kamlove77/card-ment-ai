@@ -3,71 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>카드 상담 매니저</title>
+    <title>카드 상담 가이드 매니저</title>
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --point: #f1c40f; --success: #27ae60; --bg: #f8f9fa; }
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; color: #333; }
         
-        /* 인센티브 대시보드 */
-        .status-card { background: linear-gradient(135deg, #2980b9, #2c3e50); color: white; padding: 20px; border-radius: 15px; margin-bottom: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .avg-badge { font-size: 26px; font-weight: bold; color: var(--point); margin-bottom: 5px; }
-        .target-box { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 13px; line-height: 1.8; }
-        .highlight { color: #55efc4; font-weight: bold; font-size: 15px; }
-
+        /* 상단 공지 및 버튼 바 */
         .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
-        .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
-        .refresh-btn { background: var(--point); color: #2c3e50; border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; }
+        .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
+        .btn-group { display: flex; gap: 8px; }
+        .nav-btn { text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-refresh { background: var(--point); color: #2c3e50; }
+        .btn-calc { background: var(--success); color: white; }
+        .btn-dash { background: var(--accent); color: white; }
         
         .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
         .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 320px; border: 1px solid #eee; }
         .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 5px solid var(--primary); padding-left: 10px; }
         
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
-        .display-area { min-height: 100px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
+        .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
         
-        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        /* 실적 테이블 및 계산기 */
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
         th, td { border: 1px solid #eee; padding: 8px 5px; text-align: center; }
+        th { background: #f8f9fa; }
         .today-row { background: #fff9db; font-weight: bold; }
+        
+        .status-box { background: #f1f3f5; border-radius: 12px; padding: 15px; margin-top: 15px; border: 1px solid #dee2e6; }
+        .status-title { font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; }
+        .money-tag { color: #e67e22; font-weight: bold; }
+        .target-info { font-size: 12px; line-height: 1.6; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc; }
+        .highlight { color: #2980b9; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="status-card" id="status-board">
-    <div id="loading-msg">데이터 분석 중...</div>
-    <div id="real-status" style="display:none;">
-        <div class="avg-badge"><span id="current-avg">0</span> 평균 달성 중</div>
-        <div style="font-size: 15px;">💰 현재 <span id="current-money" style="color:var(--point); font-weight:bold;">0원</span> 구간 확보</div>
-        
-        <div class="target-box">
-            현재 <span id="current-days">0</span>일 근무 / 남은 <span class="highlight">5일</span> 전략<br>
-            🎯 10만원(126평균)까지: 남은 5일간 매일 <span class="highlight" id="need-126">0</span>개씩!<br>
-            🔥 15만원(135평균)까지: 남은 5일간 매일 <span class="highlight" id="need-135">0</span>개씩!
-        </div>
-    </div>
-</div>
-
 <div class="notice-wrapper">
     <div class="notice-header">
-        <span>📢 공지 & 가이드</span>
-        <button class="refresh-btn" onclick="loadData()">🔄 동기화</button>
+        <span>📢 공지사항</span>
+        <div class="btn-group">
+            <a href="calculator.html" class="nav-btn btn-calc">🧮 해외계산기</a>
+            <a href="dashboard.html" class="nav-btn btn-dash">📊 대시보드</a>
+            <button class="nav-btn btn-refresh" onclick="loadData()">🔄 동기화</button>
+        </div>
     </div>
-    <div id="notice-container">로딩 중...</div>
+    <div id="notice-container" style="font-size: 13px; min-height: 20px;">데이터를 불러오는 중...</div>
 </div>
 
 <div class="main-container">
     <div class="card">
-        <div class="title">📝 유형별 멘트</div>
+        <div class="title">📝 상담 멘트 가이드</div>
         <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
-        <div id="ment-display" class="display-area"></div>
+        <div id="ment-display" class="display-area">유형을 선택하거나 검색하세요.</div>
     </div>
+
     <div class="card">
-        <div class="title">🔍 빠른 검색 (영어/한글)</div>
+        <div class="title">🔍 빠른 검색 (한/영)</div>
         <input type="text" id="keyword" oninput="searchGuide()" placeholder="예: VISA, 해외, 102">
-        <div id="guide-display" class="display-area" style="max-height:150px; overflow-y:auto; min-height:50px;"></div>
+        <div id="guide-display" style="max-height:100px; overflow-y:auto; margin-bottom:10px; font-size:13px;"></div>
         
-        <div class="perf-section" style="margin-top:15px;">
-            <div class="title">📊 상세 실적 현황</div>
-            <table id="perf-table"></table>
+        <div class="title" style="margin-top:20px;">📊 실적 현황</div>
+        <table id="perf-table"></table>
+
+        <div class="status-box">
+            <div class="status-title">
+                <span>현재 평균: <span id="txt-avg" class="highlight">0</span></span>
+                <span class="money-tag" id="txt-money">0원 확보</span>
+            </div>
+            <div class="target-info">
+                현재 <span id="txt-days" class="highlight">0</span>일 근무 / 남은 <span class="highlight">5일</span> 전략<br>
+                🎯 126평균(10만): 매일 <span class="highlight" id="need-126">0</span>개<br>
+                🔥 135평균(15만): 매일 <span class="highlight" id="need-135">0</span>개
+            </div>
         </div>
     </div>
 </div>
@@ -82,71 +90,80 @@
         return Array.isArray(item) ? item : Object.values(item);
     }
 
+    function formatDate(val) {
+        if (!val) return "-";
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return String(val).substring(5,10);
+        return (d.getMonth() + 1).toString().padStart(2, '0') + "/" + d.getDate().toString().padStart(2, '0');
+    }
+
     async function loadData() {
+        const noticeCont = document.getElementById('notice-container');
         try {
             const res = await fetch(url + "?t=" + Date.now());
             db = await res.json();
             
-            // 1. 공지
-            document.getElementById('notice-container').innerHTML = db.notice.filter(n => toArr(n)[1]).reverse().slice(0, 3).map(n => `<div>• ${toArr(n)[1]}</div>`).join('');
+            // 1. 공지사항 복구
+            if(db.notice && db.notice.length > 0) {
+                noticeCont.innerHTML = db.notice.filter(n => toArr(n)[1]).reverse().slice(0, 2).map(n => `<div>• ${toArr(n)[1]}</div>`).join('');
+            } else {
+                noticeCont.innerText = "등록된 공의사항이 없습니다.";
+            }
 
-            // 2. 멘트 선택
-            const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
-            document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+            // 2. 멘트 선택 복구
+            if(db.ment) {
+                const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
+                document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+            }
 
-            // 3. 실적 & 인센티브 계산
+            // 3. 실적 & 날짜 & 계산기 복구
             if(db.perf) {
                 let total = 0, days = 0, tableRows = "";
                 db.perf.forEach((p, idx) => {
                     const r = toArr(p);
                     const val = Number(r[1]) || 0;
                     if(val > 0) { total += val; days++; }
-                    tableRows += `<tr class="${idx === db.perf.length-1 ? 'today-row' : ''}"><td>${String(r[0]).substring(5,10)}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
+                    tableRows += `<tr class="${idx === db.perf.length-1 ? 'today-row' : ''}">
+                        <td>${formatDate(r[0])}</td><td>${val}</td><td>${r[2]||'-'}</td>
+                    </tr>`;
                 });
                 
                 const avg = days > 0 ? (total / days).toFixed(1) : 0;
                 const totalProjDays = days + REMAINDAYS;
-
                 const calcNeed = (target) => {
                     const need = (target * totalProjDays) - total;
                     return need > 0 ? (need / REMAINDAYS).toFixed(1) : "달성!";
                 };
 
-                document.getElementById('loading-msg').style.display = 'none';
-                document.getElementById('real-status').style.display = 'block';
-                document.getElementById('current-avg').innerText = avg;
-                document.getElementById('current-days').innerText = days;
-                document.getElementById('current-money').innerText = avg >= 135 ? "15만원" : avg >= 126 ? "10만원" : avg >= 124 ? "65,000원" : "0원";
+                document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>비고</th></tr></thead><tbody>${tableRows}</tbody>`;
+                document.getElementById('txt-avg').innerText = avg;
+                document.getElementById('txt-days').innerText = days;
+                document.getElementById('txt-money').innerText = avg >= 135 ? "15만원 확보" : avg >= 126 ? "10만원 확보" : avg >= 124 ? "65,000원 확보" : "미달성";
                 document.getElementById('need-126').innerText = calcNeed(126);
                 document.getElementById('need-135').innerText = calcNeed(135);
-                document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>비고</th></tr></thead><tbody>${tableRows}</tbody>`;
             }
-        } catch (e) { document.getElementById('loading-msg').innerText = "데이터 연결 실패"; }
+        } catch (e) {
+            noticeCont.innerText = "⚠️ 데이터 연결 실패. 시트 배포 상태를 확인하세요.";
+        }
     }
 
     function updateMent() {
         const val = document.getElementById('ment-select').value;
         const found = db.ment.find(m => toArr(m)[0] === val);
-        document.getElementById('ment-display').innerText = found ? toArr(found)[4] : "";
+        document.getElementById('ment-display').innerText = found ? toArr(found)[4] : "내용이 없습니다.";
     }
 
-    // --- [영어 검색 해결 포인트: toLowerCase()] ---
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
         if (!q) { display.innerHTML = ""; return; }
-        
         const results = db.ment.filter(m => {
             const r = toArr(m);
-            // 번호(r[1])와 키워드(r[2]) 모두 소문자로 바꿔서 비교 (영어 검색 완벽 대응)
-            const num = String(r[1]).toLowerCase();
-            const key = String(r[2]).toLowerCase();
-            return num.includes(q) || key.includes(q);
+            return String(r[1]).toLowerCase().includes(q) || String(r[2]).toLowerCase().includes(q);
         });
-
         display.innerHTML = results.map(m => {
             const r = toArr(m);
-            return `<div onclick="showDetail('${r[0]}')" style="color:#3498db; cursor:pointer; font-weight:bold; border-bottom:1px solid #eee; padding:8px 0;">[${r[1]}] ${r[2]}</div>`;
+            return `<div onclick="showDetail('${r[0]}')" style="color:#3498db; cursor:pointer; padding:5px 0; border-bottom:1px solid #eee;">[${r[1]}] ${r[2]}</div>`;
         }).join('');
     }
 
