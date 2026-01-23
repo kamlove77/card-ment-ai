@@ -7,55 +7,45 @@
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --point: #f1c40f; --success: #27ae60; --bg: #f8f9fa; }
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; color: #333; }
-        
         .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
         .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
         .btn-group { display: flex; gap: 8px; }
         .nav-btn { text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; border: none; }
         .btn-refresh { background: var(--point); color: #2c3e50; }
-        
         .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
         .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 320px; border: 1px solid #eee; }
         .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 5px solid var(--primary); padding-left: 10px; }
-        
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
         .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
-        
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
         th, td { border: 1px solid #eee; padding: 8px 5px; text-align: center; }
         th { background: #f8f9fa; }
-        .today-row { background: #fff9db; font-weight: bold; }
-        
-        /* 인센티브 박스 */
         .status-box { background: #ffffff; border-radius: 12px; padding: 15px; margin-top: 15px; border: 2px solid var(--accent); }
         .total-display { text-align: center; margin-bottom: 10px; }
-        .total-label { font-size: 13px; color: #666; }
         .total-value { font-size: 24px; font-weight: bold; color: var(--accent); }
-        
         .target-info { font-size: 13px; line-height: 2.2; color: #333; border-top: 1px solid #eee; padding-top: 10px; }
         .highlight { color: #e74c3c; font-weight: bold; }
         .safe { color: #27ae60; font-weight: bold; }
-        .goal-tag { display: inline-block; width: 100px; font-weight: bold; color: #555; }
     </style>
 </head>
 <body>
 
 <div class="notice-wrapper">
     <div class="notice-header">
-        <span>📢 공지사항</span>
+        <span>📢 업무 공지</span>
         <div class="btn-group">
-            <a href="calculator.html" class="nav-btn btn-refresh" style="background:var(--success); color:white;">🧮 해외계산기</a>
+            <a href="calculator.html" class="nav-btn" style="background:var(--success); color:white;">🧮 해외계산기</a>
             <button class="nav-btn btn-refresh" onclick="loadData()">🔄 동기화</button>
         </div>
     </div>
-    <div id="notice-container" style="font-size: 13px;">데이터 업데이트 중...</div>
+    <div id="notice-container" style="font-size: 13px;">데이터를 불러오는 중입니다...</div>
 </div>
 
 <div class="main-container">
     <div class="card">
-        <div class="title">📝 상담 멘트 가이드</div>
+        <div class="title">📝 상담 멘트</div>
         <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
-        <div id="ment-display" class="display-area">유형을 선택하거나 검색하세요.</div>
+        <div id="ment-display" class="display-area">유형 선택 또는 검색</div>
     </div>
 
     <div class="card">
@@ -68,24 +58,24 @@
 
         <div class="status-box">
             <div class="total-display">
-                <div class="total-label">현재 총 누적 콜수</div>
+                <div style="font-size:13px; color:#666;">현재 총 누적 콜수</div>
                 <div class="total-value"><span id="txt-total">0</span>개</div>
             </div>
             <div class="target-info">
-                <div><span class="goal-tag">💰 6.5만 (124)</span> <span id="msg-124">계산 중...</span></div>
-                <div><span class="goal-tag">🎁 10만 (126)</span> <span id="msg-126">계산 중...</span></div>
-                <div style="margin-top: 8px; font-size: 11px; color: #999; text-align: right; line-height: 1.2;">
-                    *누적 1,871개(1/23 기준) + 남은 5일 영업일(총 20일) 기준
-                </div>
+                <div>💰 6.5만 (124): <span id="msg-124">-</span></div>
+                <div>🎁 10만 (126): <span id="msg-126">-</span></div>
+                <div style="font-size:11px; color:#999; text-align:right;">*남은 5일 영업일 기준</div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    // ⚠️ [중요] 구글 시트의 웹 앱 URL을 여기에 정확히 붙여넣으세요!
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
     const REMAINDAYS = 5; 
     const TOTAL_GOAL_DAYS = 20;
+    let cachedDb = null;
 
     function toArr(item) { return Array.isArray(item) ? item : Object.values(item); }
     function formatDate(val) {
@@ -96,30 +86,69 @@
     }
 
     async function loadData() {
+        const noticeCont = document.getElementById('notice-container');
+        noticeCont.innerText = "🔄 서버 연결 중...";
         try {
-            const res = await fetch(url + "?t=" + Date.now());
-            const db = await res.json();
-            window.dbData = db; 
+            const response = await fetch(scriptUrl + "?t=" + new Date().getTime());
+            const db = await response.json();
+            cachedDb = db;
             
+            // 1. 공지사항
             if(db.notice) {
-                document.getElementById('notice-container').innerHTML = db.notice.filter(n => toArr(n)[1]).reverse().slice(0, 2).map(n => `<div>[${formatDate(toArr(n)[0])}] ${toArr(n)[1]}</div>`).join('');
+                noticeCont.innerHTML = db.notice.filter(n => toArr(n)[1]).reverse().slice(0, 2).map(n => `<div>[${formatDate(toArr(n)[0])}] ${toArr(n)[1]}</div>`).join('');
             }
 
+            // 2. 멘트 선택박스
             const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
             document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
 
+            // 3. 실적 & 목표 계산
             if(db.perf) {
                 let currentTotal = 0;
                 let tableRows = "";
                 db.perf.forEach((p, idx) => {
                     const r = toArr(p);
                     const val = Number(r[1]) || 0;
-                    currentTotal += val;
-                    tableRows += `<tr class="${idx === db.perf.length-1 ? 'today-row' : ''}"><td>${formatDate(r[0])}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
+                    if(val > 0) currentTotal += val;
+                    tableRows += `<tr><td>${formatDate(r[0])}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
                 });
 
                 document.getElementById('txt-total').innerText = currentTotal.toLocaleString();
                 document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>비고</th></tr></thead><tbody>${tableRows}</tbody>`;
 
-                // 목표 계산 (124: 2480개, 126: 2520개)
-                const goal124 =
+                const goal124 = 124 * TOTAL_GOAL_DAYS;
+                const goal126 = 126 * TOTAL_GOAL_DAYS;
+                const calcMsg = (goal, colorClass) => {
+                    const diff = goal - currentTotal;
+                    return diff <= 0 ? "<span class='safe'>🎉 달성 완료!</span>" : `남은 <span class="${colorClass}">${diff}개</span> (일 ${ (diff/REMAINDAYS).toFixed(1) }개)`;
+                };
+                document.getElementById('msg-124').innerHTML = calcMsg(goal124, 'safe');
+                document.getElementById('msg-126').innerHTML = calcMsg(goal126, 'highlight');
+            }
+        } catch (e) {
+            noticeCont.innerHTML = "<span style='color:#e74c3c;'>⚠️ 데이터 연결 실패. 시트 URL을 확인하세요.</span>";
+        }
+    }
+
+    function updateMent() {
+        const val = document.getElementById('ment-select').value;
+        const found = cachedDb.ment.find(m => toArr(m)[0] === val);
+        document.getElementById('ment-display').innerText = found ? toArr(found)[4] : "내용이 없습니다.";
+    }
+
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        if (!q || !cachedDb) { display.innerHTML = ""; return; }
+        const results = cachedDb.ment.filter(m => {
+            const r = toArr(m);
+            return String(r[1]).toLowerCase().includes(q) || String(r[2]).toLowerCase().includes(q);
+        });
+        display.innerHTML = results.map(m => `<div onclick="showDetail('${toArr(m)[0]}')" style="color:#3498db; cursor:pointer; padding:5px 0; border-bottom:1px solid #eee;">[${toArr(m)[1]}] ${toArr(m)[2]}</div>`).join('');
+    }
+
+    function showDetail(type) { document.getElementById('ment-select').value = type; updateMent(); }
+    window.onload = loadData;
+</script>
+</body>
+</html>
