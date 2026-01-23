@@ -3,54 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>카드 상담 가이드 - 메인</title>
+    <title>카드 상담 매니저</title>
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --point: #f1c40f; --success: #27ae60; --bg: #f8f9fa; }
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; color: #333; }
+        
+        /* 인센티브 대시보드 */
+        .status-card { background: linear-gradient(135deg, #2980b9, #2c3e50); color: white; padding: 20px; border-radius: 15px; margin-bottom: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .avg-badge { font-size: 26px; font-weight: bold; color: var(--point); margin-bottom: 5px; }
+        .target-box { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 13px; line-height: 1.8; }
+        .highlight { color: #55efc4; font-weight: bold; font-size: 15px; }
+
         .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
         .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
-        .btn-group { display: flex; gap: 8px; }
-        .refresh-btn { background: transparent; border: 1px solid rgba(255,255,255,0.5); color: white; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
-        .dash-btn { background: var(--point); color: #2c3e50 !important; border: none; }
-        .calc-btn { background: var(--success); color: white !important; border: none; }
-        #notice-container { font-size: 13px; min-height: 20px; line-height: 1.6; }
+        .refresh-btn { background: var(--point); color: #2c3e50; border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; }
+        
         .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
         .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 320px; border: 1px solid #eee; }
         .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 5px solid var(--primary); padding-left: 10px; }
+        
         select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
-        .display-area { min-height: 150px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
+        .display-area { min-height: 100px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
+        
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
         th, td { border: 1px solid #eee; padding: 8px 5px; text-align: center; }
-        .today { background: #fff9db; font-weight: bold; }
-        .total-row { background: var(--point); color: #2c3e50; font-weight: bold; font-size: 12px; }
+        .today-row { background: #fff9db; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="notice-wrapper">
-    <div class="notice-header">
-        <span>📢 업무 가이드</span>
-        <div class="btn-group">
-            <a href="dashboard.html" class="refresh-btn dash-btn">📊 대시보드</a>
-            <a href="calculator.html" class="refresh-btn calc-btn">🧮 계산기</a>
-            <button class="refresh-btn" onclick="loadData()">🔄 동기화</button>
+<div class="status-card" id="status-board">
+    <div id="loading-msg">데이터 분석 중...</div>
+    <div id="real-status" style="display:none;">
+        <div class="avg-badge"><span id="current-avg">0</span> 평균 달성 중</div>
+        <div style="font-size: 15px;">💰 현재 <span id="current-money" style="color:var(--point); font-weight:bold;">0원</span> 구간 확보</div>
+        
+        <div class="target-box">
+            현재 <span id="current-days">0</span>일 근무 / 남은 <span class="highlight">5일</span> 전략<br>
+            🎯 10만원(126평균)까지: 남은 5일간 매일 <span class="highlight" id="need-126">0</span>개씩!<br>
+            🔥 15만원(135평균)까지: 남은 5일간 매일 <span class="highlight" id="need-135">0</span>개씩!
         </div>
     </div>
-    <div id="notice-container">데이터 연결 중...</div>
+</div>
+
+<div class="notice-wrapper">
+    <div class="notice-header">
+        <span>📢 공지 & 가이드</span>
+        <button class="refresh-btn" onclick="loadData()">🔄 동기화</button>
+    </div>
+    <div id="notice-container">로딩 중...</div>
 </div>
 
 <div class="main-container">
     <div class="card">
-        <div class="title">📝 상담 멘트 가이드</div>
+        <div class="title">📝 유형별 멘트</div>
         <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
         <div id="ment-display" class="display-area"></div>
     </div>
     <div class="card">
-        <div class="title">🔍 빠른 검색</div>
-        <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드 입력">
+        <div class="title">🔍 빠른 검색 (영어/한글)</div>
+        <input type="text" id="keyword" oninput="searchGuide()" placeholder="예: VISA, 해외, 102">
         <div id="guide-display" class="display-area" style="max-height:150px; overflow-y:auto; min-height:50px;"></div>
+        
         <div class="perf-section" style="margin-top:15px;">
-            <div class="title">📊 실적 (일수/평균)</div>
+            <div class="title">📊 상세 실적 현황</div>
             <table id="perf-table"></table>
         </div>
     </div>
@@ -58,65 +74,54 @@
 
 <script>
     const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    const REMAINDAYS = 5; 
     let db = { notice: [], ment: [], perf: [] };
 
-    // 어떤 형식이든 배열로 변환해주는 마법의 함수
     function toArr(item) {
         if (!item) return [];
         return Array.isArray(item) ? item : Object.values(item);
     }
 
     async function loadData() {
-        const noticeCont = document.getElementById('notice-container');
         try {
             const res = await fetch(url + "?t=" + Date.now());
-            const data = await res.json();
-            db = data;
+            db = await res.json();
             
-            // 1. 공지사항
-            if(db.notice && db.notice.length > 0) {
-                noticeCont.innerHTML = [...db.notice].reverse().slice(0, 5).map(n => {
-                    const r = toArr(n);
-                    return `<div style="padding:2px 0;"><span style="color:var(--point);">[${r[0]||''}]</span> ${r[1]||''}</div>`;
-                }).join('');
-            }
+            // 1. 공지
+            document.getElementById('notice-container').innerHTML = db.notice.filter(n => toArr(n)[1]).reverse().slice(0, 3).map(n => `<div>• ${toArr(n)[1]}</div>`).join('');
 
-            // 2. 셀렉트박스 (멘트 유형)
-            if(db.ment && db.ment.length > 0) {
-                const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
-                document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + 
-                    types.map(t => `<option value="${t}">${t}</option>`).join('');
-            }
+            // 2. 멘트 선택
+            const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
+            document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
 
-            // 3. 실적 테이블 (날짜/합계/평균)
-            if(db.perf && db.perf.length > 0) {
+            // 3. 실적 & 인센티브 계산
+            if(db.perf) {
                 let total = 0, days = 0, tableRows = "";
                 db.perf.forEach((p, idx) => {
                     const r = toArr(p);
                     const val = Number(r[1]) || 0;
                     if(val > 0) { total += val; days++; }
-
-                    let dStr = "-";
-                    if(r[0]) {
-                        let d = new Date(r[0]);
-                        // 날짜가 숫자로 올 경우나 문자로 올 경우 모두 대응
-                        dStr = isNaN(d.getTime()) ? String(r[0]).substring(5,10) : (d.getMonth()+1)+"/"+d.getDate();
-                    }
-
-                    tableRows += `<tr class="${idx === db.perf.length-1 ? 'today' : ''}">
-                        <td>${dStr}</td><td>${val.toLocaleString()}</td><td>${r[2]||'-'}</td>
-                    </tr>`;
+                    tableRows += `<tr class="${idx === db.perf.length-1 ? 'today-row' : ''}"><td>${String(r[0]).substring(5,10)}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
                 });
                 
                 const avg = days > 0 ? (total / days).toFixed(1) : 0;
-                document.getElementById('perf-table').innerHTML = `
-                    <thead><tr><th>날짜</th><th>실적</th><th>%</th></tr></thead>
-                    <tbody>${tableRows}<tr class="total-row"><td>합계(${days}일)</td><td>${total.toLocaleString()}</td><td>평균:${avg}</td></tr></tbody>`;
+                const totalProjDays = days + REMAINDAYS;
+
+                const calcNeed = (target) => {
+                    const need = (target * totalProjDays) - total;
+                    return need > 0 ? (need / REMAINDAYS).toFixed(1) : "달성!";
+                };
+
+                document.getElementById('loading-msg').style.display = 'none';
+                document.getElementById('real-status').style.display = 'block';
+                document.getElementById('current-avg').innerText = avg;
+                document.getElementById('current-days').innerText = days;
+                document.getElementById('current-money').innerText = avg >= 135 ? "15만원" : avg >= 126 ? "10만원" : avg >= 124 ? "65,000원" : "0원";
+                document.getElementById('need-126').innerText = calcNeed(126);
+                document.getElementById('need-135').innerText = calcNeed(135);
+                document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>비고</th></tr></thead><tbody>${tableRows}</tbody>`;
             }
-        } catch (e) {
-            noticeCont.innerHTML = "⚠️ 데이터 연결 실패 (시트 배포 확인 필요)";
-            console.error("Error details:", e);
-        }
+        } catch (e) { document.getElementById('loading-msg').innerText = "데이터 연결 실패"; }
     }
 
     function updateMent() {
@@ -125,18 +130,29 @@
         document.getElementById('ment-display').innerText = found ? toArr(found)[4] : "";
     }
 
+    // --- [영어 검색 해결 포인트: toLowerCase()] ---
     function searchGuide() {
         const q = document.getElementById('keyword').value.toLowerCase().trim();
         const display = document.getElementById('guide-display');
         if (!q) { display.innerHTML = ""; return; }
+        
         const results = db.ment.filter(m => {
             const r = toArr(m);
-            return String(r[1]).includes(q) || String(r[2]).includes(q);
+            // 번호(r[1])와 키워드(r[2]) 모두 소문자로 바꿔서 비교 (영어 검색 완벽 대응)
+            const num = String(r[1]).toLowerCase();
+            const key = String(r[2]).toLowerCase();
+            return num.includes(q) || key.includes(q);
         });
+
         display.innerHTML = results.map(m => {
             const r = toArr(m);
-            return `<div style="color:#3498db; font-weight:bold; border-bottom:1px solid #eee; padding:5px 0;">[${r[1]}] ${r[2]}</div>`;
+            return `<div onclick="showDetail('${r[0]}')" style="color:#3498db; cursor:pointer; font-weight:bold; border-bottom:1px solid #eee; padding:8px 0;">[${r[1]}] ${r[2]}</div>`;
         }).join('');
+    }
+
+    function showDetail(type) {
+        document.getElementById('ment-select').value = type;
+        updateMent();
     }
 
     window.onload = loadData;
