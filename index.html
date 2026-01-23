@@ -6,23 +6,20 @@
     <title>카드 매니저</title>
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --point: #f1c40f; --success: #27ae60; --bg: #f8f9fa; }
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; color: #333; }
-        .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
-        .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
-        .btn-group { display: flex; gap: 8px; }
-        .nav-btn { text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: none; }
-        .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
-        .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 320px; border: 1px solid #eee; margin-bottom:12px; }
-        .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 5px solid var(--primary); padding-left: 10px; }
-        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
-        .display-area { min-height: 100px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; font-size: 14px; color: #444; }
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 15px; background: var(--bg); color: #333; line-height: 1.5; }
+        .notice-wrapper { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
+        .notice-header { font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
+        .btn-refresh { background: var(--point); color: #2c3e50; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee; margin-bottom: 12px; }
+        .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); border-left: 5px solid var(--primary); padding-left: 10px; font-size: 14px; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
+        .display-area { min-height: 80px; white-space: pre-wrap; font-size: 14px; color: #444; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
         th, td { border: 1px solid #eee; padding: 8px 5px; text-align: center; }
         th { background: #f8f9fa; }
-        .status-box { background: #ffffff; border-radius: 12px; padding: 15px; margin-top: 15px; border: 2px solid var(--accent); }
-        .total-display { text-align: center; margin-bottom: 10px; }
-        .total-value { font-size: 24px; font-weight: bold; color: var(--accent); }
-        .target-info { font-size: 13px; line-height: 2.2; color: #333; border-top: 1px solid #eee; padding-top: 10px; }
+        .status-box { background: #ffffff; border-radius: 12px; padding: 15px; border: 2px solid var(--accent); margin-top: 10px; }
+        .total-value { font-size: 26px; font-weight: bold; color: var(--accent); text-align: center; margin: 5px 0; }
+        .target-info { font-size: 13px; line-height: 2.2; border-top: 1px solid #eee; padding-top: 10px; }
         .highlight { color: #e74c3c; font-weight: bold; }
         .safe { color: #27ae60; font-weight: bold; }
     </style>
@@ -32,78 +29,103 @@
 <div class="notice-wrapper">
     <div class="notice-header">
         <span>📢 공지사항</span>
-        <div class="btn-group">
-            <a href="calculator.html" class="nav-btn" style="background:var(--success); color:white;">🧮 해외계산기</a>
-            <button class="nav-btn" onclick="loadData()" style="background:var(--point); color:#2c3e50;">🔄 동기화</button>
-        </div>
+        <button class="btn-refresh" onclick="location.reload()">🔄 새로고침</button>
     </div>
-    <div id="notice-container" style="font-size: 13px;">연결 중...</div>
+    <div id="notice-container">데이터 로딩 중...</div>
 </div>
 
-<div class="main-container">
-    <div class="card">
-        <div class="title">📝 상담 멘트</div>
-        <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
-        <div id="ment-display" class="display-area">내용이 여기에 표시됩니다.</div>
-    </div>
+<div class="card">
+    <div class="title">📝 상담 멘트</div>
+    <select id="ment-select" onchange="updateMent()"><option value="">유형 선택</option></select>
+    <div id="ment-display" class="display-area">상담 유형을 선택하세요.</div>
+</div>
 
-    <div class="card">
-        <div class="title">🔍 빠른 검색</div>
-        <input type="text" id="keyword" oninput="searchGuide()" placeholder="키워드 입력">
-        <div id="guide-display" style="max-height:80px; overflow-y:auto; margin-bottom:10px; font-size:12px;"></div>
-        
-        <div class="title" style="margin-top:10px;">📊 실적 (최근 5일)</div>
-        <table id="perf-table"></table>
-
-        <div class="status-box">
-            <div class="total-display">
-                <div style="font-size:12px; color:#666;">현재 총 누적 콜수</div>
-                <div class="total-value"><span id="txt-total">0</span>개</div>
-            </div>
-            <div class="target-info">
-                <div>💰 6.5만 (124): <span id="msg-124">-</span></div>
-                <div>🎁 10만 (126): <span id="msg-126">-</span></div>
-                <div style="font-size:11px; color:#999; text-align:right;">*1/21 누적 1,585개 포함</div>
-            </div>
+<div class="card">
+    <div class="title">📊 실적 현황 (1/21 누적 포함)</div>
+    <div class="status-box">
+        <div style="text-align:center; font-size:13px; color:#666;">현재 총 누적 콜수</div>
+        <div class="total-value" id="txt-total">0</div>
+        <div class="target-info">
+            <div>💰 6.5만 (124): <span id="msg-124">-</span></div>
+            <div>🎁 10만 (126): <span id="msg-126">-</span></div>
         </div>
     </div>
+    <table id="perf-table" style="margin-top:15px;"></table>
 </div>
 
 <script>
     const scriptUrl = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
-    const BASE_COUNT = 1585; // 1/21까지 누적분
+    const BASE_COUNT = 1585; // 1/21까지 확정 누적분
     const REMAINDAYS = 5; 
     const TOTAL_GOAL_DAYS = 20;
-    let db = null;
-
-    function toArr(item) { return Array.isArray(item) ? item : Object.values(item); }
-    function formatDate(val) {
-        if (!val) return "";
-        const d = new Date(val);
-        if (isNaN(d.getTime())) return String(val).substring(5,10);
-        return (d.getMonth() + 1).toString().padStart(2, '0') + "/" + d.getDate().toString().padStart(2, '0');
-    }
+    let dbData = null;
 
     async function loadData() {
-        const noticeCont = document.getElementById('notice-container');
         try {
-            const response = await fetch(scriptUrl + "?t=" + new Date().getTime());
-            db = await response.json();
+            const response = await fetch(scriptUrl + "?t=" + Date.now());
+            dbData = await response.json();
             
-            if(db.notice) {
-                noticeCont.innerHTML = db.notice.filter(n => toArr(n)[1]).reverse().slice(0, 2).map(n => `<div>[${formatDate(toArr(n)[0])}] ${toArr(n)[1]}</div>`).join('');
+            // 1. 공지사항
+            if(dbData.notice) {
+                const noticeHtml = dbData.notice.reverse().slice(0, 2).map(n => {
+                    const r = Array.isArray(n) ? n : Object.values(n);
+                    return `<div>• ${r[1]}</div>`;
+                }).join('');
+                document.getElementById('notice-container').innerHTML = noticeHtml;
             }
 
-            const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
-            document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+            // 2. 멘트 선택박스
+            const mentSelect = document.getElementById('ment-select');
+            const types = [...new Set(dbData.ment.map(m => Array.isArray(m) ? m[0] : m.type))].filter(Boolean);
+            types.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t; opt.innerText = t;
+                mentSelect.appendChild(opt);
+            });
 
-            if(db.perf) {
-                let tableRows = "";
-                let dailyTotal = 0; // 22일 이후 실적만 합산할 변수
-
-                db.perf.forEach((p) => {
-                    const r = toArr(p);
-                    const dateStr = formatDate(r[0]);
+            // 3. 실적 계산
+            if(dbData.perf) {
+                let dailyTotal = 0;
+                let tableHtml = "<thead><tr><th>날짜</th><th>실적</th><th>비고</th></tr></thead><tbody>";
+                
+                dbData.perf.forEach(p => {
+                    const r = Array.isArray(p) ? p : Object.values(p);
                     const val = Number(r[1]) || 0;
+                    const dateRaw = String(r[0]);
                     
-                    // 22일과 23일 실적만 추출
+                    // 22일, 23일 실적만 합산 (나머지 날짜는 BASE_COUNT에 이미 포함됨)
+                    if(dateRaw.includes("22") || dateRaw.includes("23")) {
+                        dailyTotal += val;
+                    }
+                    tableHtml += `<tr><td>${dateRaw.substring(5,10)}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
+                });
+                tableHtml += "</tbody>";
+                document.getElementById('perf-table').innerHTML = tableHtml;
+
+                const realTotal = BASE_COUNT + dailyTotal;
+                document.getElementById('txt-total').innerText = realTotal.toLocaleString() + "개";
+
+                // 목표 계산
+                const goal124 = (124 * TOTAL_GOAL_DAYS) - realTotal;
+                const goal126 = (126 * TOTAL_GOAL_DAYS) - realTotal;
+
+                document.getElementById('msg-124').innerHTML = goal124 <= 0 ? "<span class='safe'>🎉 달성!</span>" : `남은 <span class='safe'>${goal124}개</span> (일 ${(goal124/REMAINDAYS).toFixed(1)})`;
+                document.getElementById('msg-126').innerHTML = goal126 <= 0 ? "<span class='safe'>🎉 달성!</span>" : `남은 <span class='highlight'>${goal126}개</span> (일 ${(goal126/REMAINDAYS).toFixed(1)})`;
+            }
+        } catch (e) {
+            document.getElementById('notice-container').innerText = "⚠️ 데이터 연결 실패";
+        }
+    }
+
+    function updateMent() {
+        const val = document.getElementById('ment-select').value;
+        const found = dbData.ment.find(m => (Array.isArray(m) ? m[0] : m.type) === val);
+        const ment = Array.isArray(found) ? found[4] : found.content;
+        document.getElementById('ment-display').innerText = ment || "내용이 없습니다.";
+    }
+
+    window.onload = loadData;
+</script>
+
+</body>
+</html>
