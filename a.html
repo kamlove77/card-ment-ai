@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>카드 상담 가이드 매니저</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --point: #f1c40f; --success: #27ae60; --bg: #f8f9fa; }
+        body { font-family: 'Malgun Gothic', sans-serif; margin: 0 auto; padding: 15px; background: var(--bg); max-width: 1100px; color: #333; }
+        .notice-wrapper { background: var(--primary); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; }
+        .notice-header { font-weight: bold; font-size: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
+        .btn-group { display: flex; gap: 8px; }
+        .nav-btn { text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-refresh { background: var(--point); color: #2c3e50; }
+        .btn-calc { background: var(--success); color: white; }
+        .btn-dash { background: var(--accent); color: white; }
+        .main-container { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+        .card { background: white; flex: 1; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 320px; border: 1px solid #eee; }
+        .title { font-weight: bold; margin-bottom: 10px; color: var(--primary); font-size: 14px; border-left: 5px solid var(--primary); padding-left: 10px; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 10px; outline: none; }
+        .display-area { min-height: 120px; white-space: pre-wrap; word-break: break-all; line-height: 1.7; font-size: 14px; color: #444; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
+        th, td { border: 1px solid #eee; padding: 8px 5px; text-align: center; }
+        th { background: #f8f9fa; }
+        .today-row { background: #fff9db; font-weight: bold; }
+        .status-box { background: #f1f3f5; border-radius: 12px; padding: 15px; margin-top: 15px; border: 1px solid #dee2e6; }
+        .status-title { font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; }
+        .money-tag { color: #e67e22; font-weight: bold; }
+        .target-info { font-size: 12px; line-height: 1.8; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ccc; }
+        .highlight { color: #2980b9; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="notice-wrapper">
+    <div class="notice-header">
+        <span>📢 공지사항</span>
+        <div class="btn-group">
+            <a href="calculator.html" class="nav-btn btn-calc">🧮 해외계산기</a>
+            <a href="dashboard.html" class="nav-btn btn-dash">📊 대시보드</a>
+            <button class="nav-btn btn-refresh" onclick="loadData()">🔄 동기화</button>
+        </div>
+    </div>
+    <div id="notice-container" style="font-size: 13px; min-height: 20px;">데이터 연결 시도 중...</div>
+</div>
+
+<div class="main-container">
+    <div class="card">
+        <div class="title">📝 상담 멘트 가이드</div>
+        <select id="ment-select" onchange="updateMent()"><option value="">-- 로딩 중 --</option></select>
+        <div id="ment-display" class="display-area">유형을 선택하거나 검색하세요.</div>
+    </div>
+    <div class="card">
+        <div class="title">🔍 빠른 검색 (한/영)</div>
+        <input type="text" id="keyword" oninput="searchGuide()" placeholder="예: VISA, 해외, 102">
+        <div id="guide-display" style="max-height:100px; overflow-y:auto; margin-bottom:10px; font-size:13px;"></div>
+        
+        <div class="title" style="margin-top:20px;">📊 실적 현황</div>
+        <table id="perf-table"></table>
+        
+        <div class="status-box">
+            <div class="status-title">
+                <span>현재 누적: <span id="txt-total" class="highlight">0</span>개</span>
+                <span class="money-tag" id="txt-money">계산 중...</span>
+            </div>
+            <div id="target-detail" class="target-info">
+                ⭐ 124평균(6.5만): <span class="highlight" id="need-124">-</span><br>
+                🎯 126평균(10만): <span class="highlight" id="need-126">-</span><br>
+                🔥 135평균(15만): <span class="highlight" id="need-135">-</span><br>
+                <div style="font-size: 10px; color: #999; margin-top: 5px;">*1/21 누적 1,585개 기준 고정 합산</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const url = "
