@@ -74,4 +74,107 @@
 </div>
 
 <script>
-    const url = "
+    const url = "https://script.google.com/macros/s/AKfycbxTpgRKDGBMrq4IAEozIVSR1gtMdlFwOPosubxZUXG4BaYTYFVgk68lZPjF9dqOzRfEbA/exec";
+    const REMAINDAYS = 5; 
+    const FIXED_BASE = 1585; // 1/21 누적분 고정
+    let db = { notice: [], ment: [], perf: [] };
+
+    function toArr(item) { return Array.isArray(item) ? item : Object.values(item); }
+    function formatDate(val) {
+        if (!val) return "";
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return String(val).substring(5,10).replace('-','/');
+        return (d.getMonth() + 1).toString().padStart(2, '0') + "/" + d.getDate().toString().padStart(2, '0');
+    }
+
+    async function loadData() {
+        const noticeCont = document.getElementById('notice-container');
+        noticeCont.innerText = "데이터 동기화 중...";
+        try {
+            const res = await fetch(url + "?t=" + Date.now());
+            db = await res.json();
+            
+            // 1. 공지사항
+            if(db.notice) {
+                noticeCont.innerHTML = db.notice.filter(n => toArr(n)[1]).reverse().slice(0, 2).map(n => {
+                    const r = toArr(n);
+                    return `<div><span style="color:var(--point); font-weight:bold;">[${formatDate(r[0])}]</span> ${r[1]}</div>`;
+                }).join('');
+            }
+
+            // 2. 멘트 선택박스
+            const types = [...new Set(db.ment.map(m => toArr(m)[0]))].filter(Boolean);
+            document.getElementById('ment-select').innerHTML = '<option value="">-- 유형 선택 --</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+
+            // 3. 실적 & 인센티브 계산 (핵심 수정 부분)
+            if(db.perf) {
+                let tableRows = "";
+                let day22Val = 0;
+                let day23Val = 0;
+
+                db.perf.forEach((p, idx) => {
+                    const r = toArr(p);
+                    const dateStr = formatDate(r[0]);
+                    const val = Number(r[1]) || 0;
+                    
+                    // 테이블은 시트 내용 그대로 출력
+                    tableRows += `<tr class="${idx === db.perf.length-1 ? 'today-row' : ''}"><td>${dateStr}</td><td>${val}</td><td>${r[2]||'-'}</td></tr>`;
+                    
+                    // 날짜를 확인해서 22일, 23일 값만 따로 저장
+                    if(dateStr.includes("01/22")) day22Val = val;
+                    if(dateStr.includes("01/23")) day23Val = val;
+                });
+
+                // 누적 계산 = 고정 1585 + 22일 + 23일
+                const realTotal = FIXED_BASE + day22Val + day23Val;
+                document.getElementById('txt-total').innerText = realTotal.toLocaleString();
+                document.getElementById('perf-table').innerHTML = `<thead><tr><th>날짜</th><th>실적</th><th>비고</th></tr></thead><tbody>${tableRows}</tbody>`;
+
+                // 목표치 계산 (총 20일 기준)
+                const calcGoal = (target) => {
+                    const diff = (target * 20) - realTotal;
+                    return diff <= 0 ? "🎉 달성!" : "남은 " + diff + "개 (일 " + (diff / REMAINDAYS).toFixed(1) + ")";
+                };
+
+                document.getElementById('need-124').innerText = calcGoal(124);
+                document.getElementById('need-126').innerText = calcGoal(126);
+                document.getElementById('need-135').innerText = calcGoal(135);
+
+                // 현재 등급 표시
+                const currentAvg = realTotal / 15; // 21일까지 13일 + 22일(1일) + 23일(1일) = 총 15일치 데이터 기준
+                document.getElementById('txt-money').innerText = currentAvg >= 135 ? "15만원 페이스" : currentAvg >= 126 ? "10만원 페이스" : currentAvg >= 124 ? "6.5만원 페이스" : "목표 미달";
+            }
+        } catch (e) {
+            noticeCont.innerHTML = "⚠️ 연결 실패";
+        }
+    }
+
+    function updateMent() {
+        const val = document.getElementById('ment-select').value;
+        const found = db.ment.find(m => toArr(m)[0] === val);
+        document.getElementById('ment-display').innerText = found ? toArr(found)[4] : "유형을 선택하세요.";
+    }
+
+    function searchGuide() {
+        const q = document.getElementById('keyword').value.toLowerCase().trim();
+        const display = document.getElementById('guide-display');
+        if (!q) { display.innerHTML = ""; return; }
+        const results = db.ment.filter(m => {
+            const r = toArr(m);
+            return String(r[1]).toLowerCase().includes(q) || String(r[2]).toLowerCase().includes(q);
+        });
+        display.innerHTML = results.map(m => {
+            const r = toArr(m);
+            return `<div onclick="showDetail('${r[0]}')" style="color:#3498db; cursor:pointer; padding:5px 0; border-bottom:1px solid #eee;">[${r[1]}] ${r[2]}</div>`;
+        }).join('');
+    }
+
+    function showDetail(type) {
+        document.getElementById('ment-select').value = type;
+        updateMent();
+    }
+
+    window.onload = loadData;
+</script>
+</body>
+</html>
